@@ -34,14 +34,20 @@
     <main class="p-4 max-w-md mx-auto">
         
         <div id="viewRegistro" class="tab-content active space-y-6">
-            <div id="timerCard" class="bg-green-50 border-2 border-green-200 rounded-2xl p-4 flex justify-between items-center transition-colors duration-500">
-                <div>
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Tiempo Transcurrido</p>
-                    <p class="text-3xl font-black text-gray-800" id="tiempoTranscurrido">-- min</p>
+            <div id="timerCard" class="bg-green-50 border-2 border-green-200 rounded-2xl p-5 transition-colors duration-500 space-y-4 shadow-inner">
+                <div class="flex justify-between items-center w-full">
+                    <div>
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider" id="labelReloj">Siguiente toma en:</p>
+                        <p class="text-4xl font-black text-gray-800" id="tiempoTranscurrido">-- min</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Meta</p>
+                        <p class="text-lg font-bold text-gray-700"><span id="limiteDisplay">150</span> min</p>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Límite</p>
-                    <p class="text-lg font-bold text-gray-700"><span id="limiteDisplay">150</span> min</p>
+
+                <div class="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-700 overflow-hidden border border-gray-300">
+                    <div id="progressBar" class="bg-blue-600 h-3 rounded-full transition-all duration-1000 ease-linear" style="width: 0%"></div>
                 </div>
             </div>
 
@@ -319,51 +325,82 @@
 
         function actualizarReloj() {
             const ahora = new Date();
+            // diffMs es el tiempo QUE HA PASADO desde la última toma
             const diffMs = ahora - ultimaToma;
             const diffMinutos = Math.floor(diffMs / 60000);
             
+            // --- NUEVA LÓGICA: TEMPORIZADOR REGRESIVO ---
+            // Calculamos cuánto falta para llegar al límite configurado
+            let minutosRestantes = limiteMinutos - diffMinutos;
+
+            // --- NUEVA LÓGICA: BARRA DE PROGRESO INTERACTIVA ---
+            const progressBar = document.getElementById('progressBar');
+            // Calculamos el porcentaje que HA PASADO
+            let porcentajePasado = (diffMinutos / limiteMinutos) * 100;
+            
+            // Aseguramos que el porcentaje esté entre 0 y 100 para que la barra no se salga
+            let porcentajeClamped = Math.min(100, Math.max(0, porcentajePasado)); 
+            
+            // Actualizamos el ancho de la barra visualmente
+            progressBar.style.width = porcentajeClamped + '%';
+
+            // Manejo de casos especiales en el display
             if(diffMinutos < 0) {
-                tiempoTranscurrido.innerText = "Toma futura";
+                // Si la toma está registrada en el futuro
+                tiempoTranscurrido.innerText = "-- min";
+                progressBar.style.width = '0%'; // Barra vacía
+                actualizarColorReloj(0); // Forzar color verde/neutral
                 return;
             }
 
-            tiempoTranscurrido.innerText = `${diffMinutos} min`;
-            actualizarColorReloj(diffMinutos);
+            // --- ACTUALIZAR DISPLAY (Temporizador o Mensaje de Exceso) ---
+            if (minutosRestantes > 0) {
+                // Aún falta tiempo: Mostrar cuenta regresiva simple
+                tiempoTranscurrido.innerText = `${minutosRestantes} min`;
+            } else if (minutosRestantes === 0) {
+                // Llegamos exactos al límite
+                tiempoTranscurrido.innerText = `¡YA!`;
+            } else {
+                // Se excedió el tiempo: Mostrar cuánto tiempo lleva de retraso
+                // Math.abs() convierte el número negativo en positivo
+                tiempoTranscurrido.innerText = `Retraso: ${Math.abs(minutosRestantes)} min`;
+            }
 
-            // --- MOTOR DE NOTIFICACIONES (ALARMAS) ---
-            const minutosRestantes = limiteMinutos - diffMinutos;
+            // --- MANTENER LÓGICA DE COLORES Y ALARMAS EXISTENTE ---
+            // La función de colores ya usa diffMinutos, así que funciona igual
+            actualizarColorReloj(diffMinutos); 
+            // También actualizamos el color de la barra de progreso para que combine
+            actualizarColorBarraProgreso(diffMinutos);
 
-            // Alarma 1: Faltan 10 minutos exactos
+            // --- MOTOR DE NOTIFICACIONES (ALARMAS) EXISTENTE ---
+            // Reutilizamos minutosRestantes calculado arriba para las alarmas
             if (minutosRestantes === 10 && !notificado10Min) {
                 enviarNotificacion("¡Atención! 🍼", "Faltan 10 minutos para el límite de la próxima toma.");
-                notificado10Min = true; // Evitar spam el siguiente minuto
+                notificado10Min = true; 
             } 
-            // Alarma 2: Se excedió el tiempo límite
             else if (minutosRestantes <= 0 && !notificadoLimite) {
                 enviarNotificacion("¡Hora del biberón! 🚨", "Se ha alcanzado o excedido el tiempo límite configurado.");
                 notificadoLimite = true; 
             }
         }
 
-        // Lógica visual de colores del reloj
-        function actualizarColorReloj(minutos = null) {
-            if(minutos === null) {
-                const diffMs = new Date() - ultimaToma;
-                minutos = Math.floor(diffMs / 60000);
-            }
+        // --- NUEVA FUNCIÓN AUXILIAR: COLOR DE LA BARRA ---
+        // Pequeña función para que la barra cambie de azul a naranja/rojo igual que la tarjeta
+        function actualizarColorBarraProgreso(minutos) {
+            const progressBar = document.getElementById('progressBar');
             const porcentaje = minutos / limiteMinutos;
             
-            timerCard.classList.remove('bg-green-50', 'border-green-200', 'bg-orange-50', 'border-orange-200', 'bg-red-50', 'border-red-300', 'animate-pulse');
+            // Limpiar clases de color existentes
+            progressBar.classList.remove('bg-blue-600', 'bg-orange-500', 'bg-red-600');
             
             if (porcentaje < 0.6) {
-                timerCard.classList.add('bg-green-50', 'border-green-200'); // Verde
+                progressBar.classList.add('bg-blue-600'); // Azul (Normal)
             } else if (porcentaje < 0.9) {
-                timerCard.classList.add('bg-orange-50', 'border-orange-200'); // Naranja
+                progressBar.classList.add('bg-orange-500'); // Naranja (Advertencia)
             } else {
-                timerCard.classList.add('bg-red-50', 'border-red-300', 'animate-pulse'); // Rojo
+                progressBar.classList.add('bg-red-600'); // Rojo (Límite/Exceso)
             }
         }
-
         // --- 9. GRÁFICOS (CHART.JS) ---
         function generarGrafico(tomas) {
             const ctx = document.getElementById('graficoOnzas').getContext('2d');
