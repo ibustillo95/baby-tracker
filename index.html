@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BabyTracker</title>
+
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="icon" sizes="512x512" href="./icon.png">
     
@@ -11,11 +12,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BabyTracker">
     <link rel="apple-touch-icon" href="./icon.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
     <style>
         body { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
         .tab-content { display: none; }
@@ -116,14 +119,14 @@
 
     <script>
         // --- 1. CREDENCIALES FIREBASE ---
+        // ¡REEMPLAZA ESTO CON TUS DATOS REALES!
         const firebaseConfig = {
-            apiKey: "AIzaSyC1p8czf56NeSUboDYSzaSed4m2yJq2SDA",
-            authDomain: "momb2b-3eb14.firebaseapp.com",
-            projectId: "momb2b-3eb14",
-            storageBucket: "momb2b-3eb14.firebasestorage.app",
-            messagingSenderId: "440475320328",
-            appId: "1:440475320328:web:794638a982f19902a891bd",
-            measurementId: "G-JXCTRXV4ZF"
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_PROYECTO.firebaseapp.com",
+            projectId: "TU_PROYECTO",
+            storageBucket: "TU_PROYECTO.appspot.com",
+            messagingSenderId: "TU_SENDER_ID",
+            appId: "TU_APP_ID"
         };
 
         if (!firebase.apps.length) {
@@ -137,25 +140,10 @@
         let intervaloReloj;
         let graficoInstancia = null;
 
-        // ¡NUEVO!: Variables para notificaciones
+        // Banderas para el motor de notificaciones (Alarmas)
         let notificado10Min = false;
         let notificadoLimite = false;
-        let ultimaTomaId = null;
-
-        // ¡NUEVO!: Solicitar permiso para notificaciones
-        if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-            Notification.requestPermission();
-        }
-
-        // ¡NUEVO!: Función encargada de lanzar la alerta
-        function enviarNotificacion(titulo, cuerpo) {
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(titulo, {
-                    body: cuerpo,
-                    icon: "https://cdn-icons-png.flaticon.com/512/864/864483.png" // Ícono de un biberón
-                });
-            }
-        }
+        let ultimaTomaId = null; // Para detectar registros nuevos
 
         // Referencias DOM principales
         const inputOz = document.getElementById('inputOz');
@@ -166,7 +154,12 @@
         const limiteDisplay = document.getElementById('limiteDisplay');
         const listaHistorial = document.getElementById('listaHistorial');
 
-        // Configurar hora inicial
+        // Solicitar permiso para notificaciones al cargar
+        if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+
+        // Configurar hora inicial por defecto
         function setHoraActual() {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -174,7 +167,7 @@
         }
         setHoraActual();
 
-        // Controles de botones (+ / -)
+        // Controles de botones de cantidad (+ / -)
         document.getElementById('btnMinus').addEventListener('click', () => {
             let val = parseFloat(inputOz.value);
             if(val > 0.5) inputOz.value = (val - 0.5).toFixed(1);
@@ -197,7 +190,17 @@
             btnElement.classList.add('text-blue-600');
         }
 
-        // --- 4. FIREBASE: CONFIGURACIÓN GLOBAL ---
+        // --- 4. FUNCIÓN AUXILIAR: ENVIAR NOTIFICACIÓN (ALARMA) ---
+        function enviarNotificacion(titulo, cuerpo) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(titulo, {
+                    body: cuerpo,
+                    icon: "./icon.png" // Usa tu icono personalizado
+                });
+            }
+        }
+
+        // --- 5. FIREBASE: CONFIGURACIÓN GLOBAL SINCRONIZADA ---
         db.collection("configuracion").doc("limiteGlobal").onSnapshot((doc) => {
             if (doc.exists) {
                 limiteMinutos = doc.data().minutos;
@@ -209,7 +212,7 @@
             }
         });
 
-        // --- 5. FIREBASE: LECTURA EN TIEMPO REAL (HISTORIAL, RELOJ Y GRÁFICOS) ---
+        // --- 6. FIREBASE: LECTURA EN TIEMPO REAL (HISTORIAL, RELOJ, GRÁFICOS Y ALARMAS) ---
         db.collection("tomas").orderBy("fecha", "desc").onSnapshot((snapshot) => {
             listaHistorial.innerHTML = "";
             let tomasParaGrafico = [];
@@ -220,38 +223,29 @@
                 return;
             }
 
-            // CORRECCIÓN AQUÍ: Tomamos el primer documento de forma directa
-            // ¡NUEVO!: Lógica inteligente para resetear las alertas
+            // Lógica inteligente para resetear las alarmas ante un nuevo registro
             const primerDoc = snapshot.docs[0];
             const nuevaUltimaToma = primerDoc.data().fecha.toDate();
 
-            // Comprobamos si es un registro completamente nuevo comparando los IDs
             if (ultimaTomaId !== primerDoc.id) {
-                ultimaTomaId = primerDoc.id; // Actualizamos el ID actual
+                ultimaTomaId = primerDoc.id; 
                 ultimaToma = nuevaUltimaToma;
-                notificado10Min = false; // Reseteamos la alerta de los 10 minutos
-                notificadoLimite = false; // Reseteamos la alerta del límite excedido
+                // Reseteamos las banderas de notificaciones
+                notificado10Min = false; 
+                notificadoLimite = false; 
                 iniciarReloj();
             }
 
-            snapshot.forEach((doc, index) => {
+            snapshot.forEach((doc) => {
                 const data = doc.data();
-                const id = doc.id; // ¡NUEVO!: Capturamos el ID único del documento
+                const id = doc.id;
                 const fechaToma = data.fecha.toDate();
                 const horaStr = fechaToma.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 tomasParaGrafico.push(data);
 
-                // Configurar reloj con la toma más reciente
-                if (index === 0) {
-                    ultimaToma = fechaToma;
-                    iniciarReloj();
-                }
-
-                // Renderizar lista del historial
+                // Renderizar lista del historial con botón de borrar
                 const li = document.createElement('li');
                 li.className = "p-4 flex justify-between items-center hover:bg-gray-50 transition-colors";
-                
-                // ¡ACTUALIZADO!: Agregamos el botón de la papelera que llama a borrarToma()
                 li.innerHTML = `
                     <div class="flex items-center space-x-4">
                         <div class="bg-blue-100 p-3 rounded-full text-blue-600">
@@ -277,7 +271,7 @@
             generarGrafico(tomasParaGrafico);
         });
 
-        // --- 6. GUARDAR NUEVA TOMA (CON MANEJO DE ERRORES) ---
+        // --- 7. FIREBASE: GUARDAR NUEVA TOMA CON MANEJO DE ERRORES ---
         btnGuardar.addEventListener('click', () => {
             btnGuardar.innerText = "Guardando...";
             btnGuardar.disabled = true;
@@ -289,9 +283,10 @@
             db.collection("tomas").add({
                 fecha: fechaToma,
                 onzas: onzas,
-                registro: new Date()
+                registro: new Date() // Fecha de creación real
             })
             .then(() => {
+                // Éxito visual
                 btnGuardar.innerText = "¡Guardado!";
                 btnGuardar.classList.remove('bg-blue-600');
                 btnGuardar.classList.add('bg-green-500');
@@ -302,7 +297,7 @@
                     btnGuardar.classList.add('bg-blue-600');
                     btnGuardar.disabled = false;
                     btnGuardar.classList.remove('opacity-75');
-                    setHoraActual();
+                    setHoraActual(); // Resetear a la hora actual
                 }, 2000);
             })
             .catch((error) => {
@@ -314,36 +309,18 @@
             });
         });
 
-        // --- NUEVA FUNCIÓN: BORRAR TOMA ---
-        function borrarToma(id, fechaTomaStr) {
-            // Confirmación antes de borrar para evitar accidentes
-            if(confirm(`¿Estás seguro de que deseas borrar la toma de las ${fechaTomaStr}?`)) {
-                db.collection("tomas").doc(id).delete()
-                .then(() => {
-                    console.log("Toma borrada exitosamente");
-                    // No necesitas actualizar el HTML manualmente, 
-                    // onSnapshot (el listener en tiempo real) lo hará por ti.
-                })
-                .catch((error) => {
-                    console.error("Error al borrar la toma: ", error);
-                    alert("Hubo un error al borrar el registro. Intenta de nuevo.");
-                });
-            }
-        }
-        
-        
-        // --- 7. LÓGICA DEL RELOJ ---
+        // --- 8. LÓGICA DEL RELOJ Y MOTOR DE ALARMAS ---
         function iniciarReloj() {
             if (intervaloReloj) clearInterval(intervaloReloj);
             actualizarReloj();
-            intervaloReloj = setInterval(actualizarReloj, 60000);
+            intervaloReloj = setInterval(actualizarReloj, 60000); // Actualizar cada minuto
         }
 
         function actualizarReloj() {
             const ahora = new Date();
             const diffMs = ahora - ultimaToma;
             const diffMinutos = Math.floor(diffMs / 60000);
-    
+            
             if(diffMinutos < 0) {
                 tiempoTranscurrido.innerText = "Toma futura";
                 return;
@@ -352,22 +329,22 @@
             tiempoTranscurrido.innerText = `${diffMinutos} min`;
             actualizarColorReloj(diffMinutos);
 
-            // --- ¡NUEVO!: Lógica de Notificaciones ---
+            // --- MOTOR DE NOTIFICACIONES (ALARMAS) ---
             const minutosRestantes = limiteMinutos - diffMinutos;
 
-            // Faltan 10 minutos exactos
+            // Alarma 1: Faltan 10 minutos exactos
             if (minutosRestantes === 10 && !notificado10Min) {
-            enviarNotificacion("¡Atención! 🍼", "Faltan 10 minutos para el límite de la próxima toma.");
-            notificado10Min = true; // Encendemos la bandera para no enviar spam el siguiente minuto
-            }
-                
-            // El límite llegó a cero o se excedió
+                enviarNotificacion("¡Atención! 🍼", "Faltan 10 minutos para el límite de la próxima toma.");
+                notificado10Min = true; // Evitar spam el siguiente minuto
+            } 
+            // Alarma 2: Se excedió el tiempo límite
             else if (minutosRestantes <= 0 && !notificadoLimite) {
-            enviarNotificacion("¡Hora del biberón! 🚨", "Se ha alcanzado o excedido el tiempo límite configurado.");
-            notificadoLimite = true; // Encendemos la bandera
+                enviarNotificacion("¡Hora del biberón! 🚨", "Se ha alcanzado o excedido el tiempo límite configurado.");
+                notificadoLimite = true; 
             }
         }
 
+        // Lógica visual de colores del reloj
         function actualizarColorReloj(minutos = null) {
             if(minutos === null) {
                 const diffMs = new Date() - ultimaToma;
@@ -378,29 +355,31 @@
             timerCard.classList.remove('bg-green-50', 'border-green-200', 'bg-orange-50', 'border-orange-200', 'bg-red-50', 'border-red-300', 'animate-pulse');
             
             if (porcentaje < 0.6) {
-                timerCard.classList.add('bg-green-50', 'border-green-200'); 
+                timerCard.classList.add('bg-green-50', 'border-green-200'); // Verde
             } else if (porcentaje < 0.9) {
-                timerCard.classList.add('bg-orange-50', 'border-orange-200'); 
+                timerCard.classList.add('bg-orange-50', 'border-orange-200'); // Naranja
             } else {
-                timerCard.classList.add('bg-red-50', 'border-red-300', 'animate-pulse'); 
+                timerCard.classList.add('bg-red-50', 'border-red-300', 'animate-pulse'); // Rojo
             }
         }
 
-        // --- 8. GRÁFICOS (CHART.JS) ---
+        // --- 9. GRÁFICOS (CHART.JS) ---
         function generarGrafico(tomas) {
             const ctx = document.getElementById('graficoOnzas').getContext('2d');
             
+            // Agrupar onzas por fecha
             const resumen = {};
             tomas.forEach(toma => {
                 const fechaStr = toma.fecha.toDate().toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
                 resumen[fechaStr] = (resumen[fechaStr] || 0) + toma.onzas;
             });
 
-            const etiquetas = Object.keys(resumen).reverse().slice(-7); 
+            // Ordenar fechas cronológicamente
+            const etiquetas = Object.keys(resumen).reverse().slice(-7); // Últimos 7 días activos
             const datos = etiquetas.map(fecha => resumen[fecha]);
 
             if(graficoInstancia) {
-                graficoInstancia.destroy();
+                graficoInstancia.destroy(); // Evitar superposición de gráficos
             }
 
             graficoInstancia = new Chart(ctx, {
@@ -410,20 +389,29 @@
                     datasets: [{
                         label: 'Onzas Consumidas',
                         data: datos,
-                        backgroundColor: '#3b82f6',
+                        backgroundColor: '#3b82f6', // Azul Tailwind
                         borderRadius: 6
                     }]
                 },
                 options: {
                     responsive: true,
                     scales: {
-                        y: { beginAtZero: true }
+                        y: { beginAtZero: true, title: { display: true, text: 'Onzas (oz)' } }
                     }
                 }
             });
         }
 
-        // --- 9. MODAL DE AJUSTES ---
+        // --- 10. FUNCIÓN: BORRAR TOMA DEL HISTORIAL ---
+        function borrarToma(id, horaStr) {
+            if(confirm(`¿Estás seguro de que deseas borrar la toma de las ${horaStr}?`)) {
+                db.collection("tomas").doc(id).delete()
+                .then(() => console.log("Toma borrada exitosamente"))
+                .catch((error) => alert("Error al borrar: " + error.message));
+            }
+        }
+
+        // --- 11. MODAL DE AJUSTES SINCRONIZADO ---
         const modal = document.getElementById('settingsModal');
         function abrirSettings() { modal.classList.remove('hidden'); }
         function cerrarSettings() { modal.classList.add('hidden'); }
@@ -431,6 +419,7 @@
         document.getElementById('btnGuardarSettings').addEventListener('click', () => {
             const nuevoLimite = parseInt(document.getElementById('inputLimite').value);
             if(nuevoLimite > 0) {
+                // Guardar en Firebase para que se sincronice en ambos teléfonos
                 db.collection("configuracion").doc("limiteGlobal").set({ minutos: nuevoLimite })
                 .then(() => cerrarSettings())
                 .catch(err => alert("Error al guardar configuración: " + err.message));
