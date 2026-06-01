@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ffffff">
     <title>Baby Biberón Tracker</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,9 +13,10 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap');
-        body { font-family: 'Nunito', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Nunito', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         
-        /* Utilidades de UI (Inspiradas en tu ERP) */
+        /* Ajustes Mobile-First */
+        .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
         .nav-item { display: flex; align-items: center; padding: 0.75rem 1rem; color: #64748b; border-radius: 1rem; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s ease; font-weight: 600; }
         .nav-item.active { background-color: #3b82f6; color: white; box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39); }
         .xui-card { background: white; border-radius: 1.5rem; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; transition: transform 0.2s; }
@@ -26,14 +28,17 @@
 </head>
 <body class="text-slate-800 h-screen w-screen overflow-hidden flex flex-col md:flex-row">
 
-    <div id="toast-container" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 w-11/12 max-w-sm"></div>
+    <div id="toast-container" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 w-11/12 max-w-sm pointer-events-none"></div>
 
-    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t border-slate-200 flex justify-around p-3 pb-safe z-40 shadow-[0_-5px_15px_-5px_rgba(0,0,0,0.05)]">
-        <div onclick="app.switchView('registro')" id="mob-registro" class="text-3xl opacity-50 transition-opacity">🍼</div>
-        <div onclick="app.switchView('historial')" id="mob-historial" class="text-3xl opacity-50 transition-opacity">📋</div>
-        <div onclick="app.switchView('reportes')" id="mob-reportes" class="text-3xl opacity-50 transition-opacity">📊</div>
+    <!-- NAVEGACIÓN MÓVIL OPTIMIZADA -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t border-slate-100 flex justify-around p-4 pb-safe z-40 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.05)]">
+        <div onclick="app.switchView('registro')" id="mob-registro" class="text-3xl opacity-40 transition-all duration-300 transform">🍼</div>
+        <div onclick="app.switchView('historial')" id="mob-historial" class="text-3xl opacity-40 transition-all duration-300 transform">📋</div>
+        <div onclick="app.switchView('reportes')" id="mob-reportes" class="text-3xl opacity-40 transition-all duration-300 transform">📊</div>
+        <div onclick="app.switchView('configuracion')" id="mob-configuracion" class="text-3xl opacity-40 transition-all duration-300 transform">⚙️</div>
     </nav>
 
+    <!-- SIDEBAR DESKTOP -->
     <aside class="hidden md:flex w-72 bg-white border-r border-slate-200 flex-col p-6 shadow-lg z-20">
         <div class="flex items-center gap-3 mb-10">
             <div class="bg-blue-500 text-white text-2xl w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/40">👶</div>
@@ -43,105 +48,120 @@
             <div onclick="app.switchView('registro')" id="nav-registro" class="nav-item active"><span class="mr-3 text-xl">🍼</span> Nueva Toma</div>
             <div onclick="app.switchView('historial')" id="nav-historial" class="nav-item"><span class="mr-3 text-xl">📋</span> Historial</div>
             <div onclick="app.switchView('reportes')" id="nav-reportes" class="nav-item"><span class="mr-3 text-xl">📊</span> Reportes</div>
+            <div onclick="app.switchView('configuracion')" id="nav-configuracion" class="nav-item"><span class="mr-3 text-xl">⚙️</span> Configuración</div>
         </nav>
     </aside>
 
-    <main class="flex-1 h-screen overflow-y-auto bg-slate-50 relative pb-24 md:pb-0">
-        <header class="md:hidden bg-white p-5 shadow-sm sticky top-0 z-30">
+    <main class="flex-1 h-screen overflow-y-auto bg-slate-50 relative pb-28 md:pb-0">
+        <header class="md:hidden bg-white p-5 shadow-sm sticky top-0 z-30 flex justify-between items-center">
             <h1 class="text-xl font-black text-slate-800 flex items-center gap-2"><span class="text-2xl">👶</span> BabyTracker</h1>
         </header>
 
-        <div class="p-5 md:p-10 max-w-5xl mx-auto space-y-6">
+        <div class="p-4 md:p-10 max-w-5xl mx-auto space-y-6 mt-2">
 
+            <!-- VISTA: REGISTRO -->
             <div id="view-registro" class="block animate-fade-in">
-                <div class="mb-6">
-                    <h2 class="text-3xl font-black tracking-tight text-slate-800">Nueva Toma</h2>
-                    <p class="text-slate-500 font-medium">Registra el biberón que le acabas de dar.</p>
+                
+                <!-- ALERTA DINÁMICA DE TIEMPO -->
+                <div id="alert-ultima-toma" class="hidden mb-6 p-4 rounded-2xl border-2 flex items-center justify-between transition-colors duration-500 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span id="alert-icon" class="text-3xl drop-shadow-sm">⏱️</span>
+                        <div>
+                            <div class="text-[10px] font-black uppercase tracking-widest opacity-60">Tiempo transcurrido</div>
+                            <div id="alert-time" class="text-2xl font-black tracking-tight">-- min</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] font-black uppercase tracking-widest opacity-60">Límite</div>
+                        <div id="alert-limit" class="text-sm font-bold">150 min</div>
+                    </div>
                 </div>
 
                 <div class="xui-card space-y-6">
                     <div>
-                        <label class="block text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">Cantidad (Onzas - oz)</label>
-                        <div class="flex items-center gap-4">
-                            <button onclick="app.adjustOz(-0.5)" class="w-14 h-14 bg-slate-100 rounded-2xl text-2xl font-black text-slate-600 hover:bg-slate-200 active:scale-95 transition-all">-</button>
-                            <input type="number" id="input-oz" value="4.0" step="0.5" class="flex-1 bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-center text-4xl font-black text-blue-600 outline-none focus:border-blue-500">
-                            <button onclick="app.adjustOz(0.5)" class="w-14 h-14 bg-blue-100 rounded-2xl text-2xl font-black text-blue-600 hover:bg-blue-200 active:scale-95 transition-all">+</button>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Cantidad (Onzas - oz)</label>
+                        <div class="flex items-center gap-3">
+                            <button onclick="app.adjustOz(-0.5)" class="w-16 h-16 bg-slate-100 rounded-2xl text-3xl font-black text-slate-600 hover:bg-slate-200 active:scale-95 transition-all shadow-sm">-</button>
+                            <input type="number" id="input-oz" value="4.0" step="0.5" class="flex-1 bg-slate-50 border-2 border-slate-200 rounded-2xl h-16 text-center text-4xl font-black text-blue-600 outline-none focus:border-blue-500 shadow-inner">
+                            <button onclick="app.adjustOz(0.5)" class="w-16 h-16 bg-blue-100 rounded-2xl text-3xl font-black text-blue-600 hover:bg-blue-200 active:scale-95 transition-all shadow-sm">+</button>
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">Hora de la toma</label>
-                        <input type="datetime-local" id="input-time" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-lg font-bold text-slate-700 outline-none focus:border-blue-500">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Hora de la toma</label>
+                        <input type="datetime-local" id="input-time" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-xl font-black text-slate-700 outline-none focus:border-blue-500">
                     </div>
 
-                    <button onclick="app.saveFeeding()" id="btn-save" class="w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-black py-5 rounded-2xl shadow-lg shadow-blue-500/30 text-xl tracking-wide transition-all">
-                        REGISTRAR BIBERÓN
+                    <button onclick="app.saveFeeding()" id="btn-save" class="w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-500/30 text-xl tracking-wide transition-all mt-2">
+                        REGISTRAR TOMA
                     </button>
-                </div>
-                
-                <div class="mt-8">
-                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Resumen de Hoy</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center justify-center">
-                            <span class="text-3xl mb-1">🍼</span>
-                            <span class="text-2xl font-black text-slate-800" id="dash-tomas-hoy">0</span>
-                            <span class="text-xs font-bold text-slate-400 uppercase">Tomas hoy</span>
-                        </div>
-                        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center justify-center">
-                            <span class="text-3xl mb-1">💧</span>
-                            <span class="text-2xl font-black text-blue-500" id="dash-oz-hoy">0 oz</span>
-                            <span class="text-xs font-bold text-slate-400 uppercase">Total Consumido</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
+            <!-- VISTA: HISTORIAL -->
             <div id="view-historial" class="hidden">
-                <div class="mb-6 flex justify-between items-end">
-                    <div>
-                        <h2 class="text-3xl font-black tracking-tight text-slate-800">Historial</h2>
-                        <p class="text-slate-500 font-medium">Registro cronológico de tomas.</p>
-                    </div>
+                <div class="mb-6">
+                    <h2 class="text-3xl font-black tracking-tight text-slate-800">Historial</h2>
+                    <p class="text-slate-500 font-medium">Registro cronológico de tomas.</p>
                 </div>
 
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                    <ul id="historial-list" class="divide-y divide-slate-100">
-                        </ul>
-                    <div id="historial-empty" class="p-10 text-center text-slate-400 hidden">
-                        <span class="text-5xl block mb-3 opacity-50">📭</span>
-                        <p class="font-bold">No hay tomas registradas aún.</p>
+                    <ul id="historial-list" class="divide-y divide-slate-50"></ul>
+                    <div id="historial-empty" class="p-12 text-center text-slate-400 hidden">
+                        <span class="text-6xl block mb-4 opacity-50 drop-shadow-sm">📭</span>
+                        <p class="font-bold text-lg">No hay tomas registradas.</p>
                     </div>
                 </div>
             </div>
 
+            <!-- VISTA: REPORTES -->
             <div id="view-reportes" class="hidden">
                 <div class="mb-6">
                     <h2 class="text-3xl font-black tracking-tight text-slate-800">Métricas</h2>
-                    <p class="text-slate-500 font-medium">Análisis de consumo.</p>
+                    <p class="text-slate-500 font-medium">Análisis de consumo de leche.</p>
                 </div>
 
-                <div class="flex bg-slate-200/60 p-1.5 rounded-2xl mb-6 shadow-inner w-full max-w-sm mx-auto md:mx-0">
-                    <button onclick="app.setReportFilter('hoy')" id="rep-hoy" class="flex-1 px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-800 shadow-sm transition-all">Hoy</button>
-                    <button onclick="app.setReportFilter('semana')" id="rep-semana" class="flex-1 px-4 py-2 rounded-xl text-sm font-bold text-slate-500 transition-all">Semana</button>
-                    <button onclick="app.setReportFilter('mes')" id="rep-mes" class="flex-1 px-4 py-2 rounded-xl text-sm font-bold text-slate-500 transition-all">Mes</button>
+                <div class="flex bg-slate-200/60 p-1.5 rounded-2xl mb-6 shadow-inner w-full">
+                    <button onclick="app.setReportFilter('hoy')" id="rep-hoy" class="flex-1 px-4 py-3 rounded-xl text-sm font-black bg-white text-slate-800 shadow-sm transition-all">Hoy</button>
+                    <button onclick="app.setReportFilter('semana')" id="rep-semana" class="flex-1 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 transition-all">Semana</button>
+                    <button onclick="app.setReportFilter('mes')" id="rep-mes" class="flex-1 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 transition-all">Mes</button>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="xui-card border-l-4 border-l-blue-500">
-                        <div class="text-xs font-bold text-slate-400 uppercase">Total Tomas</div>
-                        <div class="text-3xl font-black text-slate-800 mt-1" id="rep-total-tomas">0</div>
+                    <div class="xui-card border-l-4 border-l-blue-500 text-center md:text-left">
+                        <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Tomas</div>
+                        <div class="text-4xl font-black text-slate-800 mt-1" id="rep-total-tomas">0</div>
                     </div>
-                    <div class="xui-card border-l-4 border-l-indigo-500">
-                        <div class="text-xs font-bold text-slate-400 uppercase">Total Onzas</div>
-                        <div class="text-3xl font-black text-indigo-600 mt-1" id="rep-total-oz">0 oz</div>
+                    <div class="xui-card border-l-4 border-l-indigo-500 text-center md:text-left">
+                        <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Onzas</div>
+                        <div class="text-4xl font-black text-indigo-600 mt-1" id="rep-total-oz">0</div>
                     </div>
                 </div>
 
                 <div class="xui-card">
-                    <h3 class="font-black text-slate-700 mb-4 text-center">Consumo por período (Onzas)</h3>
+                    <h3 class="font-black text-slate-700 mb-6 text-center">Evolución de consumo (oz)</h3>
                     <div class="relative h-64 w-full">
                         <canvas id="chart-oz"></canvas>
                     </div>
+                </div>
+            </div>
+
+            <!-- VISTA: CONFIGURACIÓN -->
+            <div id="view-configuracion" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-black tracking-tight text-slate-800">Ajustes</h2>
+                    <p class="text-slate-500 font-medium">Personaliza el comportamiento del tracker.</p>
+                </div>
+
+                <div class="xui-card space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Tiempo objetivo entre tomas (Minutos)</label>
+                        <input type="number" id="input-threshold" value="150" step="10" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-2xl text-center font-black text-slate-700 outline-none focus:border-amber-500 shadow-inner">
+                        <p class="text-[11px] text-slate-400 font-bold mt-3 leading-snug">El panel principal pasará de verde a rojo a medida que transcurra este tiempo, indicando que el bebé podría tener hambre pronto.</p>
+                    </div>
+                    <button onclick="app.saveSettings()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl text-lg tracking-wide transition-all">
+                        GUARDAR PREFERENCIAS
+                    </button>
                 </div>
             </div>
 
@@ -149,35 +169,41 @@
     </main>
 
     <script>
-        // ESTADO GLOBAL DE LA APP (Adaptado de tu ERP)
         window.app = {
             db: null,
             feedings: [],
             reportFilter: 'hoy',
             chartInstance: null,
+            timeThreshold: 150, // Límite por defecto
+            timerInterval: null,
 
             init() {
                 this.setCurrentTime();
-                this.setupNavigation();
                 
-                // INICIALIZACIÓN DE FIREBASE (¡Reemplaza con tus credenciales!)
+                // Cargar ajustes del dispositivo
+                const savedThreshold = localStorage.getItem('babyTrackerThreshold');
+                if(savedThreshold) {
+                    this.timeThreshold = parseInt(savedThreshold);
+                    document.getElementById('input-threshold').value = this.timeThreshold;
+                }
+
+                // INICIALIZACIÓN DE FIREBASE (¡No olvides colocar tus datos aquí!)
                 const firebaseConfig = {
-                    apiKey: "AIzaSyC1p8czf56NeSUboDYSzaSed4m2yJq2SDA",
-                    authDomain: "momb2b-3eb14.firebaseapp.com",
-                    projectId: "momb2b-3eb14",
-                    storageBucket: "momb2b-3eb14.appspot.com",
-                    messagingSenderId: "440475320328",
-                    appId: "1:440475320328:web:794638a982f19902a891bd"
+                    apiKey: "TU_API_KEY",
+                    authDomain: "TU_PROYECTO.firebaseapp.com",
+                    projectId: "TU_PROYECTO",
+                    storageBucket: "TU_PROYECTO.appspot.com",
+                    messagingSenderId: "TU_SENDER_ID",
+                    appId: "TU_APP_ID"
                 };
 
-                // Evitar inicialización múltiple si recargas en dev
                 if (!firebase.apps.length) {
                     firebase.initializeApp(firebaseConfig);
                 }
                 
                 this.db = firebase.firestore();
 
-                // Escuchar cambios en tiempo real
+                // Listener de la base de datos
                 this.db.collection('tomas').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
                     this.feedings = [];
                     snapshot.forEach(doc => {
@@ -188,64 +214,114 @@
                             dateObj: data.timestamp ? data.timestamp.toDate() : new Date(data.dateLocal)
                         });
                     });
-                    this.updateDashboard();
+                    
                     this.renderHistory();
                     this.renderReports();
+                    this.updateTimerUI(); // Actualizar el cronómetro inmediatamente
                 }, error => {
-                    console.error("Error al leer Firebase:", error);
-                    this.toast("Error de conexión a Firebase. Revisa tus credenciales.", "error");
+                    console.error("Error Firebase:", error);
+                    this.toast("Error de conexión. Verifica Firebase.", "error");
                 });
+
+                // Bucle para recalcular el cronómetro cada 60 segundos
+                this.timerInterval = setInterval(() => this.updateTimerUI(), 60000);
+            },
+
+            // --- LÓGICA DE TIEMPO Y COLOR ---
+            updateTimerUI() {
+                const alertBox = document.getElementById('alert-ultima-toma');
+                
+                if(!this.feedings || this.feedings.length === 0) {
+                    alertBox.classList.add('hidden');
+                    return;
+                }
+                
+                alertBox.classList.remove('hidden');
+                
+                // La toma más reciente
+                const lastFeeding = this.feedings[0];
+                const now = new Date();
+                const diffMs = now - lastFeeding.dateObj;
+                const diffMins = Math.floor(diffMs / 60000);
+
+                document.getElementById('alert-time').innerText = `${diffMins} min`;
+                document.getElementById('alert-limit').innerText = `${this.timeThreshold} min`;
+
+                // Cálculo para la semaforización de colores
+                const ratio = diffMins / this.timeThreshold;
+
+                // Limpiar clases previas
+                alertBox.classList.remove(
+                    'bg-emerald-50', 'border-emerald-300', 'text-emerald-800', 
+                    'bg-amber-50', 'border-amber-300', 'text-amber-800',
+                    'bg-rose-50', 'border-rose-400', 'text-rose-900', 'shadow-rose-500/30'
+                );
+                document.getElementById('alert-icon').classList.remove('animate-bounce');
+
+                // Asignar nuevos colores
+                if(ratio < 0.6) {
+                    // Verde (Bien)
+                    alertBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-800');
+                } else if (ratio < 0.9) {
+                    // Naranja (Aviso)
+                    alertBox.classList.add('bg-amber-50', 'border-amber-300', 'text-amber-800');
+                } else {
+                    // Rojo (Alerta)
+                    alertBox.classList.add('bg-rose-50', 'border-rose-400', 'text-rose-900', 'shadow-rose-500/30');
+                    if(ratio >= 1.0) {
+                        document.getElementById('alert-icon').classList.add('animate-bounce');
+                    }
+                }
             },
 
             // --- UI & NAVEGACIÓN ---
             switchView(viewId) {
-                // Ocultar todas las vistas
-                ['registro', 'historial', 'reportes'].forEach(id => {
+                ['registro', 'historial', 'reportes', 'configuracion'].forEach(id => {
                     document.getElementById(`view-${id}`).style.display = 'none';
-                    // Resetear botones desktop
+                    // Reset Desktop
                     const navBtn = document.getElementById(`nav-${id}`);
                     if(navBtn) navBtn.classList.remove('active');
-                    // Resetear botones mobile
+                    // Reset Mobile
                     const mobBtn = document.getElementById(`mob-${id}`);
-                    if(mobBtn) { mobBtn.style.opacity = '0.5'; mobBtn.style.borderBottom = 'none'; }
+                    if(mobBtn) { 
+                        mobBtn.style.opacity = '0.4'; 
+                        mobBtn.classList.remove('-translate-y-2', 'scale-110'); 
+                    }
                 });
 
-                // Mostrar vista seleccionada
                 document.getElementById(`view-${viewId}`).style.display = 'block';
                 
-                // Activar botón desktop
                 const navActive = document.getElementById(`nav-${viewId}`);
                 if(navActive) navActive.classList.add('active');
                 
-                // Activar botón mobile
                 const mobActive = document.getElementById(`mob-${viewId}`);
-                if(mobActive) { mobActive.style.opacity = '1'; }
+                if(mobActive) { 
+                    mobActive.style.opacity = '1'; 
+                    mobActive.classList.add('-translate-y-2', 'scale-110');
+                }
 
                 if(viewId === 'reportes') this.renderReports();
-            },
-
-            setupNavigation() {
-                // Asegurar que inicie en registro
-                this.switchView('registro');
+                
+                // Hacer scroll automático hacia arriba en móvil
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             },
 
             toast(msg, type = 'info') {
                 const c = document.getElementById('toast-container');
-                const colors = { info: 'bg-slate-800', success: 'bg-blue-500', error: 'bg-rose-500' };
+                const colors = { info: 'bg-slate-800', success: 'bg-emerald-500', error: 'bg-rose-600' };
                 const el = document.createElement('div');
-                el.className = `toast ${colors[type]} text-white px-5 py-3 rounded-2xl shadow-xl font-bold flex items-center gap-3`;
-                el.innerHTML = `<span>${type === 'success' ? '✅' : type === 'error' ? '⚠️' : 'ℹ️'}</span> ${msg}`;
+                el.className = `toast ${colors[type]} text-white px-5 py-4 rounded-2xl shadow-2xl font-black tracking-wide flex items-center gap-3`;
+                el.innerHTML = `<span class="text-xl">${type === 'success' ? '✅' : type === 'error' ? '⚠️' : 'ℹ️'}</span> ${msg}`;
                 c.appendChild(el);
                 setTimeout(() => {
                     el.style.opacity = '0';
                     setTimeout(() => el.remove(), 300);
-                }, 3000);
+                }, 3500);
             },
 
-            // --- LÓGICA DE REGISTRO ---
+            // --- LÓGICA DE DATOS ---
             setCurrentTime() {
                 const now = new Date();
-                // Ajustar al formato datetime-local (YYYY-MM-DDTHH:MM)
                 now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
                 document.getElementById('input-time').value = now.toISOString().slice(0, 16);
             },
@@ -254,15 +330,26 @@
                 const input = document.getElementById('input-oz');
                 let current = parseFloat(input.value) || 0;
                 current += amount;
-                if (current < 0.5) current = 0.5; // Mínimo
+                if (current < 0.5) current = 0.5;
                 input.value = current.toFixed(1);
             },
 
-            async saveFeeding() {
-                if (!this.db) {
-                    this.toast("Firebase no está configurado", "error");
-                    return;
+            saveSettings() {
+                const val = parseInt(document.getElementById('input-threshold').value);
+                if(val && val > 0) {
+                    this.timeThreshold = val;
+                    localStorage.setItem('babyTrackerThreshold', val);
+                    this.updateTimerUI(); // Actualiza el semáforo al instante
+                    this.toast("Límite guardado correctamente", "success");
+                    // Regresar al dashboard automáticamente
+                    setTimeout(() => this.switchView('registro'), 500);
+                } else {
+                    this.toast("Ingresa un tiempo válido", "error");
                 }
+            },
+
+            async saveFeeding() {
+                if (!this.db) { this.toast("Configura Firebase primero", "error"); return; }
 
                 const btn = document.getElementById('btn-save');
                 const oz = parseFloat(document.getElementById('input-oz').value);
@@ -275,28 +362,27 @@
                 try {
                     await this.db.collection('tomas').add({
                         oz: oz,
-                        dateLocal: timeStr, // respaldo en texto
+                        dateLocal: timeStr,
                         timestamp: firebase.firestore.Timestamp.fromDate(timestamp)
                     });
-                    this.toast("¡Biberón registrado exitosamente!", "success");
-                    this.setCurrentTime(); // Resetear hora
+                    this.toast("¡Biberón registrado!", "success");
+                    this.setCurrentTime();
                 } catch (error) {
                     this.toast("Error al guardar", "error");
                     console.error(error);
                 } finally {
                     btn.disabled = false;
-                    btn.innerText = "REGISTRAR BIBERÓN";
+                    btn.innerText = "REGISTRAR TOMA";
                 }
             },
 
             async deleteFeeding(id) {
-                if(confirm("¿Eliminar este registro?")) {
+                if(confirm("¿Seguro que deseas eliminar este registro?")) {
                     await this.db.collection('tomas').doc(id).delete();
                     this.toast("Registro eliminado", "info");
                 }
             },
 
-            // --- PROCESAMIENTO DE DATOS ---
             filterData(period) {
                 const now = new Date();
                 const start = new Date();
@@ -304,22 +390,14 @@
                 if (period === 'hoy') {
                     start.setHours(0, 0, 0, 0);
                 } else if (period === 'semana') {
-                    start.setDate(now.getDate() - now.getDay()); // Domingo pasado
+                    start.setDate(now.getDate() - now.getDay()); 
                     start.setHours(0, 0, 0, 0);
                 } else if (period === 'mes') {
-                    start.setDate(1); // Primer día del mes
+                    start.setDate(1);
                     start.setHours(0, 0, 0, 0);
                 }
 
                 return this.feedings.filter(f => f.dateObj >= start);
-            },
-
-            updateDashboard() {
-                const tomasHoy = this.filterData('hoy');
-                const totalOz = tomasHoy.reduce((sum, t) => sum + t.oz, 0);
-                
-                document.getElementById('dash-tomas-hoy').innerText = tomasHoy.length;
-                document.getElementById('dash-oz-hoy').innerText = `${totalOz.toFixed(1)} oz`;
             },
 
             renderHistory() {
@@ -333,23 +411,22 @@
                 } else {
                     emptyMsg.style.display = 'none';
                     this.feedings.forEach(f => {
-                        // Formato de fecha (Ej: Hoy a las 14:30 o 25/10 14:30)
                         const isToday = new Date().toDateString() === f.dateObj.toDateString();
                         const timeStr = f.dateObj.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
-                        const dateStr = isToday ? 'Hoy' : f.dateObj.toLocaleDateString('es-HN', { day: 'numeric', month: 'short' });
+                        const dateStr = isToday ? 'Hoy' : f.dateObj.toLocaleDateString('es-HN', { day: '2-digit', month: 'short' });
 
                         list.innerHTML += `
-                            <li class="p-4 flex justify-between items-center hover:bg-slate-50 transition-colors">
-                                <div class="flex items-center gap-4">
-                                    <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-full flex items-center justify-center font-black text-lg">
+                            <li class="p-5 flex justify-between items-center hover:bg-blue-50 transition-colors">
+                                <div class="flex items-center gap-5">
+                                    <div class="bg-gradient-to-br from-blue-400 to-blue-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-md">
                                         ${f.oz}
                                     </div>
                                     <div>
-                                        <div class="font-bold text-slate-700">${timeStr}</div>
-                                        <div class="text-xs font-semibold text-slate-400 uppercase">${dateStr}</div>
+                                        <div class="font-black text-slate-800 text-lg">${timeStr}</div>
+                                        <div class="text-[11px] font-black text-slate-400 uppercase tracking-widest">${dateStr}</div>
                                     </div>
                                 </div>
-                                <button onclick="app.deleteFeeding('${f.id}')" class="text-slate-300 hover:text-rose-500 font-bold p-2 text-xl">
+                                <button onclick="app.deleteFeeding('${f.id}')" class="bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 w-10 h-10 rounded-full flex items-center justify-center font-black text-xl transition-colors">
                                     ×
                                 </button>
                             </li>
@@ -358,60 +435,50 @@
                 }
             },
 
-            // --- REPORTES ---
             setReportFilter(period) {
                 this.reportFilter = period;
-                
-                // Actualizar estilos botones
                 ['hoy', 'semana', 'mes'].forEach(p => {
                     const btn = document.getElementById(`rep-${p}`);
                     if(p === period) {
-                        btn.className = "flex-1 px-4 py-2 rounded-xl text-sm font-bold bg-white text-slate-800 shadow-sm transition-all";
+                        btn.className = "flex-1 px-4 py-3 rounded-xl text-sm font-black bg-white text-slate-800 shadow-sm transition-all";
                     } else {
-                        btn.className = "flex-1 px-4 py-2 rounded-xl text-sm font-bold text-slate-500 transition-all";
+                        btn.className = "flex-1 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 transition-all";
                     }
                 });
-                
                 this.renderReports();
             },
 
             renderReports() {
                 const data = this.filterData(this.reportFilter);
                 
-                // Actualizar KPIs
                 const totalOz = data.reduce((sum, t) => sum + t.oz, 0);
                 document.getElementById('rep-total-tomas').innerText = data.length;
                 document.getElementById('rep-total-oz').innerText = `${totalOz.toFixed(1)} oz`;
 
-                // Preparar datos para Chart.js
                 this.renderChart(data);
             },
 
             renderChart(data) {
                 const ctx = document.getElementById('chart-oz').getContext('2d');
-                
-                // Agrupar datos dependiendo del filtro
                 let chartData = {};
                 
-                data.forEach(t => {
+                // Ordenar de viejo a nuevo para que el gráfico vaya de izquierda a derecha
+                const sortedData = [...data].reverse();
+
+                sortedData.forEach(t => {
                     let label = "";
                     if (this.reportFilter === 'hoy') {
-                        // Agrupar por hora
                         label = `${t.dateObj.getHours()}:00`;
                     } else {
-                        // Agrupar por día
                         label = t.dateObj.toLocaleDateString('es-HN', { weekday: 'short', day: 'numeric' });
                     }
                     chartData[label] = (chartData[label] || 0) + t.oz;
                 });
 
-                // Ordenar labels cronológicamente
                 const labels = Object.keys(chartData);
                 const values = Object.values(chartData);
 
-                if (this.chartInstance) {
-                    this.chartInstance.destroy();
-                }
+                if (this.chartInstance) this.chartInstance.destroy();
 
                 this.chartInstance = new Chart(ctx, {
                     type: 'bar',
@@ -421,8 +488,8 @@
                             label: 'Onzas (oz)',
                             data: values,
                             backgroundColor: '#3b82f6',
-                            borderRadius: 8,
-                            barPercentage: 0.6
+                            borderRadius: 6,
+                            barPercentage: 0.5
                         }]
                     },
                     options: {
@@ -430,7 +497,7 @@
                         maintainAspectRatio: false,
                         plugins: { legend: { display: false } },
                         scales: {
-                            y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false } },
+                            y: { beginAtZero: true, border: { display: false } },
                             x: { grid: { display: false }, border: { display: false } }
                         }
                     }
@@ -438,8 +505,8 @@
             }
         };
 
-        // Inicializar cuando el DOM cargue
         window.addEventListener('DOMContentLoaded', () => {
+            window.app.switchView('registro'); // Asegura que inicie en el tab correcto
             window.app.init();
         });
     </script>
