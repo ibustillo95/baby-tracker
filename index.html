@@ -130,6 +130,26 @@
         let intervaloReloj;
         let graficoInstancia = null;
 
+        // ¡NUEVO!: Variables para notificaciones
+        let notificado10Min = false;
+        let notificadoLimite = false;
+        let ultimaTomaId = null;
+
+        // ¡NUEVO!: Solicitar permiso para notificaciones
+        if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+
+        // ¡NUEVO!: Función encargada de lanzar la alerta
+        function enviarNotificacion(titulo, cuerpo) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(titulo, {
+                    body: cuerpo,
+                    icon: "https://cdn-icons-png.flaticon.com/512/864/864483.png" // Ícono de un biberón
+                });
+            }
+        }
+
         // Referencias DOM principales
         const inputOz = document.getElementById('inputOz');
         const inputHora = document.getElementById('inputHora');
@@ -194,8 +214,18 @@
             }
 
             // CORRECCIÓN AQUÍ: Tomamos el primer documento de forma directa
-            ultimaToma = snapshot.docs[0].data().fecha.toDate();
-            iniciarReloj();
+            // ¡NUEVO!: Lógica inteligente para resetear las alertas
+            const primerDoc = snapshot.docs[0];
+            const nuevaUltimaToma = primerDoc.data().fecha.toDate();
+
+            // Comprobamos si es un registro completamente nuevo comparando los IDs
+            if (ultimaTomaId !== primerDoc.id) {
+                ultimaTomaId = primerDoc.id; // Actualizamos el ID actual
+                ultimaToma = nuevaUltimaToma;
+                notificado10Min = false; // Reseteamos la alerta de los 10 minutos
+                notificadoLimite = false; // Reseteamos la alerta del límite excedido
+                iniciarReloj();
+            }
 
             snapshot.forEach((doc, index) => {
                 const data = doc.data();
@@ -306,7 +336,7 @@
             const ahora = new Date();
             const diffMs = ahora - ultimaToma;
             const diffMinutos = Math.floor(diffMs / 60000);
-            
+    
             if(diffMinutos < 0) {
                 tiempoTranscurrido.innerText = "Toma futura";
                 return;
@@ -314,6 +344,21 @@
 
             tiempoTranscurrido.innerText = `${diffMinutos} min`;
             actualizarColorReloj(diffMinutos);
+
+            // --- ¡NUEVO!: Lógica de Notificaciones ---
+            const minutosRestantes = limiteMinutos - diffMinutos;
+
+            // Faltan 10 minutos exactos
+            if (minutosRestantes === 10 && !notificado10Min) {
+            enviarNotificacion("¡Atención! 🍼", "Faltan 10 minutos para el límite de la próxima toma.");
+            notificado10Min = true; // Encendemos la bandera para no enviar spam el siguiente minuto
+            }
+                
+            // El límite llegó a cero o se excedió
+            else if (minutosRestantes <= 0 && !notificadoLimite) {
+            enviarNotificacion("¡Hora del biberón! 🚨", "Se ha alcanzado o excedido el tiempo límite configurado.");
+            notificadoLimite = true; // Encendemos la bandera
+            }
         }
 
         function actualizarColorReloj(minutos = null) {
