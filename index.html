@@ -7,7 +7,6 @@
 
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="icon" sizes="512x512" href="./icon.png">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BabyTracker">
@@ -20,7 +19,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        body { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+        body { padding-bottom: calc(85px + env(safe-area-inset-bottom)); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
     </style>
@@ -72,8 +71,8 @@
             </div>
         </div>
 
-        <div id="viewHistorial" class="tab-content">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">Historial de Tomas</h2>
+        <div id="viewHistorial" class="tab-content space-y-4">
+            <h2 class="text-xl font-bold text-gray-800">Historial de Tomas</h2>
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <ul id="listaHistorial" class="divide-y divide-gray-100">
                     <li class="p-6 text-center text-gray-500">Cargando historial...</li>
@@ -81,10 +80,27 @@
             </div>
         </div>
 
-        <div id="viewReportes" class="tab-content">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">Reporte de Consumo (7 días)</h2>
+        <div id="viewReportes" class="tab-content space-y-4">
+            <h2 class="text-xl font-bold text-gray-800">Reporte de Consumo Total</h2>
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
+                <div class="flex space-x-3">
+                    <div class="flex-1">
+                        <label class="block text-xs text-gray-500 uppercase font-bold mb-1">Inicio</label>
+                        <input type="date" id="dateFilterStart" class="w-full bg-gray-50 border border-gray-200 text-sm p-2 rounded-xl focus:ring-blue-500">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs text-gray-500 uppercase font-bold mb-1">Fin</label>
+                        <input type="date" id="dateFilterEnd" class="w-full bg-gray-50 border border-gray-200 text-sm p-2 rounded-xl focus:ring-blue-500">
+                    </div>
+                </div>
+                <button id="btnAplicarFiltros" class="w-full bg-blue-600 text-white font-bold text-sm rounded-xl py-2 shadow-sm">
+                    Aplicar Filtros
+                </button>
+            </div>
+
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                <canvas id="graficoOnzas"></canvas>
+                <canvas id="graficoOnzasCurva"></canvas>
             </div>
         </div>
 
@@ -101,7 +117,7 @@
                 <span class="text-[10px] font-bold">Historial</span>
             </button>
             <button onclick="cambiarTab('viewReportes', this)" class="nav-btn flex-1 py-2 text-gray-400 hover:text-blue-500 transition-colors flex flex-col items-center">
-                <i class="fa-solid fa-chart-bar text-xl mb-1"></i>
+                <i class="fa-solid fa-chart-line text-xl mb-1"></i>
                 <span class="text-[10px] font-bold">Reportes</span>
             </button>
             <button onclick="abrirSettings()" class="flex-1 py-2 text-gray-400 hover:text-gray-600 transition-colors flex flex-col items-center">
@@ -125,7 +141,7 @@
 
     <script>
         // --- 1. CREDENCIALES FIREBASE ---
-        // ¡AHORA SÍ, TUS DATOS REALES! "xD"
+        // ¡AHORA SÍ ESTÁN TUS DATOS REALES! "xD"
         const firebaseConfig = {
             apiKey: "AIzaSyC1p8czf56NeSUboDYSzaSed4m2yJq2SDA",
             authDomain: "momb2b-3eb14.firebaseapp.com",
@@ -147,10 +163,10 @@
         let intervaloReloj;
         let graficoInstancia = null;
 
-        // Banderas para el motor de notificaciones (Alarmas)
+        // Banderas para el motor de notificaciones
         let notificado10Min = false;
         let notificadoLimite = false;
-        let ultimaTomaId = null; // Para detectar registros nuevos
+        let ultimaTomaId = null;
 
         // Referencias DOM principales
         const inputOz = document.getElementById('inputOz');
@@ -160,13 +176,17 @@
         const timerCard = document.getElementById('timerCard');
         const limiteDisplay = document.getElementById('limiteDisplay');
         const listaHistorial = document.getElementById('listaHistorial');
+        
+        // Referencias Reportes
+        const filterStart = document.getElementById('dateFilterStart');
+        const filterEnd = document.getElementById('dateFilterEnd');
 
         // Solicitar permiso para notificaciones al cargar
         if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
             Notification.requestPermission();
         }
 
-        // Configurar hora inicial por defecto
+        // Configurar hora inicial por defecto (toma actual)
         function setHoraActual() {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -197,12 +217,12 @@
             btnElement.classList.add('text-blue-600');
         }
 
-        // --- 4. FUNCIÓN AUXILIAR: ENVIAR NOTIFICACIÓN (ALARMA) ---
+        // --- 4. FUNCIÓN AUXILIAR: ENVIAR NOTIFICACIÓN ---
         function enviarNotificacion(titulo, cuerpo) {
             if ("Notification" in window && Notification.permission === "granted") {
                 new Notification(titulo, {
                     body: cuerpo,
-                    icon: "./icon.png" // Usa tu icono personalizado
+                    icon: "./icon.png"
                 });
             }
         }
@@ -213,16 +233,19 @@
                 limiteMinutos = doc.data().minutos;
                 limiteDisplay.innerText = limiteMinutos;
                 document.getElementById('inputLimite').value = limiteMinutos;
-                actualizarColorReloj(); 
+                actualizarColorReloj(); // Forzar actualización visual
             } else {
                 db.collection("configuracion").doc("limiteGlobal").set({ minutos: 150 });
             }
         });
 
-        // --- 6. FIREBASE: LECTURA EN TIEMPO REAL (HISTORIAL, RELOJ, GRÁFICOS Y ALARMAS) ---
+        // --- 6. FIREBASE: LECTURA EN TIEMPO REAL (HISTORIAL, RELOJ Y TOMAS GLOBALES) ---
+        // Usamos una variable global para guardar las tomas y re-procesar los reportes si el filtro cambia
+        let tomasProcesadas = [];
+
         db.collection("tomas").orderBy("fecha", "desc").onSnapshot((snapshot) => {
             listaHistorial.innerHTML = "";
-            let tomasParaGrafico = [];
+            tomasProcesadas = []; // Resetear
 
             if (snapshot.empty) {
                 listaHistorial.innerHTML = "<li class='p-6 text-center text-gray-500'>No hay tomas registradas</li>";
@@ -230,14 +253,13 @@
                 return;
             }
 
-            // Lógica inteligente para resetear las alarmas ante un nuevo registro
+            // Lógica para reloj y resetear alarmas
             const primerDoc = snapshot.docs[0];
             const nuevaUltimaToma = primerDoc.data().fecha.toDate();
 
             if (ultimaTomaId !== primerDoc.id) {
                 ultimaTomaId = primerDoc.id; 
                 ultimaToma = nuevaUltimaToma;
-                // Reseteamos las banderas de notificaciones
                 notificado10Min = false; 
                 notificadoLimite = false; 
                 iniciarReloj();
@@ -248,7 +270,7 @@
                 const id = doc.id;
                 const fechaToma = data.fecha.toDate();
                 const horaStr = fechaToma.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                tomasParaGrafico.push(data);
+                tomasProcesadas.push({id, fecha: fechaToma, onzas: data.onzas}); // Guardar en crudo
 
                 // Renderizar lista del historial con botón de borrar
                 const li = document.createElement('li');
@@ -275,10 +297,11 @@
                 listaHistorial.appendChild(li);
             });
 
-            generarGrafico(tomasParaGrafico);
+            // Procesar el reporte inicial (sin filtros)
+            generarGraficoCurvaAscendente();
         });
 
-        // --- 7. FIREBASE: GUARDAR NUEVA TOMA CON MANEJO DE ERRORES ---
+        // --- 7. FIREBASE: GUARDAR NUEVA TOMA CON MANEJO DE ERRORES REAL ---
         btnGuardar.addEventListener('click', () => {
             btnGuardar.innerText = "Guardando...";
             btnGuardar.disabled = true;
@@ -290,7 +313,7 @@
             db.collection("tomas").add({
                 fecha: fechaToma,
                 onzas: onzas,
-                registro: new Date() // Fecha de creación real
+                registro: new Date()
             })
             .then(() => {
                 // Éxito visual
@@ -309,14 +332,14 @@
             })
             .catch((error) => {
                 console.error("Error al guardar: ", error);
-                alert("Hubo un error al guardar en la base de datos. Revisa las reglas de Firestore.");
+                alert("Hubo un error al guardar en la base de datos. Revisa las reglas de Firestore o tu conexión.");
                 btnGuardar.innerText = "Guardar Toma";
                 btnGuardar.disabled = false;
                 btnGuardar.classList.remove('opacity-75');
             });
         });
 
-        // --- 8. LÓGICA DEL RELOJ Y MOTOR DE ALARMAS ---
+        // --- 8. LÓGICA DEL RELOJ (FIX COLORES RETRASO) Y BARRA DE PROGRESO ---
         function iniciarReloj() {
             if (intervaloReloj) clearInterval(intervaloReloj);
             actualizarReloj();
@@ -325,55 +348,38 @@
 
         function actualizarReloj() {
             const ahora = new Date();
-            // diffMs es el tiempo QUE HA PASADO desde la última toma
             const diffMs = ahora - ultimaToma;
             const diffMinutos = Math.floor(diffMs / 60000);
             
-            // --- NUEVA LÓGICA: TEMPORIZADOR REGRESIVO ---
-            // Calculamos cuánto falta para llegar al límite configurado
+            // Calculamos cuánto falta o cuánto sobra (Número negativo = Retraso)
             let minutosRestantes = limiteMinutos - diffMinutos;
 
-            // --- NUEVA LÓGICA: BARRA DE PROGRESO INTERACTIVA ---
-            const progressBar = document.getElementById('progressBar');
-            // Calculamos el porcentaje que HA PASADO
-            let porcentajePasado = (diffMinutos / limiteMinutos) * 100;
-            
-            // Aseguramos que el porcentaje esté entre 0 y 100 para que la barra no se salga
-            let porcentajeClamped = Math.min(100, Math.max(0, porcentajePasado)); 
-            
-            // Actualizamos el ancho de la barra visualmente
-            progressBar.style.width = porcentajeClamped + '%';
-
-            // Manejo de casos especiales en el display
+            // Actualizar display de texto (Temporizador Regresivo)
             if(diffMinutos < 0) {
-                // Si la toma está registrada en el futuro
                 tiempoTranscurrido.innerText = "-- min";
-                progressBar.style.width = '0%'; // Barra vacía
-                actualizarColorReloj(0); // Forzar color verde/neutral
-                return;
-            }
-
-            // --- ACTUALIZAR DISPLAY (Temporizador o Mensaje de Exceso) ---
-            if (minutosRestantes > 0) {
-                // Aún falta tiempo: Mostrar cuenta regresiva simple
+                minutosRestantes = limiteMinutos; // Neutralizar alarmas
+            } else if (minutosRestantes > 0) {
                 tiempoTranscurrido.innerText = `${minutosRestantes} min`;
+                document.getElementById('labelReloj').innerText = "Siguiente toma en:";
             } else if (minutosRestantes === 0) {
-                // Llegamos exactos al límite
                 tiempoTranscurrido.innerText = `¡YA!`;
             } else {
-                // Se excedió el tiempo: Mostrar cuánto tiempo lleva de retraso
-                // Math.abs() convierte el número negativo en positivo
+                // Retraso
                 tiempoTranscurrido.innerText = `Retraso: ${Math.abs(minutosRestantes)} min`;
+                document.getElementById('labelReloj').innerText = "Debió tomar hace:";
             }
 
-            // --- MANTENER LÓGICA DE COLORES Y ALARMAS EXISTENTE ---
-            // La función de colores ya usa diffMinutos, así que funciona igual
+            // Actualizar Barra de Progreso
+            const progressBar = document.getElementById('progressBar');
+            let porcentajeClamped = Math.min(100, Math.max(0, (diffMinutos / limiteMinutos) * 100)); 
+            progressBar.style.width = porcentajeClamped + '%';
+
+            // --- FIX DE COLORES ---
+            // Le pasamos *siempre* el diffMinutos real (tiempo transcurrido)
             actualizarColorReloj(diffMinutos); 
-            // También actualizamos el color de la barra de progreso para que combine
             actualizarColorBarraProgreso(diffMinutos);
 
-            // --- MOTOR DE NOTIFICACIONES (ALARMAS) EXISTENTE ---
-            // Reutilizamos minutosRestantes calculado arriba para las alarmas
+            // --- MOTOR DE NOTIFICACIONES ---
             if (minutosRestantes === 10 && !notificado10Min) {
                 enviarNotificacion("¡Atención! 🍼", "Faltan 10 minutos para el límite de la próxima toma.");
                 notificado10Min = true; 
@@ -384,68 +390,128 @@
             }
         }
 
-        // --- NUEVA FUNCIÓN AUXILIAR: COLOR DE LA BARRA ---
-        // Pequeña función para que la barra cambie de azul a naranja/rojo igual que la tarjeta
-        function actualizarColorBarraProgreso(minutos) {
-            const progressBar = document.getElementById('progressBar');
-            const porcentaje = minutos / limiteMinutos;
+        function actualizarColorReloj(minutos) {
+            timerCard.classList.remove('bg-green-50', 'border-green-200', 'bg-orange-50', 'border-orange-200', 'bg-red-50', 'border-red-300', 'animate-pulse');
             
-            // Limpiar clases de color existentes
-            progressBar.classList.remove('bg-blue-600', 'bg-orange-500', 'bg-red-600');
-            
-            if (porcentaje < 0.6) {
-                progressBar.classList.add('bg-blue-600'); // Azul (Normal)
-            } else if (porcentaje < 0.9) {
-                progressBar.classList.add('bg-orange-500'); // Naranja (Advertencia)
+            // Si hay retraso, minutos > limiteMinutos
+            if (minutos >= limiteMinutos) {
+                // Rojo + Pulso (Alarma)
+                timerCard.classList.add('bg-red-50', 'border-red-300', 'animate-pulse'); 
+            } else if (minutos > (limiteMinutos * 0.75)) {
+                // Naranja (Advertencia > 75%)
+                timerCard.classList.add('bg-orange-50', 'border-orange-200'); 
             } else {
-                progressBar.classList.add('bg-red-600'); // Rojo (Límite/Exceso)
+                // Verde (Seguro)
+                timerCard.classList.add('bg-green-50', 'border-green-200'); 
             }
         }
-        // --- 9. GRÁFICOS (CHART.JS) ---
-        function generarGrafico(tomas) {
-            const ctx = document.getElementById('graficoOnzas').getContext('2d');
+
+        function actualizarColorBarraProgreso(minutos) {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.classList.remove('bg-blue-600', 'bg-orange-500', 'bg-red-600');
             
-            // Agrupar onzas por fecha
-            const resumen = {};
-            tomas.forEach(toma => {
-                const fechaStr = toma.fecha.toDate().toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-                resumen[fechaStr] = (resumen[fechaStr] || 0) + toma.onzas;
+            if (minutos >= limiteMinutos) {
+                progressBar.classList.add('bg-red-600'); 
+            } else if (minutos > (limiteMinutos * 0.75)) {
+                progressBar.classList.add('bg-orange-500'); 
+            } else {
+                progressBar.classList.add('bg-blue-600'); 
+            }
+        }
+
+        // --- 9. REPORTES (GRÁFICA CURVA ASCENDENTE ACUMULATIVA + FILTROS) ---
+        
+        // Listener del botón Aplicar Filtros
+        document.getElementById('btnAplicarFiltros').addEventListener('click', generarGraficoCurvaAscendente);
+
+        function generarGraficoCurvaAscendente() {
+            const ctx = document.getElementById('graficoOnzasCurva').getContext('2d');
+            
+            // 1. Clonar y ordenar tomas CRONOLÓGICAMENTE (más antiguas primero para la curva)
+            let tomasFiltradas = tomasProcesadas.slice().reverse();
+
+            // 2. Aplicar Filtros de Fecha si están definidos
+            if (filterStart.value) {
+                const startDate = new Date(filterStart.value);
+                tomasFiltradas = tomasFiltradas.filter(t => t.fecha >= startDate);
+            }
+            if (filterEnd.value) {
+                const endDate = new Date(filterEnd.value);
+                endDate.setHours(23, 59, 59); // Incluir todo el día final
+                tomasFiltradas = tomasFiltradas.filter(t => t.fecha <= endDate);
+            }
+
+            // 3. Procesar datos para curva ascendente (Acumulativa)
+            const etiquetas = []; // X = "Toma 1", "Toma 2"...
+            const datosAcumulados = []; // Y = Onzas acumuladas
+            let onzasAcumuladasTotal = 0;
+
+            tomasFiltradas.forEach((toma, index) => {
+                onzasAcumuladasTotal += toma.onzas;
+                
+                // Etiqueta corta (Fecha/Hora) para no saturar
+                // const shortDateStr = toma.fecha.toLocaleTimeString([], {month: 'numeric', day:'numeric', hour: '2-digit', minute:'2-digit'});
+                // etiquetas.push(shortDateStr);
+                
+                etiquetas.push(`Toma ${index + 1}`); // Eje X simplificado
+                datosAcumulados.push(onzasAcumuladasTotal.toFixed(1)); // Y acumulado
             });
 
-            // Ordenar fechas cronológicamente
-            const etiquetas = Object.keys(resumen).reverse().slice(-7); // Últimos 7 días activos
-            const datos = etiquetas.map(fecha => resumen[fecha]);
-
+            // 4. Crear o Actualizar Gráfico
             if(graficoInstancia) {
-                graficoInstancia.destroy(); // Evitar superposición de gráficos
+                graficoInstancia.destroy(); // Evitar superposición
+            }
+
+            if(tomasFiltradas.length === 0) {
+                listaHistorial.innerHTML = "<li class='p-6 text-center text-gray-500'>No hay datos para las fechas elegidas</li>"; // Reutilizamos historial? No, mejor no pintar nada.
+                return;
             }
 
             graficoInstancia = new Chart(ctx, {
-                type: 'bar',
+                type: 'line', // Tipo Línea
                 data: {
                     labels: etiquetas,
                     datasets: [{
-                        label: 'Onzas Consumidas',
-                        data: datos,
-                        backgroundColor: '#3b82f6', // Azul Tailwind
-                        borderRadius: 6
+                        label: 'Onzas Totales Consumidas',
+                        data: datosAcumulados,
+                        borderColor: '#2563eb', // Azul fuerte
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)', // Relleno ligero abajo
+                        fill: true,
+                        tension: 0.3, // Curva suave
+                        pointBackgroundColor: '#2563eb',
+                        borderWidth: 3
                     }]
                 },
                 options: {
                     responsive: true,
+                    plugins: {
+                        legend: { display: false } // Ocultar leyenda para ahorrar espacio
+                    },
                     scales: {
-                        y: { beginAtZero: true, title: { display: true, text: 'Onzas (oz)' } }
+                        x: { 
+                            title: { display: true, text: 'Tomas (Cronológicas)' },
+                            grid: { display: false }
+                        },
+                        y: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: 'Onzas Acumuladas (oz)' },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        }
                     }
                 }
             });
         }
 
-        // --- 10. FUNCIÓN: BORRAR TOMA DEL HISTORIAL ---
+        // --- 10. FUNCIÓN: BORRAR TOMA DEL HISTORIAL (CON CONFIRMACIÓN) ---
         function borrarToma(id, horaStr) {
             if(confirm(`¿Estás seguro de que deseas borrar la toma de las ${horaStr}?`)) {
                 db.collection("tomas").doc(id).delete()
-                .then(() => console.log("Toma borrada exitosamente"))
-                .catch((error) => alert("Error al borrar: " + error.message));
+                .then(() => {
+                    console.log("Toma borrada exitosamente");
+                })
+                .catch((error) => {
+                    alert("Hubo un error al borrar el registro: " + error.message);
+                });
             }
         }
 
