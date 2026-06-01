@@ -197,26 +197,41 @@
             ultimaToma = snapshot.docs[0].data().fecha.toDate();
             iniciarReloj();
 
-            snapshot.forEach((doc) => {
+            snapshot.forEach((doc, index) => {
                 const data = doc.data();
+                const id = doc.id; // ¡NUEVO!: Capturamos el ID único del documento
                 const fechaToma = data.fecha.toDate();
+                const horaStr = fechaToma.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 tomasParaGrafico.push(data);
+
+                // Configurar reloj con la toma más reciente
+                if (index === 0) {
+                    ultimaToma = fechaToma;
+                    iniciarReloj();
+                }
 
                 // Renderizar lista del historial
                 const li = document.createElement('li');
                 li.className = "p-4 flex justify-between items-center hover:bg-gray-50 transition-colors";
+                
+                // ¡ACTUALIZADO!: Agregamos el botón de la papelera que llama a borrarToma()
                 li.innerHTML = `
                     <div class="flex items-center space-x-4">
                         <div class="bg-blue-100 p-3 rounded-full text-blue-600">
                             <i class="fa-solid fa-bottle-droplet"></i>
                         </div>
                         <div>
-                            <p class="font-bold text-gray-800">${fechaToma.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                            <p class="font-bold text-gray-800">${horaStr}</p>
                             <p class="text-xs text-gray-500 uppercase tracking-wider">${fechaToma.toLocaleDateString()}</p>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xl font-black text-blue-600">${data.onzas} <span class="text-sm font-bold text-gray-400">oz</span></p>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            <p class="text-xl font-black text-blue-600">${data.onzas} <span class="text-sm font-bold text-gray-400">oz</span></p>
+                        </div>
+                        <button onclick="borrarToma('${id}', '${horaStr}')" class="text-red-400 hover:text-red-600 p-2 transition-colors">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
                     </div>
                 `;
                 listaHistorial.appendChild(li);
@@ -262,6 +277,24 @@
             });
         });
 
+        // --- NUEVA FUNCIÓN: BORRAR TOMA ---
+        function borrarToma(id, fechaTomaStr) {
+            // Confirmación antes de borrar para evitar accidentes
+            if(confirm(`¿Estás seguro de que deseas borrar la toma de las ${fechaTomaStr}?`)) {
+                db.collection("tomas").doc(id).delete()
+                .then(() => {
+                    console.log("Toma borrada exitosamente");
+                    // No necesitas actualizar el HTML manualmente, 
+                    // onSnapshot (el listener en tiempo real) lo hará por ti.
+                })
+                .catch((error) => {
+                    console.error("Error al borrar la toma: ", error);
+                    alert("Hubo un error al borrar el registro. Intenta de nuevo.");
+                });
+            }
+        }
+        
+        
         // --- 7. LÓGICA DEL RELOJ ---
         function iniciarReloj() {
             if (intervaloReloj) clearInterval(intervaloReloj);
