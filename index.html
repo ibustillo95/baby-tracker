@@ -42,12 +42,18 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        html, body {
+        html {
             height: 100%;
-            overflow: hidden;
             font-family: 'Nunito', sans-serif;
             background: var(--cream);
             color: var(--ink);
+        }
+        body {
+            min-height: 100%;
+            font-family: 'Nunito', sans-serif;
+            background: var(--cream);
+            color: var(--ink);
+            /* No overflow:hidden — leave natural scroll to body */
         }
 
         /* ── Background blob decoration ── */
@@ -76,7 +82,7 @@
         #app {
             position: relative;
             z-index: 1;
-            height: 100%;
+            min-height: 100%;
             display: flex;
             flex-direction: column;
             max-width: 430px;
@@ -128,16 +134,11 @@
 
         /* ── SCROLLABLE CONTENT ── */
         #scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding: 8px 16px 20px;
+            padding: 8px 16px calc(28px + env(safe-area-inset-bottom));
             display: flex;
             flex-direction: column;
             gap: 14px;
-            scrollbar-width: none;
         }
-        #scroll-area::-webkit-scrollbar { display: none; }
 
         /* ── CARDS ── */
         .card {
@@ -480,6 +481,36 @@
             font-weight: 600;
         }
 
+        /* ── CHART TOGGLE ── */
+        .chart-toggle {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            background: var(--cream);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            border: 1.5px solid var(--peach);
+        }
+        .ctoggle-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-family: 'Nunito', sans-serif;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--muted);
+            padding: 8px 6px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+        .ctoggle-btn.active {
+            background: linear-gradient(135deg, var(--apricot), var(--coral));
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(231,111,81,0.30);
+        }
+
         /* ── CHART CARD ── */
         .chart-card { padding: 16px 16px 12px; }
         .chart-header {
@@ -733,8 +764,15 @@
         <!-- 4. CHART CARD -->
         <div class="card chart-card">
             <div class="chart-header">
-                <div class="chart-title">Consumo acumulado</div>
+                <div class="chart-title">Gráfico de consumo</div>
             </div>
+
+            <!-- View mode toggle -->
+            <div class="chart-toggle" id="chartToggle">
+                <button class="ctoggle-btn active" data-mode="acumulado">📈 Global</button>
+                <button class="ctoggle-btn" data-mode="portoma">🍼 Por toma</button>
+            </div>
+
             <div class="filter-row" style="margin-bottom:12px">
                 <input type="date" class="filter-date" id="dateFilterStart">
                 <input type="date" class="filter-date" id="dateFilterEnd">
@@ -1011,7 +1049,18 @@
     }
 
     /* ── CHART ── */
+    let chartMode = 'acumulado'; // 'acumulado' | 'portoma'
+
     document.getElementById('btnAplicarFiltros').addEventListener('click', generarGrafico);
+
+    document.getElementById('chartToggle').addEventListener('click', e => {
+        const btn = e.target.closest('.ctoggle-btn');
+        if (!btn) return;
+        chartMode = btn.dataset.mode;
+        document.querySelectorAll('.ctoggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        generarGrafico();
+    });
 
     function generarGrafico() {
         const ctx = document.getElementById('graficoOnzasCurva').getContext('2d');
@@ -1030,32 +1079,72 @@
         if (graficoInstancia) { graficoInstancia.destroy(); graficoInstancia = null; }
         if (!filtradas.length) return;
 
-        let acum = 0;
         const labels = filtradas.map((_, i) => `T${i + 1}`);
-        const data   = filtradas.map(t => { acum += t.onzas; return +acum.toFixed(1); });
+        let data, chartType, fillMode, yLabel, tension, barColor;
+
+        if (chartMode === 'acumulado') {
+            let acum = 0;
+            data = filtradas.map(t => { acum += t.onzas; return +acum.toFixed(1); });
+            chartType = 'line';
+            fillMode  = true;
+            tension   = 0.4;
+            yLabel    = 'oz acumuladas';
+        } else {
+            // Por toma: oz individualmente + barra para ver claramente cada toma
+            data      = filtradas.map(t => +t.onzas.toFixed(1));
+            chartType = 'bar';
+            fillMode  = false;
+            tension   = 0;
+            yLabel    = 'oz por toma';
+        }
+
+        const isBar = chartType === 'bar';
 
         graficoInstancia = new Chart(ctx, {
-            type: 'line',
+            type: chartType,
             data: {
                 labels,
                 datasets: [{
                     data,
                     borderColor: '#F4A261',
-                    backgroundColor: 'rgba(244,162,97,0.12)',
-                    fill: true,
-                    tension: 0.4,
+                    backgroundColor: isBar
+                        ? filtradas.map((_, i) => i % 2 === 0 ? 'rgba(244,162,97,0.75)' : 'rgba(69,123,157,0.65)')
+                        : 'rgba(244,162,97,0.12)',
+                    fill: fillMode,
+                    tension,
                     pointBackgroundColor: '#E76F51',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    borderWidth: 2.5
+                    pointRadius: isBar ? 0 : 4,
+                    pointHoverRadius: isBar ? 0 : 6,
+                    borderWidth: isBar ? 0 : 2.5,
+                    borderRadius: isBar ? 6 : 0,
                 }]
             },
             options: {
                 responsive: true,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.parsed.y} oz`
+                        },
+                        backgroundColor: '#2D2214',
+                        titleFont: { family: 'Nunito', weight: '800' },
+                        bodyFont: { family: 'Nunito' },
+                        cornerRadius: 8,
+                        padding: 10,
+                    }
+                },
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { family: 'Nunito', size: 10 }, color: '#9A8878' } },
-                    y: { beginAtZero: true, grid: { color: 'rgba(45,34,20,0.05)' }, ticks: { font: { family: 'Nunito', size: 10 }, color: '#9A8878' } }
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: 'Nunito', size: 10 }, color: '#9A8878' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(45,34,20,0.05)' },
+                        ticks: { font: { family: 'Nunito', size: 10 }, color: '#9A8878' },
+                        title: { display: true, text: yLabel, font: { family: 'Nunito', size: 9 }, color: '#9A8878' }
+                    }
                 }
             }
         });
