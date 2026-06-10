@@ -1,1179 +1,1462 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BabyTracker</title>
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="BabyTracker">
-    <link rel="icon" sizes="512x512" href="./icon.png">
-    <link rel="apple-touch-icon" href="./icon.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BabyTracker · Ethan</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BabyTracker">
+<link rel="icon" sizes="512x512" href="./icon.png">
+<link rel="apple-touch-icon" href="./icon.png">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:    #FFF8F0;
+  --peach:    #FCDAB7;
+  --apricot:  #F4A261;
+  --coral:    #E76F51;
+  --sage:     #81B29A;
+  --sage-lt:  #C8DDD4;
+  --sky:      #457B9D;
+  --sky-lt:   #BDD5E8;
+  --lavender: #C9B8D8;
+  --lav-lt:   #EAE4F2;
+  --ink:      #2D2214;
+  --muted:    #9A8878;
+  --warn:     #E9C46A;
+  --danger:   #E63946;
+  --green:    #52B788;
+  --green-lt: #D8EFE4;
+  --card-bg:  rgba(255,255,255,0.82);
+  --glass:    rgba(255,255,255,0.55);
+  --radius:   20px;
+  --radius-sm:12px;
+  --shadow:   0 4px 24px rgba(45,34,20,0.10);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--ink)}
+body{min-height:100vh;font-family:'Nunito',sans-serif;background:var(--cream);color:var(--ink)}
+body::before{content:'';position:fixed;top:-120px;right:-120px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,var(--peach) 0%,transparent 70%);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;bottom:-100px;left:-80px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,var(--sage-lt) 0%,transparent 70%);pointer-events:none;z-index:0}
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+/* ── APP SHELL ── */
+#app{position:relative;z-index:1;max-width:430px;margin:0 auto;padding-bottom:80px}
 
-    <style>
-        :root {
-            --cream:    #FFF8F0;
-            --peach:    #FCDAB7;
-            --apricot:  #F4A261;
-            --coral:    #E76F51;
-            --sage:     #81B29A;
-            --sage-lt:  #C8DDD4;
-            --sky:      #457B9D;
-            --sky-lt:   #BDD5E8;
-            --lavender: #C9B8D8;
-            --ink:      #2D2214;
-            --muted:    #9A8878;
-            --warn:     #E9C46A;
-            --danger:   #E63946;
-            --card-bg:  rgba(255,255,255,0.78);
-            --glass:    rgba(255,255,255,0.55);
-            --radius:   20px;
-            --radius-sm:12px;
-            --shadow:   0 4px 24px rgba(45,34,20,0.10);
-            --shadow-lg:0 8px 40px rgba(45,34,20,0.15);
-        }
+/* ── HEADER ── */
+header{padding:16px 20px 8px;display:flex;justify-content:space-between;align-items:center}
+.header-brand{display:flex;align-items:center;gap:10px}
+.header-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--apricot),var(--coral));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 10px rgba(244,162,97,0.45)}
+.header-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);letter-spacing:-0.3px}
+.header-title span{color:var(--apricot)}
+.header-sub{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;line-height:1;margin-top:1px}
+.hdr-actions{display:flex;gap:8px}
+.icon-btn{width:38px;height:38px;border:none;background:var(--glass);backdrop-filter:blur(10px);border-radius:12px;color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,0.8);transition:all .2s}
+.icon-btn:active{transform:scale(0.92);background:var(--peach)}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+/* ── BOTTOM NAV ── */
+#bottomNav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(255,248,240,0.95);backdrop-filter:blur(20px);border-top:1.5px solid rgba(255,255,255,0.9);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 4px 8px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);transition:color .2s}
+.nav-btn.active{color:var(--coral)}
+.nav-btn .nav-ico{font-size:20px;line-height:1}
+.nav-btn.active .nav-ico{filter:drop-shadow(0 2px 4px rgba(231,111,81,0.4))}
 
-        html {
-            height: 100%;
-            font-family: 'Nunito', sans-serif;
-            background: var(--cream);
-            color: var(--ink);
-        }
-        body {
-            min-height: 100%;
-            font-family: 'Nunito', sans-serif;
-            background: var(--cream);
-            color: var(--ink);
-            /* No overflow:hidden — leave natural scroll to body */
-        }
+/* ── PAGES ── */
+.page{display:none;padding:8px 16px 0;flex-direction:column;gap:14px}
+.page.active{display:flex}
 
-        /* ── Background blob decoration ── */
-        body::before {
-            content: '';
-            position: fixed;
-            top: -120px; right: -120px;
-            width: 380px; height: 380px;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--peach) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 0;
-        }
-        body::after {
-            content: '';
-            position: fixed;
-            bottom: -100px; left: -80px;
-            width: 320px; height: 320px;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--sage-lt) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 0;
-        }
+/* ── CARDS ── */
+.card{background:var(--card-bg);backdrop-filter:blur(16px);border-radius:var(--radius);border:1.5px solid rgba(255,255,255,0.9);box-shadow:var(--shadow);overflow:hidden}
 
-        /* ── LAYOUT ── */
-        #app {
-            position: relative;
-            z-index: 1;
-            min-height: 100%;
-            display: flex;
-            flex-direction: column;
-            max-width: 430px;
-            margin: 0 auto;
-        }
+/* ══════════════════════════════════════
+   PAGE 1 · TIMELINE
+══════════════════════════════════════ */
 
-        /* ── HEADER ── */
-        header {
-            padding: 16px 20px 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .header-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .header-icon {
-            width: 38px; height: 38px;
-            background: linear-gradient(135deg, var(--apricot), var(--coral));
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px;
-            box-shadow: 0 2px 10px rgba(244,162,97,0.45);
-        }
-        .header-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 22px;
-            color: var(--ink);
-            letter-spacing: -0.3px;
-        }
-        .header-title span { color: var(--apricot); }
-        .settings-btn {
-            width: 38px; height: 38px;
-            border: none;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            color: var(--muted);
-            font-size: 16px;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            border: 1.5px solid rgba(255,255,255,0.8);
-            transition: all .2s;
-        }
-        .settings-btn:active { transform: scale(0.92); background: var(--peach); }
+/* NEXT FEED hero */
+#heroCard{padding:20px;transition:background .6s;background:linear-gradient(135deg,rgba(255,255,255,0.85),rgba(252,218,183,0.45))}
+#heroCard.warn{background:linear-gradient(135deg,rgba(255,255,255,0.85),rgba(233,196,106,0.45))}
+#heroCard.danger{background:linear-gradient(135deg,rgba(255,255,255,0.85),rgba(230,57,70,0.15));animation:pulseBorder 1.4s ease-in-out infinite}
+@keyframes pulseBorder{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 4px rgba(230,57,70,0.18),var(--shadow)}}
+.hero-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.hero-lbl{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+#heroTime{font-size:42px;font-weight:900;line-height:1;letter-spacing:-2px;color:var(--ink);transition:color .4s}
+#heroCard.warn #heroTime{color:#B07C00}
+#heroCard.danger #heroTime{color:var(--danger)}
+.hero-right{text-align:right}
+.hero-right .hero-lbl{margin-bottom:4px}
+#heroNextAt{font-size:22px;font-weight:900;color:var(--ink)}
+#heroNextAt small{font-size:12px;font-weight:700;color:var(--muted)}
+.prog-track{height:8px;background:rgba(45,34,20,0.08);border-radius:99px;overflow:hidden}
+#heroProg{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--sage),var(--sky));width:0%;transition:width 1s linear,background .6s}
+#heroCard.warn #heroProg{background:linear-gradient(90deg,var(--warn),#D4A017)}
+#heroCard.danger #heroProg{background:linear-gradient(90deg,var(--coral),var(--danger))}
+#heroLastFeed{margin-top:10px;font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:5px}
+#heroLastFeed .dot{width:6px;height:6px;border-radius:50%;background:var(--sage);display:inline-block}
 
-        /* ── SCROLLABLE CONTENT ── */
-        #scroll-area {
-            padding: 8px 16px calc(28px + env(safe-area-inset-bottom));
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
+/* TIMELINE */
+.tl-header{padding:14px 20px 8px;display:flex;justify-content:space-between;align-items:center}
+.tl-title{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.tl-date{font-size:12px;font-weight:800;color:var(--ink)}
+#tlScroll{overflow-x:auto;padding:0 16px 16px;display:flex;gap:10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#tlScroll::-webkit-scrollbar{display:none}
 
-        /* ── CARDS ── */
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border-radius: var(--radius);
-            border: 1.5px solid rgba(255,255,255,0.9);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
+.tl-slot{flex-shrink:0;width:80px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.tl-bubble{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;position:relative;transition:transform .2s,box-shadow .2s}
+.tl-bubble:active{transform:scale(0.92)}
+.tl-slot.done .tl-bubble{background:var(--green-lt);border:2px solid var(--green);box-shadow:0 2px 10px rgba(82,183,136,0.25)}
+.tl-slot.next .tl-bubble{background:linear-gradient(135deg,var(--apricot),var(--coral));border:2px solid var(--coral);box-shadow:0 4px 16px rgba(231,111,81,0.40);animation:bounceNext 2s ease-in-out infinite}
+@keyframes bounceNext{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.tl-slot.predicted .tl-bubble{background:#fff;border:2px dashed var(--peach)}
+.tl-slot.overdue .tl-bubble{background:rgba(230,57,70,0.08);border:2px solid var(--danger)}
+.tl-slot.skipped .tl-bubble{background:#f5f5f5;border:2px dashed #ddd;opacity:.6}
 
-        /* ── TIMER CARD ── */
-        #timerCard {
-            padding: 20px;
-            transition: background .6s, border-color .6s;
-            background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(252,218,183,0.45));
-        }
-        #timerCard.state-warn {
-            background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(233,196,106,0.45));
-        }
-        #timerCard.state-danger {
-            background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(230,57,70,0.15));
-            animation: pulse-border 1.4s ease-in-out infinite;
-        }
-        @keyframes pulse-border {
-            0%, 100% { box-shadow: var(--shadow); }
-            50%       { box-shadow: 0 0 0 4px rgba(230,57,70,0.18), var(--shadow); }
-        }
+.tl-badge{position:absolute;top:-3px;right:-3px;width:16px;height:16px;border-radius:50%;font-size:8px;font-weight:900;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff}
+.tl-slot.done .tl-badge{background:var(--green);color:#fff}
+.tl-slot.overdue .tl-badge{background:var(--danger);color:#fff}
 
-        .timer-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 14px;
-        }
-        .timer-label {
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin-bottom: 4px;
-        }
-        #tiempoTranscurrido {
-            font-size: 38px;
-            font-weight: 900;
-            line-height: 1;
-            color: var(--ink);
-            letter-spacing: -1px;
-            transition: color .4s;
-        }
-        #timerCard.state-warn  #tiempoTranscurrido { color: #B07C00; }
-        #timerCard.state-danger #tiempoTranscurrido { color: var(--danger); }
+.tl-time{font-size:11px;font-weight:800;color:var(--ink)}
+.tl-sub{font-size:9px;font-weight:700;color:var(--muted);text-align:center;line-height:1.2}
 
-        .timer-meta {
-            text-align: right;
-        }
-        .timer-meta-val {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--ink);
-        }
-        .timer-meta-val span { font-size: 12px; font-weight: 700; color: var(--muted); }
+/* connector line */
+.tl-line{position:relative;padding:0 16px 0}
+.tl-line-inner{height:2px;background:linear-gradient(90deg,var(--green) var(--done-pct,0%),var(--peach) var(--done-pct,0%));border-radius:1px;margin-bottom:-8px;position:relative;z-index:0}
 
-        /* Progress track */
-        .progress-track {
-            height: 8px;
-            background: rgba(45,34,20,0.08);
-            border-radius: 99px;
-            overflow: hidden;
-        }
-        #progressBar {
-            height: 100%;
-            border-radius: 99px;
-            background: linear-gradient(90deg, var(--sage), var(--sky));
-            width: 0%;
-            transition: width 1s linear, background .6s;
-        }
-        #timerCard.state-warn  #progressBar { background: linear-gradient(90deg, var(--warn), #D4A017); }
-        #timerCard.state-danger #progressBar { background: linear-gradient(90deg, var(--coral), var(--danger)); }
+/* ══════════════════════════════════════
+   PAGE 2 · REGISTER
+══════════════════════════════════════ */
+.reg-card{padding:20px}
+.sec-lbl{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
 
-        /* Last feed pill */
-        #lastFeedPill {
-            margin-top: 10px;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--muted);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        #lastFeedPill .dot {
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            background: var(--sage);
-            display: inline-block;
-        }
+/* Type selector */
+.type-seg{display:flex;background:var(--cream);border-radius:var(--radius-sm);border:1.5px solid var(--peach);padding:4px;gap:4px;margin-bottom:16px}
+.type-btn{flex:1;border:none;background:transparent;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:var(--muted);padding:9px 6px;border-radius:9px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.type-btn.active{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(45,34,20,0.10)}
 
-        /* ── REGISTER CARD ── */
-        .reg-card { padding: 20px; }
+/* Formula fields */
+#fieldsFormula{}
+.oz-stepper{display:flex;align-items:center;justify-content:space-between;background:var(--cream);border-radius:var(--radius-sm);border:1.5px solid var(--peach);padding:10px 14px;margin-bottom:12px}
+.step-btn{width:40px;height:40px;border:none;border-radius:10px;background:#fff;color:var(--ink);font-size:22px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(45,34,20,0.10);display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.step-btn:active{transform:scale(0.88)}
+.oz-display{display:flex;flex-direction:column;align-items:center}
+#inputOzDisplay{font-size:44px;font-weight:900;color:var(--sky);line-height:1;letter-spacing:-2px}
+.oz-unit{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+#inputOz{display:none}
+.quick-pills{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.quick-pill{border:none;background:var(--peach);color:var(--ink);font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;border-radius:99px;padding:5px 14px;cursor:pointer;transition:all .15s}
+.quick-pill.active,.quick-pill:active{background:var(--apricot);color:#fff}
 
-        .reg-header {
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin-bottom: 16px;
-        }
+/* Breast fields */
+#fieldsBreast{display:none}
+.breast-row{display:flex;gap:10px;margin-bottom:12px}
+.breast-side{flex:1;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.breast-side.active-side{border-color:var(--lavender);background:var(--lav-lt)}
+.breast-ico{font-size:22px}
+.breast-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+.breast-min{font-size:28px;font-weight:900;color:var(--sky);line-height:1}
+.breast-min-lbl{font-size:9px;font-weight:700;color:var(--muted)}
+.breast-steppers{display:flex;gap:6px}
+.bs-btn{width:32px;height:32px;border:none;border-radius:9px;background:#fff;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(45,34,20,0.08);transition:transform .15s}
+.bs-btn:active{transform:scale(0.88)}
 
-        /* Oz stepper */
-        .oz-stepper {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--cream);
-            border-radius: var(--radius-sm);
-            border: 1.5px solid var(--peach);
-            padding: 10px 14px;
-            margin-bottom: 14px;
-        }
-        .step-btn {
-            width: 40px; height: 40px;
-            border: none;
-            border-radius: 10px;
-            background: #fff;
-            color: var(--ink);
-            font-size: 22px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(45,34,20,0.10);
-            display: flex; align-items: center; justify-content: center;
-            transition: transform .15s, box-shadow .15s;
-            flex-shrink: 0;
-        }
-        .step-btn:active { transform: scale(0.88); box-shadow: none; }
+/* Time row */
+.time-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.time-input-wrap{flex:1}
+#inputHora{width:100%;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:10px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--ink);outline:none;transition:border-color .2s}
+#inputHora:focus{border-color:var(--apricot)}
+.now-btn{border:none;background:var(--sage-lt);color:var(--sage);font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:8px 12px;border-radius:var(--radius-sm);cursor:pointer;white-space:nowrap;transition:all .15s}
+.now-btn:active{background:var(--sage);color:#fff}
 
-        .oz-display {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #inputOzDisplay {
-            font-size: 44px;
-            font-weight: 900;
-            color: var(--sky);
-            line-height: 1;
-            letter-spacing: -2px;
-        }
-        .oz-unit {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--muted);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        /* Hidden real input */
-        #inputOz { display: none; }
+/* Save btn */
+#btnGuardar{width:100%;background:linear-gradient(135deg,var(--apricot),var(--coral));color:#fff;border:none;border-radius:var(--radius-sm);padding:15px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 4px 18px rgba(231,111,81,0.40);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+#btnGuardar:active{transform:scale(0.97)}
+#btnGuardar:disabled{opacity:.7}
+#btnGuardar.saved{background:linear-gradient(135deg,var(--sage),#5A9E84);box-shadow:0 4px 18px rgba(129,178,154,0.40)}
 
-        /* Quick-select pills */
-        .quick-pills {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 14px;
-            flex-wrap: wrap;
-        }
-        .quick-pill {
-            border: none;
-            background: var(--peach);
-            color: var(--ink);
-            font-family: 'Nunito', sans-serif;
-            font-size: 12px;
-            font-weight: 800;
-            border-radius: 99px;
-            padding: 5px 14px;
-            cursor: pointer;
-            transition: all .15s;
-        }
-        .quick-pill:active,
-        .quick-pill.active {
-            background: var(--apricot);
-            color: #fff;
-        }
+/* Diaper card */
+.diaper-card{padding:20px}
+.diaper-row{display:flex;gap:10px}
+.diaper-btn{flex:1;border:none;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:14px 8px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s}
+.diaper-btn span{font-size:24px}
+.diaper-btn:active,.diaper-btn.saving{background:var(--peach);color:var(--ink);border-color:var(--apricot);transform:scale(0.96)}
 
-        /* Time row */
-        .time-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-        .time-label-box {
-            display: flex;
-            flex-direction: column;
-        }
-        .time-label-box .tl-label {
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-        .time-input-wrap {
-            flex: 1;
-            position: relative;
-        }
-        #inputHora {
-            width: 100%;
-            background: var(--cream);
-            border: 1.5px solid var(--peach);
-            border-radius: var(--radius-sm);
-            padding: 10px 14px;
-            font-family: 'Nunito', sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--ink);
-            outline: none;
-            transition: border-color .2s;
-        }
-        #inputHora:focus { border-color: var(--apricot); }
-        .now-btn {
-            border: none;
-            background: var(--sage-lt);
-            color: var(--sage);
-            font-family: 'Nunito', sans-serif;
-            font-size: 11px;
-            font-weight: 800;
-            padding: 8px 12px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all .15s;
-        }
-        .now-btn:active { background: var(--sage); color: #fff; }
+/* History */
+.section-label{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);padding:14px 20px 10px;display:flex;justify-content:space-between;align-items:center}
+.section-badge{background:var(--peach);color:var(--apricot);font-size:10px;font-weight:900;padding:2px 9px;border-radius:99px}
+#listaHistorial{list-style:none;max-height:260px;overflow-y:auto;scrollbar-width:none}
+#listaHistorial::-webkit-scrollbar{display:none}
+.hist-item{display:flex;align-items:center;padding:10px 20px;gap:12px;border-bottom:1px solid rgba(45,34,20,0.05);animation:slideIn .25s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.hist-item:last-child{border-bottom:none}
+.hist-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.hist-icon.ca{background:var(--sky-lt);color:var(--sky)}
+.hist-icon.cb{background:var(--sage-lt);color:var(--sage)}
+.hist-icon.cc{background:var(--peach);color:var(--apricot)}
+.hist-icon.cd{background:var(--lav-lt);color:#9B72CF}
+.hist-meta{flex:1;min-width:0}
+.hist-time{font-size:14px;font-weight:800;color:var(--ink)}
+.hist-date{font-size:11px;color:var(--muted);font-weight:600}
+.hist-val{font-size:18px;font-weight:900;color:var(--sky);white-space:nowrap}
+.hist-val span{font-size:11px;font-weight:700;color:var(--muted)}
+.hist-del{border:none;background:none;color:#ddd;font-size:14px;cursor:pointer;padding:4px 6px;border-radius:8px;transition:all .15s}
+.hist-del:active{color:var(--danger);background:rgba(230,57,70,0.08)}
+.hist-empty{padding:28px 20px;text-align:center;color:var(--muted);font-size:14px;font-weight:600}
 
-        /* Save button */
-        #btnGuardar {
-            width: 100%;
-            background: linear-gradient(135deg, var(--apricot), var(--coral));
-            color: #fff;
-            border: none;
-            border-radius: var(--radius-sm);
-            padding: 15px;
-            font-family: 'Nunito', sans-serif;
-            font-size: 16px;
-            font-weight: 900;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            box-shadow: 0 4px 18px rgba(231,111,81,0.40);
-            transition: all .2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        #btnGuardar:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(231,111,81,0.30); }
-        #btnGuardar:disabled { opacity: .7; }
-        #btnGuardar.saved {
-            background: linear-gradient(135deg, var(--sage), #5A9E84);
-            box-shadow: 0 4px 18px rgba(129,178,154,0.40);
-        }
+/* ══════════════════════════════════════
+   BREAST STOPWATCH
+══════════════════════════════════════ */
+.breast-side-sel{flex:1;border:none;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:9px 6px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:var(--muted);cursor:pointer;transition:all .2s}
+.breast-side-sel.active{background:var(--lav-lt);border-color:var(--lavender);color:#7B5EA7}
+#breastStopwatchCard{display:flex;gap:10px}
+.bsw-side-card{flex:1;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius);padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;transition:border-color .3s,background .3s}
+.bsw-side-card.running{background:var(--lav-lt);border-color:var(--lavender);animation:bswPulse 1.5s ease-in-out infinite}
+.bsw-side-card.stopped{background:var(--green-lt);border-color:var(--green)}
+@keyframes bswPulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 4px rgba(201,184,216,0.35)}}
+.bsw-ico{font-size:24px;line-height:1}
+.bsw-side-lbl{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.bsw-timer{font-size:32px;font-weight:900;color:var(--ink);letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1}
+.bsw-side-card.running .bsw-timer{color:#7B5EA7}
+.bsw-side-card.stopped .bsw-timer{color:var(--green)}
+.bsw-recorded{font-size:10px;font-weight:700;color:var(--muted);min-height:14px}
+.bsw-start-btn{width:100%;border:none;border-radius:var(--radius-sm);padding:10px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;cursor:pointer;transition:all .2s;background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(45,34,20,0.10)}
+.bsw-side-card.running .bsw-start-btn{background:var(--danger);color:#fff;box-shadow:0 2px 10px rgba(230,57,70,0.35)}
+.bsw-side-card.stopped .bsw-start-btn{background:var(--sage-lt);color:var(--sage)}
+.bsw-chip{display:inline-flex;align-items:center;gap:4px;background:var(--lav-lt);color:#7B5EA7;font-size:12px;font-weight:800;padding:5px 12px;border-radius:99px;border:1.5px solid var(--lavender)}
+.bsw-chip-total{background:var(--green-lt);color:var(--green);border-color:var(--green)}
 
-        /* ── HISTORY CARD ── */
-        .section-label {
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-            color: var(--muted);
-            padding: 16px 20px 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .section-badge {
-            background: var(--peach);
-            color: var(--apricot);
-            font-size: 10px;
-            font-weight: 900;
-            padding: 2px 9px;
-            border-radius: 99px;
-        }
+/* ══════════════════════════════════════
+   PAGE 3 · STATS
+══════════════════════════════════════ */
+/* Stat grid */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat-card{background:var(--card-bg);backdrop-filter:blur(16px);border-radius:var(--radius);border:1.5px solid rgba(255,255,255,0.9);box-shadow:var(--shadow);padding:16px}
+.stat-ico{font-size:22px;margin-bottom:8px}
+.stat-lbl{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.stat-val{font-size:28px;font-weight:900;color:var(--ink);line-height:1;letter-spacing:-1px}
+.stat-val small{font-size:12px;font-weight:700;color:var(--muted)}
+.stat-trend{font-size:10px;font-weight:800;margin-top:4px}
+.stat-trend.up{color:var(--green)}
+.stat-trend.down{color:var(--danger)}
+.stat-trend.flat{color:var(--muted)}
 
-        #listaHistorial {
-            list-style: none;
-            max-height: 220px;
-            overflow-y: auto;
-            scrollbar-width: none;
-        }
-        #listaHistorial::-webkit-scrollbar { display: none; }
+/* Compare card */
+.compare-card{padding:18px}
+.cmp-title{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.cmp-rows{display:flex;flex-direction:column;gap:10px}
+.cmp-row{display:flex;align-items:center;gap:10px}
+.cmp-row-lbl{font-size:12px;font-weight:800;color:var(--muted);width:64px;flex-shrink:0}
+.cmp-bar-wrap{flex:1;height:8px;background:rgba(45,34,20,0.07);border-radius:99px;overflow:hidden}
+.cmp-bar{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.34,1.56,.64,1)}
+.cmp-bar.better{background:linear-gradient(90deg,var(--sage),var(--green))}
+.cmp-bar.worse{background:linear-gradient(90deg,var(--warn),var(--coral))}
+.cmp-bar.same{background:var(--sky-lt)}
+.cmp-num{font-size:12px;font-weight:900;color:var(--ink);width:50px;text-align:right;flex-shrink:0}
+.cmp-delta{font-size:10px;font-weight:800;margin-left:4px}
+.cmp-delta.pos{color:var(--green)}
+.cmp-delta.neg{color:var(--danger)}
 
-        .hist-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 20px;
-            gap: 12px;
-            border-bottom: 1px solid rgba(45,34,20,0.05);
-            animation: slideIn .25s ease;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-6px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .hist-item:last-child { border-bottom: none; }
-        .hist-icon {
-            width: 36px; height: 36px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-        .hist-icon.color-a { background: var(--sky-lt); color: var(--sky); }
-        .hist-icon.color-b { background: var(--sage-lt); color: var(--sage); }
-        .hist-icon.color-c { background: var(--peach); color: var(--apricot); }
-        .hist-meta { flex: 1; min-width: 0; }
-        .hist-time { font-size: 14px; font-weight: 800; color: var(--ink); }
-        .hist-date { font-size: 11px; color: var(--muted); font-weight: 600; }
-        .hist-oz {
-            font-size: 18px; font-weight: 900;
-            color: var(--sky);
-            white-space: nowrap;
-        }
-        .hist-oz span { font-size: 11px; font-weight: 700; color: var(--muted); }
-        .hist-del {
-            border: none; background: none;
-            color: #ddd;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 4px 6px;
-            border-radius: 8px;
-            transition: all .15s;
-        }
-        .hist-del:active { color: var(--danger); background: rgba(230,57,70,0.08); }
+/* Chart card */
+.chart-card{padding:16px}
+.chart-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.chart-title{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.chart-toggle{display:flex;gap:5px;background:var(--cream);border-radius:var(--radius-sm);border:1.5px solid var(--peach);padding:3px}
+.ctgl-btn{flex:1;border:none;background:transparent;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;color:var(--muted);padding:7px 8px;border-radius:9px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.ctgl-btn.active{background:linear-gradient(135deg,var(--apricot),var(--coral));color:#fff;box-shadow:0 2px 10px rgba(231,111,81,0.30)}
+.filter-row{display:flex;gap:6px;margin-bottom:12px}
+.filter-date{background:var(--cream);border:1.5px solid var(--peach);border-radius:8px;padding:6px 8px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;color:var(--ink);outline:none;min-width:0;flex:1}
+.filter-btn{border:none;background:var(--apricot);color:#fff;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;padding:6px 12px;border-radius:8px;cursor:pointer;transition:all .15s;flex-shrink:0}
+.filter-btn:active{background:var(--coral)}
+#graficoMain{max-height:180px}
 
-        .hist-empty {
-            padding: 28px 20px;
-            text-align: center;
-            color: var(--muted);
-            font-size: 14px;
-            font-weight: 600;
-        }
+/* ══════════════════════════════════════
+   MODALS
+══════════════════════════════════════ */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(45,34,20,0.45);backdrop-filter:blur(6px);z-index:100;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:#fff;border-radius:28px 28px 0 0;width:100%;max-width:430px;padding:28px 24px calc(28px + env(safe-area-inset-bottom));animation:sheetUp .3s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes sheetUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-drag{width:40px;height:4px;border-radius:2px;background:#e0e0e0;margin:0 auto 20px}
+.modal-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--ink);margin-bottom:6px}
+.modal-sub{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:18px}
+.modal-lbl{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:block}
+.modal-input{width:100%;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:12px;font-family:'Nunito',sans-serif;font-size:28px;font-weight:900;text-align:center;color:var(--ink);outline:none;margin-bottom:18px;transition:border-color .2s}
+.modal-input:focus{border-color:var(--apricot)}
+.modal-btns{display:flex;gap:10px}
+.modal-cancel{flex:1;border:none;background:#F2EDE8;color:var(--muted);font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;padding:13px;border-radius:var(--radius-sm);cursor:pointer}
+.modal-ok{flex:1;border:none;background:linear-gradient(135deg,var(--apricot),var(--coral));color:#fff;font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;padding:13px;border-radius:var(--radius-sm);cursor:pointer;box-shadow:0 4px 14px rgba(231,111,81,0.35)}
 
-        /* ── CHART TOGGLE ── */
-        .chart-toggle {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 12px;
-            background: var(--cream);
-            border-radius: var(--radius-sm);
-            padding: 4px;
-            border: 1.5px solid var(--peach);
-        }
-        .ctoggle-btn {
-            flex: 1;
-            border: none;
-            background: transparent;
-            font-family: 'Nunito', sans-serif;
-            font-size: 12px;
-            font-weight: 800;
-            color: var(--muted);
-            padding: 8px 6px;
-            border-radius: 9px;
-            cursor: pointer;
-            transition: all .2s;
-            white-space: nowrap;
-        }
-        .ctoggle-btn.active {
-            background: linear-gradient(135deg, var(--apricot), var(--coral));
-            color: #fff;
-            box-shadow: 0 2px 10px rgba(231,111,81,0.30);
-        }
+/* Confirm slot modal fields */
+.cslot-time-display{font-size:36px;font-weight:900;color:var(--ink);text-align:center;margin-bottom:4px;letter-spacing:-1px}
+.cslot-meta{font-size:12px;font-weight:700;color:var(--muted);text-align:center;margin-bottom:16px}
+#cslotNewTime{width:100%;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:10px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--ink);outline:none;text-align:center;margin-bottom:16px}
+.cslot-shift-lbl{font-size:11px;font-weight:800;color:var(--muted);text-align:center;margin-bottom:8px;letter-spacing:.5px}
+.cslot-shift-pills{display:flex;gap:6px;margin-bottom:16px;justify-content:center}
+.shift-pill{border:none;background:var(--peach);color:var(--ink);font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;border-radius:99px;padding:5px 12px;cursor:pointer;transition:all .15s}
+.shift-pill:active{background:var(--apricot);color:#fff}
 
-        /* ── CHART CARD ── */
-        .chart-card { padding: 16px 16px 12px; }
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .chart-title {
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-        .filter-row {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-        .filter-date {
-            background: var(--cream);
-            border: 1.5px solid var(--peach);
-            border-radius: 8px;
-            padding: 5px 8px;
-            font-family: 'Nunito', sans-serif;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--ink);
-            outline: none;
-            width: 108px;
-        }
-        .filter-btn {
-            border: none;
-            background: var(--apricot);
-            color: #fff;
-            font-family: 'Nunito', sans-serif;
-            font-size: 11px;
-            font-weight: 800;
-            padding: 6px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all .15s;
-        }
-        .filter-btn:active { background: var(--coral); }
-
-        #graficoOnzasCurva {
-            max-height: 160px;
-        }
-
-        /* ── SETTINGS MODAL ── */
-        #settingsModal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(45,34,20,0.45);
-            backdrop-filter: blur(6px);
-            z-index: 100;
-            align-items: flex-end;
-            justify-content: center;
-            padding: 0;
-        }
-        #settingsModal.open { display: flex; }
-        .modal-sheet {
-            background: #fff;
-            border-radius: 28px 28px 0 0;
-            width: 100%;
-            max-width: 430px;
-            padding: 28px 24px calc(28px + env(safe-area-inset-bottom));
-            animation: sheetUp .3s cubic-bezier(0.34,1.56,0.64,1);
-        }
-        @keyframes sheetUp {
-            from { transform: translateY(100%); opacity: 0; }
-            to   { transform: translateY(0);    opacity: 1; }
-        }
-        .modal-drag {
-            width: 40px; height: 4px;
-            border-radius: 2px;
-            background: #e0e0e0;
-            margin: 0 auto 20px;
-        }
-        .modal-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 20px;
-            color: var(--ink);
-            margin-bottom: 18px;
-        }
-        .modal-label {
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin-bottom: 8px;
-            display: block;
-        }
-        #inputLimite {
-            width: 100%;
-            background: var(--cream);
-            border: 1.5px solid var(--peach);
-            border-radius: var(--radius-sm);
-            padding: 12px;
-            font-family: 'Nunito', sans-serif;
-            font-size: 28px;
-            font-weight: 900;
-            text-align: center;
-            color: var(--ink);
-            outline: none;
-            margin-bottom: 20px;
-            transition: border-color .2s;
-        }
-        #inputLimite:focus { border-color: var(--apricot); }
-        .modal-btns {
-            display: flex;
-            gap: 10px;
-        }
-        .modal-cancel {
-            flex: 1;
-            border: none;
-            background: #F2EDE8;
-            color: var(--muted);
-            font-family: 'Nunito', sans-serif;
-            font-size: 14px;
-            font-weight: 800;
-            padding: 13px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-        }
-        .modal-save {
-            flex: 1;
-            border: none;
-            background: linear-gradient(135deg, var(--apricot), var(--coral));
-            color: #fff;
-            font-family: 'Nunito', sans-serif;
-            font-size: 14px;
-            font-weight: 900;
-            padding: 13px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            box-shadow: 0 4px 14px rgba(231,111,81,0.35);
-        }
-
-        /* ── TOAST ── */
-        #toast {
-            position: fixed;
-            bottom: 24px; left: 50%;
-            transform: translateX(-50%) translateY(80px);
-            background: var(--ink);
-            color: #fff;
-            font-size: 13px;
-            font-weight: 700;
-            padding: 10px 22px;
-            border-radius: 99px;
-            z-index: 200;
-            transition: transform .35s cubic-bezier(0.34,1.56,0.64,1), opacity .3s;
-            opacity: 0;
-            white-space: nowrap;
-        }
-        #toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-    </style>
+/* ── TOAST ── */
+#toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:13px;font-weight:700;padding:10px 22px;border-radius:99px;z-index:200;transition:transform .35s cubic-bezier(0.34,1.56,0.64,1),opacity .3s;opacity:0;white-space:nowrap;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
 </head>
 <body>
 <div id="app">
 
-    <!-- HEADER -->
-    <header>
-        <div class="header-brand">
-            <div class="header-icon">🍼</div>
-            <div class="header-title">Baby<span>Tracker</span></div>
+<!-- HEADER -->
+<header>
+  <div class="header-brand">
+    <div class="header-icon">🍼</div>
+    <div>
+      <div class="header-title">Baby<span>Tracker</span></div>
+      <div class="header-sub">Ethan</div>
+    </div>
+  </div>
+  <div class="hdr-actions">
+    <button class="icon-btn" onclick="abrirSettings()" title="Ajustes">⚙️</button>
+  </div>
+</header>
+
+<!-- ══ PAGE 1: TIMELINE ══ -->
+<div id="pageTimeline" class="page active">
+
+  <!-- Hero: next feed countdown -->
+  <div id="heroCard" class="card">
+    <div class="hero-row">
+      <div>
+        <div class="hero-lbl" id="heroLabel">Próxima toma en</div>
+        <div id="heroTime">-- min</div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-lbl">Próxima a las</div>
+        <div id="heroNextAt">--:-- <small>hrs</small></div>
+      </div>
+    </div>
+    <div class="prog-track"><div id="heroProg"></div></div>
+    <div id="heroLastFeed"><span class="dot"></span><span id="heroLastText">Cargando…</span></div>
+  </div>
+
+  <!-- Timeline of day -->
+  <div class="card" style="overflow:hidden">
+    <div class="tl-header">
+      <span class="tl-title">Línea de tiempo · hoy</span>
+      <span class="tl-date" id="tlDateLabel">—</span>
+    </div>
+    <div class="tl-line"><div class="tl-line-inner" id="tlLine"></div></div>
+    <div id="tlScroll">
+      <div style="color:var(--muted);font-size:12px;font-weight:700;padding:20px 0;text-align:center;width:100%">Cargando…</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ PAGE 2: REGISTER ══ -->
+<div id="pageRegister" class="page">
+
+  <!-- Feed register -->
+  <div class="card reg-card">
+    <div class="sec-lbl">Registrar toma</div>
+
+    <!-- Type toggle -->
+    <div class="type-seg">
+      <button class="type-btn active" data-type="formula" id="typeBtnFormula">🍼 Fórmula</button>
+      <button class="type-btn" data-type="breast" id="typeBtnBreast">🤱 Pecho</button>
+      <button class="type-btn" data-type="frozen" id="typeBtnFrozen">🧊 Congelada</button>
+    </div>
+
+    <!-- Formula fields -->
+    <div id="fieldsFormula">
+      <div class="oz-stepper">
+        <button class="step-btn" id="btnMinus">−</button>
+        <div class="oz-display">
+          <div id="inputOzDisplay">4.0</div>
+          <div class="oz-unit">Onzas (oz)</div>
         </div>
-        <button class="settings-btn" onclick="abrirSettings()" title="Ajustes">⚙️</button>
-    </header>
+        <button class="step-btn" id="btnPlus">+</button>
+      </div>
+      <input type="number" id="inputOz" value="4.0" step="0.5">
+      <div class="quick-pills" id="quickPills">
+        <button class="quick-pill" data-oz="2.0">2 oz</button>
+        <button class="quick-pill" data-oz="3.0">3 oz</button>
+        <button class="quick-pill active" data-oz="4.0">4 oz</button>
+        <button class="quick-pill" data-oz="5.0">5 oz</button>
+        <button class="quick-pill" data-oz="6.0">6 oz</button>
+      </div>
+    </div>
 
-    <!-- SCROLL AREA -->
-    <div id="scroll-area">
+    <!-- Breast fields -->
+    <div id="fieldsBreast" style="display:none">
 
-        <!-- 1. TIMER CARD -->
-        <div id="timerCard" class="card">
-            <div class="timer-top">
-                <div>
-                    <div class="timer-label" id="labelReloj">Siguiente toma en</div>
-                    <div id="tiempoTranscurrido">-- min</div>
-                </div>
-                <div class="timer-meta">
-                    <div class="timer-label">Meta</div>
-                    <div class="timer-meta-val"><span id="limiteDisplay">150</span> <span>min</span></div>
-                </div>
-            </div>
-            <div class="progress-track">
-                <div id="progressBar"></div>
-            </div>
-            <div id="lastFeedPill">
-                <span class="dot"></span>
-                <span id="lastFeedText">Cargando última toma…</span>
-            </div>
+      <!-- Side selector -->
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="breast-side-sel active" data-side="left"  id="selLeft">← Izquierdo</button>
+        <button class="breast-side-sel"        data-side="right" id="selRight">Derecho →</button>
+        <button class="breast-side-sel"        data-side="both"  id="selBoth">↔ Ambos</button>
+      </div>
+
+      <!-- Stopwatch display -->
+      <div id="breastStopwatchCard">
+        <!-- Left side -->
+        <div class="bsw-side-card" id="bswLeft">
+          <div class="bsw-ico">←🤱</div>
+          <div class="bsw-side-lbl">Izquierdo</div>
+          <div class="bsw-timer" id="bswLeftTime">00:00</div>
+          <div class="bsw-recorded" id="bswLeftRecorded"></div>
+          <button class="bsw-start-btn" id="bswBtnLeft" data-side="left">▶ Iniciar</button>
         </div>
-
-        <!-- 2. REGISTER CARD -->
-        <div class="card reg-card">
-            <div class="reg-header">Registrar toma</div>
-
-            <!-- Oz stepper -->
-            <div class="oz-stepper">
-                <button class="step-btn" id="btnMinus">−</button>
-                <div class="oz-display">
-                    <div id="inputOzDisplay">4.0</div>
-                    <div class="oz-unit">Onzas (oz)</div>
-                </div>
-                <button class="step-btn" id="btnPlus">+</button>
-            </div>
-            <input type="number" id="inputOz" value="4.0" step="0.5">
-
-            <!-- Quick pills -->
-            <div class="quick-pills" id="quickPills">
-                <button class="quick-pill" data-oz="2.0">2 oz</button>
-                <button class="quick-pill" data-oz="3.0">3 oz</button>
-                <button class="quick-pill active" data-oz="4.0">4 oz</button>
-                <button class="quick-pill" data-oz="5.0">5 oz</button>
-                <button class="quick-pill" data-oz="6.0">6 oz</button>
-            </div>
-
-            <!-- Time row -->
-            <div class="time-row">
-                <div class="time-input-wrap">
-                    <input type="datetime-local" id="inputHora">
-                </div>
-                <button class="now-btn" id="btnAhora">Ahora</button>
-            </div>
-
-            <!-- Save -->
-            <button id="btnGuardar">
-                <span id="btnGuardarIcon">🍼</span>
-                <span id="btnGuardarLabel">Guardar toma</span>
-            </button>
+        <!-- Right side -->
+        <div class="bsw-side-card" id="bswRight" style="display:none">
+          <div class="bsw-ico">🤱→</div>
+          <div class="bsw-side-lbl">Derecho</div>
+          <div class="bsw-timer" id="bswRightTime">00:00</div>
+          <div class="bsw-recorded" id="bswRightRecorded"></div>
+          <button class="bsw-start-btn" id="bswBtnRight" data-side="right">▶ Iniciar</button>
         </div>
+      </div>
 
-        <!-- 3. HISTORY CARD -->
-        <div class="card" style="overflow:hidden">
-            <div class="section-label">
-                <span>Historial reciente</span>
-                <span class="section-badge" id="histBadge">—</span>
-            </div>
-            <ul id="listaHistorial">
-                <li class="hist-empty">Cargando historial…</li>
-            </ul>
+      <!-- Summary chips -->
+      <div id="bswSummary" style="display:none;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <div class="bsw-chip" id="bswChipLeft" style="display:none">← <span id="bswChipLeftVal">0</span> min</div>
+        <div class="bsw-chip" id="bswChipRight" style="display:none">→ <span id="bswChipRightVal">0</span> min</div>
+        <div class="bsw-chip bsw-chip-total" id="bswChipTotal" style="display:none">Total: <span id="bswChipTotalVal">0</span> min</div>
+      </div>
+
+    </div>
+
+    <!-- Frozen breast milk fields -->
+    <div id="fieldsFrozen" style="display:none">
+      <div style="background:var(--sky-lt);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">🧊→♨️</span>
+        <span style="font-size:11px;font-weight:800;color:var(--sky)">Leche materna descongelada (baño maría)</span>
+      </div>
+      <div class="oz-stepper">
+        <button class="step-btn" id="btnMinusFrozen">−</button>
+        <div class="oz-display">
+          <div id="inputOzFrozenDisplay">3.0</div>
+          <div class="oz-unit">Onzas (oz)</div>
         </div>
+        <button class="step-btn" id="btnPlusFrozen">+</button>
+      </div>
+      <input type="number" id="inputOzFrozen" value="3.0" step="0.5" style="display:none">
+      <div class="quick-pills">
+        <button class="quick-pill frozen-pill" data-oz="1.5">1.5 oz</button>
+        <button class="quick-pill frozen-pill" data-oz="2.0">2 oz</button>
+        <button class="quick-pill frozen-pill active" data-oz="3.0">3 oz</button>
+        <button class="quick-pill frozen-pill" data-oz="4.0">4 oz</button>
+        <button class="quick-pill frozen-pill" data-oz="5.0">5 oz</button>
+      </div>
+    </div>
+      <div class="time-input-wrap">
+        <input type="datetime-local" id="inputHora">
+      </div>
+      <button class="now-btn" id="btnAhora">Ahora</button>
+    </div>
 
-        <!-- 4. CHART CARD -->
-        <div class="card chart-card">
-            <div class="chart-header">
-                <div class="chart-title">Gráfico de consumo</div>
-            </div>
+    <button id="btnGuardar">
+      <span id="btnGuardarIcon">🍼</span>
+      <span id="btnGuardarLabel">Guardar toma</span>
+    </button>
+  </div>
 
-            <!-- View mode toggle -->
-            <div class="chart-toggle" id="chartToggle">
-                <button class="ctoggle-btn active" data-mode="acumulado">📈 Global</button>
-                <button class="ctoggle-btn" data-mode="portoma">🍼 Por toma</button>
-            </div>
+  <!-- Diaper log -->
+  <div class="card diaper-card">
+    <div class="sec-lbl" style="margin-bottom:12px">Registrar pañal</div>
+    <div class="diaper-row">
+      <button class="diaper-btn" id="diaperWet"   onclick="confirmarPanal('wet')"><span>💧</span>Mojado</button>
+      <button class="diaper-btn" id="diaperDirty" onclick="confirmarPanal('dirty')"><span>💩</span>Sucio</button>
+      <button class="diaper-btn" id="diaperBoth"  onclick="confirmarPanal('both')"><span>💧💩</span>Ambos</button>
+    </div>
+  </div>
 
-            <div class="filter-row" style="margin-bottom:12px">
-                <input type="date" class="filter-date" id="dateFilterStart">
-                <input type="date" class="filter-date" id="dateFilterEnd">
-                <button class="filter-btn" id="btnAplicarFiltros">↻</button>
-            </div>
-            <canvas id="graficoOnzasCurva"></canvas>
-        </div>
+  <!-- History -->
+  <div class="card" style="overflow:hidden">
+    <div class="section-label">
+      <span>Historial reciente</span>
+      <span class="section-badge" id="histBadge">—</span>
+    </div>
+    <ul id="listaHistorial"><li class="hist-empty">Cargando…</li></ul>
+  </div>
 
-    </div><!-- /scroll-area -->
+</div>
+
+<!-- ══ PAGE 3: STATS ══ -->
+<div id="pageStats" class="page">
+
+  <!-- 4 stat tiles -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-ico">🍼</div>
+      <div class="stat-lbl">Tomas hoy</div>
+      <div class="stat-val" id="statTomasHoy">—</div>
+      <div class="stat-trend flat" id="statTomasTrend">vs ayer</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico">📊</div>
+      <div class="stat-lbl">Promedio diario</div>
+      <div class="stat-val" id="statPromTomas">— <small>tomas</small></div>
+      <div class="stat-trend flat" id="statPromSub">últimos 7 días</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico">💧</div>
+      <div class="stat-lbl">Pañales hoy</div>
+      <div class="stat-val" id="statPanalesHoy">—</div>
+      <div class="stat-trend flat" id="statPanalesTrend">vs ayer</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico">🥛</div>
+      <div class="stat-lbl">Oz hoy</div>
+      <div class="stat-val" id="statOzHoy">— <small>oz</small></div>
+      <div class="stat-trend flat" id="statOzTrend">vs ayer</div>
+    </div>
+  </div>
+
+  <!-- Comparativa -->
+  <div class="card compare-card">
+    <div class="cmp-title">Comparativa de consumo (oz)</div>
+    <div class="cmp-rows" id="cmpRows">
+      <div style="color:var(--muted);font-size:12px;font-weight:700;padding:10px 0">Cargando…</div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="card chart-card">
+    <div class="chart-hdr">
+      <div class="chart-title" id="chartTitle">Consumo acumulado</div>
+      <div class="chart-toggle">
+        <button class="ctgl-btn active" data-mode="acumulado">📈 Global</button>
+        <button class="ctgl-btn" data-mode="portoma">🍼 Por toma</button>
+      </div>
+    </div>
+    <div class="filter-row">
+      <input type="date" class="filter-date" id="dateFilterStart">
+      <input type="date" class="filter-date" id="dateFilterEnd">
+      <button class="filter-btn" id="btnAplicarFiltros">↻</button>
+    </div>
+    <canvas id="graficoMain"></canvas>
+  </div>
+
+</div>
+
 </div><!-- /app -->
 
-<!-- SETTINGS MODAL (bottom sheet) -->
-<div id="settingsModal">
-    <div class="modal-sheet">
-        <div class="modal-drag"></div>
-        <div class="modal-title">Configuración ⚙️</div>
-        <label class="modal-label" for="inputLimite">Minutos límite entre tomas</label>
-        <input type="number" id="inputLimite" value="150">
-        <div class="modal-btns">
-            <button class="modal-cancel" onclick="cerrarSettings()">Cancelar</button>
-            <button class="modal-save" id="btnGuardarSettings">Guardar</button>
-        </div>
+<!-- BOTTOM NAV -->
+<nav id="bottomNav">
+  <button class="nav-btn active" data-page="pageTimeline" onclick="navTo(this)">
+    <span class="nav-ico">⏱️</span>Timeline
+  </button>
+  <button class="nav-btn" data-page="pageRegister" onclick="navTo(this)">
+    <span class="nav-ico">➕</span>Registrar
+  </button>
+  <button class="nav-btn" data-page="pageStats" onclick="navTo(this)">
+    <span class="nav-ico">📊</span>Estadísticas
+  </button>
+</nav>
+
+<!-- SETTINGS MODAL -->
+<div id="settingsModal" class="modal-overlay">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div class="modal-title">Configuración ⚙️</div>
+    <div class="modal-sub">Ajustes del tracker de Ethan</div>
+    <label class="modal-lbl" for="inputLimite">Minutos entre tomas</label>
+    <input type="number" class="modal-input" id="inputLimite" value="150">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="cerrarSettings()">Cancelar</button>
+      <button class="modal-ok" id="btnGuardarSettings">Guardar</button>
     </div>
+  </div>
+</div>
+
+<!-- CONFIRM SLOT MODAL -->
+<div id="slotModal" class="modal-overlay">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div class="modal-title" id="slotModalTitle">Confirmar toma</div>
+    <div class="cslot-time-display" id="slotTimeDisplay">--:--</div>
+    <div class="cslot-meta" id="slotMeta">Toma predicha</div>
+    <label class="modal-lbl">¿A qué hora se realizó?</label>
+    <input type="datetime-local" id="cslotNewTime" style="width:100%;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:10px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--ink);outline:none;margin-bottom:16px">
+    <div class="cslot-shift-lbl">¿CORRER RESTO DE TOMAS DEL DÍA?</div>
+    <div class="cslot-shift-pills">
+      <button class="shift-pill" data-min="-30">−30 min</button>
+      <button class="shift-pill" data-min="-15">−15 min</button>
+      <button class="shift-pill" data-min="0">Sin cambio</button>
+      <button class="shift-pill" data-min="15">+15 min</button>
+      <button class="shift-pill" data-min="30">+30 min</button>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="cerrarSlotModal()">Cancelar</button>
+      <button class="modal-ok" id="btnConfirmSlot">✅ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- DIAPER CONFIRM MODAL -->
+<div id="diaperModal" class="modal-overlay">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div style="text-align:center;font-size:42px;margin-bottom:8px" id="diaperModalIco">💧</div>
+    <div class="modal-title" style="text-align:center" id="diaperModalTitle">Pañal mojado</div>
+    <div class="modal-sub" style="text-align:center">¿Confirmas registrar este cambio de pañal?</div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="cerrarDiaperModal()">Cancelar</button>
+      <button class="modal-ok" id="btnConfirmDiaper">💧 Confirmar</button>
+    </div>
+  </div>
 </div>
 
 <!-- TOAST -->
 <div id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script>
-    /* ── FIREBASE CONFIG ── */
-    const firebaseConfig = {
-        apiKey: "AIzaSyC1p8czf56NeSUboDYSzaSed4m2yJq2SDA",
-        authDomain: "momb2b-3eb14.firebaseapp.com",
-        projectId: "momb2b-3eb14",
-        storageBucket: "momb2b-3eb14.firebasestorage.app",
-        messagingSenderId: "440475320328",
-        appId: "1:440475320328:web:794638a982f19902a891bd",
-        measurementId: "G-JXCTRXV4ZF"
-    };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+/* ═══════════════════════════════════════
+   FIREBASE
+═══════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyC1p8czf56NeSUboDYSzaSed4m2yJq2SDA",
+  authDomain: "momb2b-3eb14.firebaseapp.com",
+  projectId: "momb2b-3eb14",
+  storageBucket: "momb2b-3eb14.firebasestorage.app",
+  messagingSenderId: "440475320328",
+  appId: "1:440475320328:web:794638a982f19902a891bd",
+  measurementId: "G-JXCTRXV4ZF"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-    /* ── STATE ── */
-    let limiteMinutos   = 150;
-    let ultimaToma      = new Date();
-    let intervaloReloj  = null;
-    let graficoInstancia= null;
-    let tomasProcesadas = [];
-    let notificado10Min = false;
-    let notificadoLimite= false;
-    let ultimaTomaId    = null;
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+let limiteMinutos   = 150;
+let ultimaToma      = new Date();
+let ultimaTomaId    = null;
+let intervaloReloj  = null;
+let tomasProcesadas = [];  // {id, fecha, tipo, onzas, leftMin, rightMin}
+let panalesProcesados = [];
+let notif10         = false;
+let notifLimit      = false;
+let chartMode       = 'acumulado';
+let grafico         = null;
+let tipoActual      = 'formula';
+let leftMinutes     = 0;
+let rightMinutes    = 0;
+// Timeline: predicted slots for today (Date objects)
+let tlSlots         = []; // [{time:Date, status:'done'|'next'|'predicted'|'overdue', feedId?}]
+let slotShiftMin    = 0;
+let slotTargetIdx   = -1;
 
-    /* ── DOM REFS ── */
-    const inputOz          = document.getElementById('inputOz');
-    const inputOzDisplay   = document.getElementById('inputOzDisplay');
-    const inputHora        = document.getElementById('inputHora');
-    const btnGuardar       = document.getElementById('btnGuardar');
-    const btnGuardarLabel  = document.getElementById('btnGuardarLabel');
-    const btnGuardarIcon   = document.getElementById('btnGuardarIcon');
-    const tiempoEl         = document.getElementById('tiempoTranscurrido');
-    const timerCard        = document.getElementById('timerCard');
-    const limiteDisplay    = document.getElementById('limiteDisplay');
-    const listaHistorial   = document.getElementById('listaHistorial');
-    const lastFeedText     = document.getElementById('lastFeedText');
-    const labelReloj       = document.getElementById('labelReloj');
-    const filterStart      = document.getElementById('dateFilterStart');
-    const filterEnd        = document.getElementById('dateFilterEnd');
-    const histBadge        = document.getElementById('histBadge');
+/* ═══════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════ */
+function navTo(btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(btn.dataset.page).classList.add('active');
+  if (btn.dataset.page === 'pageStats') {
+    calcStats();
+    generarGrafico();
+  }
+}
 
-    /* ── HELPERS ── */
-    function toast(msg, duration = 2200) {
-        const t = document.getElementById('toast');
-        t.textContent = msg;
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), duration);
+/* ═══════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════ */
+function toast(msg, dur = 2400) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function setHoraActual(inputEl) {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  inputEl.value = now.toISOString().slice(0, 16);
+}
+setHoraActual(document.getElementById('inputHora'));
+
+function fmtTime(date) {
+  return date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+}
+function fmtDate(date) {
+  return date.toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short' });
+}
+function startOfDay(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
+function endOfDay(d)   { const x = new Date(d); x.setHours(23,59,59,999); return x; }
+
+/* ═══════════════════════════════════════
+   FIREBASE: CONFIG
+═══════════════════════════════════════ */
+db.collection("configuracion").doc("limiteGlobal").onSnapshot(doc => {
+  if (doc.exists) {
+    limiteMinutos = doc.data().minutos;
+    document.getElementById('limiteDisplay') && (document.getElementById('limiteDisplay').textContent = limiteMinutos);
+    document.getElementById('inputLimite').value = limiteMinutos;
+    buildTimeline();
+  } else {
+    db.collection("configuracion").doc("limiteGlobal").set({ minutos: 150 });
+  }
+});
+
+/* ═══════════════════════════════════════
+   FIREBASE: TOMAS REALTIME
+═══════════════════════════════════════ */
+db.collection("tomas").orderBy("fecha", "desc").onSnapshot(snapshot => {
+  tomasProcesadas = [];
+  document.getElementById('listaHistorial').innerHTML = '';
+
+  if (snapshot.empty) {
+    document.getElementById('listaHistorial').innerHTML = "<li class='hist-empty'>No hay tomas registradas aún 🍼</li>";
+    document.getElementById('histBadge').textContent = '0';
+    buildTimeline();
+    return;
+  }
+
+  const primerDoc = snapshot.docs[0];
+  if (ultimaTomaId !== primerDoc.id) {
+    ultimaTomaId  = primerDoc.id;
+    ultimaToma    = primerDoc.data().fecha.toDate();
+    notif10 = false; notifLimit = false;
+    iniciarReloj();
+  }
+
+  const icons = ['ca','cb','cc','cd'];
+  const emojis = { formula: '🍼', breast: '🤱', frozen: '🧊', diaper: '💧' };
+
+  snapshot.forEach((doc, i) => {
+    const d = doc.data();
+    const fecha = d.fecha.toDate();
+    const tipo  = d.tipo || 'formula';
+    let valStr = '', valUnit = '';
+    if (tipo === 'formula') { valStr = d.onzas; valUnit = 'oz'; }
+    else if (tipo === 'breast') { valStr = (d.leftMin||0)+(d.rightMin||0); valUnit = 'min'; }
+    tomasProcesadas.push({ id: doc.id, fecha, tipo, onzas: d.onzas||0, leftMin: d.leftMin||0, rightMin: d.rightMin||0 });
+
+    const li = document.createElement('li');
+    li.className = 'hist-item';
+    li.innerHTML = `
+      <div class="hist-icon ${icons[i%4]}">${emojis[tipo]||'🍼'}</div>
+      <div class="hist-meta">
+        <div class="hist-time">${fmtTime(fecha)}</div>
+        <div class="hist-date">${fmtDate(fecha)}</div>
+      </div>
+      <div class="hist-val">${valStr} <span>${valUnit}</span></div>
+      <button class="hist-del" onclick="borrarToma('${doc.id}','${fmtTime(fecha)}')">🗑</button>`;
+    document.getElementById('listaHistorial').appendChild(li);
+  });
+
+  document.getElementById('histBadge').textContent = snapshot.size;
+  buildTimeline();
+});
+
+/* ═══════════════════════════════════════
+   FIREBASE: PAÑALES REALTIME
+═══════════════════════════════════════ */
+db.collection("panales").orderBy("fecha","desc").onSnapshot(snapshot => {
+  panalesProcesados = [];
+  snapshot.forEach(doc => {
+    panalesProcesados.push({ id: doc.id, fecha: doc.data().fecha.toDate(), tipo: doc.data().tipo });
+  });
+});
+
+/* ═══════════════════════════════════════
+   TIMELINE
+═══════════════════════════════════════ */
+function buildTimeline() {
+  const now   = new Date();
+  const hoy   = startOfDay(now);
+  const finHoy = endOfDay(now);
+  document.getElementById('tlDateLabel').textContent = now.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  // Tomas confirmadas de hoy (cronológico)
+  const tomasHoy = tomasProcesadas
+    .filter(t => t.fecha >= hoy && t.fecha <= finHoy)
+    .sort((a,b) => a.fecha - b.fecha);
+
+  // Build predicted slots forward from last confirmed toma
+  const base = tomasHoy.length > 0 ? tomasHoy[tomasHoy.length-1].fecha : ultimaToma;
+  const intervalMs = limiteMinutos * 60000;
+
+  // How many predicted tomas fit in rest of day?
+  const predicted = [];
+  let cursor = new Date(base.getTime() + intervalMs);
+  while (cursor <= finHoy) {
+    predicted.push(new Date(cursor));
+    cursor = new Date(cursor.getTime() + intervalMs);
+  }
+  // At least show next one even if past midnight
+  if (predicted.length === 0) {
+    predicted.push(new Date(base.getTime() + intervalMs));
+  }
+
+  // Build slot list
+  tlSlots = [
+    ...tomasHoy.map(t => ({ time: t.fecha, status: 'done', feedId: t.id, data: t })),
+    ...predicted.map((t, i) => {
+      let status = i === 0 ? 'next' : 'predicted';
+      if (t < now) status = 'overdue';
+      return { time: t, status, feedId: null };
+    })
+  ];
+
+  // Progress line pct
+  const donePct = tomasHoy.length === 0 ? 0
+    : Math.round((tomasHoy.length / (tomasHoy.length + predicted.length)) * 100);
+  document.getElementById('tlLine').style.setProperty('--done-pct', donePct + '%');
+
+  renderTimeline();
+}
+
+function renderTimeline() {
+  const container = document.getElementById('tlScroll');
+  container.innerHTML = '';
+  if (tlSlots.length === 0) {
+    container.innerHTML = "<div style='color:var(--muted);font-size:12px;font-weight:700;padding:20px;text-align:center;width:200px'>Sin tomas hoy</div>";
+    return;
+  }
+
+  tlSlots.forEach((slot, idx) => {
+    const div = document.createElement('div');
+    div.className = 'tl-slot ' + slot.status;
+    div.dataset.idx = idx;
+
+    let ico = '🍼', badge = '';
+    if (slot.status === 'done') { ico = '✅'; badge = `<div class="tl-badge">✓</div>`; }
+    else if (slot.status === 'next') ico = '🍼';
+    else if (slot.status === 'overdue') { ico = '⚠️'; badge = `<div class="tl-badge">!</div>`; }
+    else ico = '🔮';
+
+    let subTxt = '';
+    if (slot.status === 'done' && slot.data) {
+      if (slot.data.tipo === 'breast') subTxt = `${(slot.data.leftMin||0)+(slot.data.rightMin||0)} min`;
+      else subTxt = `${slot.data.onzas} oz`;
+    } else if (slot.status === 'next') subTxt = 'Próxima';
+    else if (slot.status === 'predicted') subTxt = 'Predicha';
+    else if (slot.status === 'overdue') subTxt = 'Pendiente';
+
+    div.innerHTML = `
+      <div class="tl-bubble">${ico}${badge}</div>
+      <div class="tl-time">${fmtTime(slot.time)}</div>
+      <div class="tl-sub">${subTxt}</div>`;
+
+    div.addEventListener('click', () => openSlotModal(idx));
+    container.appendChild(div);
+  });
+
+  // Auto-scroll to next slot
+  const nextEl = container.querySelector('.tl-slot.next, .tl-slot.overdue');
+  if (nextEl) setTimeout(() => nextEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }), 300);
+}
+
+/* ═══════════════════════════════════════
+   SLOT MODAL (confirm / adjust toma)
+═══════════════════════════════════════ */
+function openSlotModal(idx) {
+  slotTargetIdx = idx;
+  slotShiftMin  = 0;
+  const slot = tlSlots[idx];
+  const modal = document.getElementById('slotModal');
+
+  document.getElementById('slotTimeDisplay').textContent = fmtTime(slot.time);
+  document.getElementById('slotMeta').textContent =
+    slot.status === 'done' ? '✅ Toma ya registrada'
+    : slot.status === 'next' ? '⏳ Próxima toma predicha'
+    : slot.status === 'overdue' ? '⚠️ Toma pendiente / retrasada'
+    : '🔮 Toma predicha';
+
+  // Pre-fill time input with slot time
+  const t = new Date(slot.time);
+  t.setMinutes(t.getMinutes() - t.getTimezoneOffset());
+  document.getElementById('cslotNewTime').value = t.toISOString().slice(0,16);
+
+  // Update shift pills
+  document.querySelectorAll('.shift-pill').forEach(p => p.classList.remove('active'));
+  document.querySelector('.shift-pill[data-min="0"]').classList.add('active');
+
+  document.getElementById('slotModalTitle').textContent =
+    slot.status === 'done' ? 'Detalle de toma' : 'Confirmar toma';
+  document.getElementById('btnConfirmSlot').textContent =
+    slot.status === 'done' ? '✅ Cerrar' : '✅ Confirmar toma';
+
+  modal.classList.add('open');
+}
+
+function cerrarSlotModal() {
+  document.getElementById('slotModal').classList.remove('open');
+  slotTargetIdx = -1;
+}
+
+document.querySelectorAll('.shift-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.shift-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    slotShiftMin = parseInt(btn.dataset.min);
+  });
+});
+
+document.getElementById('btnConfirmSlot').addEventListener('click', () => {
+  const slot = tlSlots[slotTargetIdx];
+  if (!slot) { cerrarSlotModal(); return; }
+  if (slot.status === 'done') { cerrarSlotModal(); return; }
+
+  const rawVal = document.getElementById('cslotNewTime').value;
+  if (!rawVal) { toast('⚠️ Ingresa la hora de la toma'); return; }
+  const fechaToma = new Date(rawVal);
+
+  // Save the toma (formula default 4oz — user can edit later in Register tab)
+  db.collection("tomas").add({
+    fecha: fechaToma,
+    tipo: 'formula',
+    onzas: 4.0,
+    registro: new Date(),
+    fromTimeline: true
+  }).then(() => {
+    // If shift, update future predicted slots visually
+    if (slotShiftMin !== 0) {
+      shiftFuturePredictions(slotTargetIdx, slotShiftMin);
     }
+    cerrarSlotModal();
+    toast(`✅ Toma confirmada${slotShiftMin !== 0 ? ` · predicciones corridas ${slotShiftMin > 0 ? '+' : ''}${slotShiftMin} min` : ''}`);
+  }).catch(err => toast('❌ Error: ' + err.message, 3000));
+});
 
-    function setHoraActual() {
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        inputHora.value = now.toISOString().slice(0, 16);
+function shiftFuturePredictions(fromIdx, shiftMin) {
+  const ms = shiftMin * 60000;
+  // Only shift predicted/next/overdue slots after fromIdx
+  for (let i = fromIdx + 1; i < tlSlots.length; i++) {
+    if (tlSlots[i].status !== 'done') {
+      tlSlots[i] = { ...tlSlots[i], time: new Date(tlSlots[i].time.getTime() + ms) };
     }
-    setHoraActual();
+  }
+  renderTimeline();
+}
 
-    function syncOzDisplay(val) {
-        inputOzDisplay.textContent = parseFloat(val).toFixed(1);
-        // highlight matching pill
-        document.querySelectorAll('.quick-pill').forEach(p => {
-            p.classList.toggle('active', parseFloat(p.dataset.oz) === parseFloat(val));
-        });
+document.getElementById('slotModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('slotModal')) cerrarSlotModal();
+});
+
+/* ═══════════════════════════════════════
+   CLOCK
+═══════════════════════════════════════ */
+function iniciarReloj() {
+  if (intervaloReloj) clearInterval(intervaloReloj);
+  actualizarReloj();
+  intervaloReloj = setInterval(actualizarReloj, 30000);
+}
+
+function actualizarReloj() {
+  const now         = new Date();
+  const diffMs      = now - ultimaToma;
+  const diffMin     = Math.floor(diffMs / 60000);
+  const remaining   = limiteMinutos - diffMin;
+
+  const heroCard    = document.getElementById('heroCard');
+  const heroTime    = document.getElementById('heroTime');
+  const heroLabel   = document.getElementById('heroLabel');
+  const heroNextAt  = document.getElementById('heroNextAt');
+  const heroLastText= document.getElementById('heroLastText');
+  const heroProg    = document.getElementById('heroProg');
+
+  // Last feed text
+  if (diffMin >= 0) {
+    const h = Math.floor(diffMin/60), m = diffMin%60;
+    heroLastText.textContent = h > 0 ? `Última toma hace ${h}h ${m}min` : `Última toma hace ${m} min`;
+  }
+
+  // Next feed time
+  const nextFeedTime = new Date(ultimaToma.getTime() + limiteMinutos * 60000);
+  heroNextAt.innerHTML = `${fmtTime(nextFeedTime)} <small>hrs</small>`;
+
+  // Countdown
+  heroCard.classList.remove('warn','danger');
+  if (remaining > 0) {
+    heroTime.textContent = `${remaining} min`;
+    heroLabel.textContent = 'Próxima toma en';
+    if (remaining <= limiteMinutos * 0.25) heroCard.classList.add('warn');
+  } else if (remaining === 0) {
+    heroTime.textContent = '¡YA!';
+    heroCard.classList.add('danger');
+  } else {
+    heroTime.textContent = `+${Math.abs(remaining)} min`;
+    heroLabel.textContent = 'Retraso';
+    heroCard.classList.add('danger');
+  }
+
+  // Progress
+  const pct = Math.min(100, Math.max(0, (diffMin / limiteMinutos) * 100));
+  heroProg.style.width = pct + '%';
+
+  // Notifications
+  if ('Notification' in window && Notification.permission === 'granted') {
+    if (remaining === 10 && !notif10) {
+      new Notification('¡Atención! 🍼', { body: 'Faltan 10 minutos para la próxima toma de Ethan.' });
+      notif10 = true;
+    } else if (remaining <= 0 && !notifLimit) {
+      new Notification('¡Hora del biberón! 🚨', { body: 'Se alcanzó el tiempo límite para Ethan.' });
+      notifLimit = true;
     }
+  }
+}
 
-    /* ── OZ CONTROLS ── */
-    document.getElementById('btnMinus').addEventListener('click', () => {
-        let v = parseFloat(inputOz.value);
-        if (v > 0.5) { inputOz.value = (v - 0.5).toFixed(1); syncOzDisplay(inputOz.value); }
-    });
-    document.getElementById('btnPlus').addEventListener('click', () => {
-        let v = parseFloat(inputOz.value);
-        inputOz.value = (v + 0.5).toFixed(1);
-        syncOzDisplay(inputOz.value);
-    });
+if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+iniciarReloj();
 
-    document.getElementById('quickPills').addEventListener('click', e => {
-        const btn = e.target.closest('.quick-pill');
-        if (!btn) return;
-        inputOz.value = btn.dataset.oz;
-        syncOzDisplay(inputOz.value);
-    });
+/* ═══════════════════════════════════════
+   REGISTER: TYPE TOGGLE
+═══════════════════════════════════════ */
+document.querySelectorAll('.type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    tipoActual = btn.dataset.type;
+    document.getElementById('fieldsFormula').style.display = tipoActual === 'formula' ? '' : 'none';
+    document.getElementById('fieldsBreast').style.display  = tipoActual === 'breast'  ? '' : 'none';
+    document.getElementById('fieldsFrozen').style.display  = tipoActual === 'frozen'  ? '' : 'none';
+  });
+});
 
-    document.getElementById('btnAhora').addEventListener('click', () => {
-        setHoraActual();
-        toast('⏰ Hora actualizada');
-    });
+/* ═══════════════════════════════════════
+   OZ STEPPER
+═══════════════════════════════════════ */
+function syncOzDisplay(val) {
+  document.getElementById('inputOzDisplay').textContent = parseFloat(val).toFixed(1);
+  document.querySelectorAll('.quick-pill').forEach(p =>
+    p.classList.toggle('active', parseFloat(p.dataset.oz) === parseFloat(val)));
+}
+document.getElementById('btnMinus').addEventListener('click', () => {
+  const v = parseFloat(document.getElementById('inputOz').value);
+  if (v > 0.5) { document.getElementById('inputOz').value = (v-0.5).toFixed(1); syncOzDisplay(v-0.5); }
+});
+document.getElementById('btnPlus').addEventListener('click', () => {
+  const v = parseFloat(document.getElementById('inputOz').value);
+  document.getElementById('inputOz').value = (v+0.5).toFixed(1); syncOzDisplay(v+0.5);
+});
+document.getElementById('quickPills').addEventListener('click', e => {
+  const btn = e.target.closest('.quick-pill');
+  if (!btn) return;
+  document.getElementById('inputOz').value = btn.dataset.oz;
+  syncOzDisplay(btn.dataset.oz);
+});
 
-    /* ── NOTIFICATIONS ── */
-    if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-        Notification.requestPermission();
+/* ── Frozen oz stepper ── */
+function syncFrozenDisplay(val) {
+  document.getElementById('inputOzFrozenDisplay').textContent = parseFloat(val).toFixed(1);
+  document.querySelectorAll('.frozen-pill').forEach(p =>
+    p.classList.toggle('active', parseFloat(p.dataset.oz) === parseFloat(val)));
+}
+document.getElementById('btnMinusFrozen').addEventListener('click', () => {
+  const v = parseFloat(document.getElementById('inputOzFrozen').value);
+  if (v > 0.5) { document.getElementById('inputOzFrozen').value = (v-0.5).toFixed(1); syncFrozenDisplay(v-0.5); }
+});
+document.getElementById('btnPlusFrozen').addEventListener('click', () => {
+  const v = parseFloat(document.getElementById('inputOzFrozen').value);
+  document.getElementById('inputOzFrozen').value = (v+0.5).toFixed(1); syncFrozenDisplay(v+0.5);
+});
+document.querySelectorAll('.frozen-pill').forEach(p => p.addEventListener('click', () => {
+  document.getElementById('inputOzFrozen').value = p.dataset.oz;
+  syncFrozenDisplay(p.dataset.oz);
+}));
+
+/* ═══════════════════════════════════════
+   BREAST STOPWATCH
+═══════════════════════════════════════ */
+const bsw = {
+  left:  { running: false, startTs: null, elapsed: 0, interval: null },
+  right: { running: false, startTs: null, elapsed: 0, interval: null },
+};
+let breastSideMode = 'left'; // 'left' | 'right' | 'both'
+
+// Side selector
+document.querySelectorAll('.breast-side-sel').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.breast-side-sel').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    breastSideMode = btn.dataset.side;
+    document.getElementById('bswLeft').style.display  = breastSideMode !== 'right' ? '' : 'none';
+    document.getElementById('bswRight').style.display = breastSideMode !== 'left'  ? '' : 'none';
+    refreshBswSummary();
+  });
+});
+
+function bswFmt(ms) {
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const ss = s % 60;
+  return `${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+}
+
+function bswTick(side) {
+  const state = bsw[side];
+  const now   = Date.now();
+  const total = state.elapsed + (state.running ? now - state.startTs : 0);
+  document.getElementById(side === 'left' ? 'bswLeftTime' : 'bswRightTime').textContent = bswFmt(total);
+  refreshBswSummary();
+}
+
+function bswToggle(side) {
+  const state    = bsw[side];
+  const card     = document.getElementById(side === 'left' ? 'bswLeft' : 'bswRight');
+  const btn      = document.getElementById(side === 'left' ? 'bswBtnLeft' : 'bswBtnRight');
+  const recEl    = document.getElementById(side === 'left' ? 'bswLeftRecorded' : 'bswRightRecorded');
+
+  if (!state.running) {
+    // START
+    state.running = true;
+    state.startTs = Date.now();
+    card.classList.add('running');
+    card.classList.remove('stopped');
+    btn.textContent = '⏹ Detener';
+    recEl.textContent = '';
+    state.interval = setInterval(() => bswTick(side), 500);
+  } else {
+    // STOP
+    clearInterval(state.interval);
+    state.elapsed += Date.now() - state.startTs;
+    state.running  = false;
+    state.startTs  = null;
+    card.classList.remove('running');
+    card.classList.add('stopped');
+    const mins = Math.round(state.elapsed / 60000);
+    btn.textContent = '↺ Reiniciar';
+    recEl.textContent = `✓ ${mins} min registrados`;
+    bswTick(side);
+    refreshBswSummary();
+  }
+}
+
+// Reiniciar (when already stopped, btn becomes reset)
+document.getElementById('bswBtnLeft').addEventListener('click', () => {
+  if (bsw.left.running) { bswToggle('left'); }
+  else if (bsw.left.elapsed > 0) { bswReset('left'); }
+  else { bswToggle('left'); }
+});
+document.getElementById('bswBtnRight').addEventListener('click', () => {
+  if (bsw.right.running) { bswToggle('right'); }
+  else if (bsw.right.elapsed > 0) { bswReset('right'); }
+  else { bswToggle('right'); }
+});
+
+function bswReset(side) {
+  clearInterval(bsw[side].interval);
+  bsw[side] = { running: false, startTs: null, elapsed: 0, interval: null };
+  const card = document.getElementById(side === 'left' ? 'bswLeft' : 'bswRight');
+  card.classList.remove('running','stopped');
+  document.getElementById(side === 'left' ? 'bswLeftTime' : 'bswRightTime').textContent = '00:00';
+  document.getElementById(side === 'left' ? 'bswLeftRecorded' : 'bswRightRecorded').textContent = '';
+  document.getElementById(side === 'left' ? 'bswBtnLeft' : 'bswBtnRight').textContent = '▶ Iniciar';
+  refreshBswSummary();
+}
+
+function bswGetMinutes(side) {
+  return Math.round(bsw[side].elapsed / 60000);
+}
+
+function refreshBswSummary() {
+  const lMin = bswGetMinutes('left');
+  const rMin = bswGetMinutes('right');
+  const total = lMin + rMin;
+  const summaryEl = document.getElementById('bswSummary');
+  const showLeft  = breastSideMode !== 'right' && lMin > 0;
+  const showRight = breastSideMode !== 'left'  && rMin > 0;
+
+  document.getElementById('bswChipLeft').style.display  = showLeft  ? 'inline-flex' : 'none';
+  document.getElementById('bswChipRight').style.display = showRight ? 'inline-flex' : 'none';
+  document.getElementById('bswChipTotal').style.display = (showLeft && showRight) ? 'inline-flex' : 'none';
+  document.getElementById('bswChipLeftVal').textContent  = lMin;
+  document.getElementById('bswChipRightVal').textContent = rMin;
+  document.getElementById('bswChipTotalVal').textContent = total;
+  summaryEl.style.display = (showLeft || showRight) ? 'flex' : 'none';
+
+  // expose for save
+  leftMinutes  = lMin;
+  rightMinutes = rMin;
+}
+
+document.getElementById('btnAhora').addEventListener('click', () => {
+  setHoraActual(document.getElementById('inputHora'));
+  toast('⏰ Hora actualizada');
+});
+
+/* ═══════════════════════════════════════
+   SAVE TOMA
+═══════════════════════════════════════ */
+document.getElementById('btnGuardar').addEventListener('click', () => {
+  const lbl  = document.getElementById('btnGuardarLabel');
+  const ico  = document.getElementById('btnGuardarIcon');
+  const btn  = document.getElementById('btnGuardar');
+  lbl.textContent = 'Guardando…'; ico.textContent = '⏳'; btn.disabled = true;
+
+  const fecha = new Date(document.getElementById('inputHora').value);
+  const data  = { fecha, tipo: tipoActual, registro: new Date() };
+
+  if (tipoActual === 'formula') {
+    data.onzas = parseFloat(document.getElementById('inputOz').value);
+  } else if (tipoActual === 'frozen') {
+    data.onzas = parseFloat(document.getElementById('inputOzFrozen').value);
+  } else {
+    data.leftMin  = leftMinutes;
+    data.rightMin = rightMinutes;
+  }
+
+  db.collection("tomas").add(data)
+    .then(() => {
+      btn.classList.add('saved');
+      lbl.textContent = '¡Guardado!'; ico.textContent = '✅';
+      toast('✅ Toma registrada');
+      setTimeout(() => {
+        btn.classList.remove('saved');
+        lbl.textContent = 'Guardar toma'; ico.textContent = '🍼';
+        btn.disabled = false;
+        setHoraActual(document.getElementById('inputHora'));
+        leftMinutes = rightMinutes = 0;
+        // reset stopwatch
+        bswReset('left'); bswReset('right');
+      }, 2200);
+    })
+    .catch(err => {
+      toast('❌ Error: ' + err.message, 3500);
+      lbl.textContent = 'Guardar toma'; ico.textContent = '🍼'; btn.disabled = false;
+    });
+});
+
+/* ═══════════════════════════════════════
+   PAÑAL — confirm modal
+═══════════════════════════════════════ */
+let diaperPendingTipo = null;
+const diaperMeta = {
+  wet:   { ico: '💧', label: 'Pañal mojado',  btn: '💧 Confirmar' },
+  dirty: { ico: '💩', label: 'Pañal sucio',   btn: '💩 Confirmar' },
+  both:  { ico: '💧💩', label: 'Pañal mixto', btn: '💧💩 Confirmar' },
+};
+
+function confirmarPanal(tipo) {
+  diaperPendingTipo = tipo;
+  const m = diaperMeta[tipo];
+  document.getElementById('diaperModalIco').textContent   = m.ico;
+  document.getElementById('diaperModalTitle').textContent = m.label;
+  document.getElementById('btnConfirmDiaper').textContent = m.btn;
+  document.getElementById('diaperModal').classList.add('open');
+}
+function cerrarDiaperModal() {
+  document.getElementById('diaperModal').classList.remove('open');
+  diaperPendingTipo = null;
+}
+document.getElementById('diaperModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('diaperModal')) cerrarDiaperModal();
+});
+document.getElementById('btnConfirmDiaper').addEventListener('click', () => {
+  if (!diaperPendingTipo) return;
+  const tipo = diaperPendingTipo;
+  cerrarDiaperModal();
+  db.collection("panales").add({ fecha: new Date(), tipo })
+    .then(() => {
+      const msgs = { wet: '💧 Pañal mojado registrado', dirty: '💩 Pañal sucio registrado', both: '💧💩 Pañal mixto registrado' };
+      toast(msgs[tipo]);
+    })
+    .catch(err => toast('❌ Error: ' + err.message, 3000));
+});
+
+/* ═══════════════════════════════════════
+   DELETE TOMA
+═══════════════════════════════════════ */
+function borrarToma(id, hora) {
+  if (confirm(`¿Borrar la toma de las ${hora}?`)) {
+    db.collection("tomas").doc(id).delete()
+      .then(() => toast('🗑 Toma eliminada'))
+      .catch(err => toast('❌ ' + err.message, 3000));
+  }
+}
+
+/* ═══════════════════════════════════════
+   STATS
+═══════════════════════════════════════ */
+function calcStats() {
+  const now    = new Date();
+  const hoy    = startOfDay(now);
+  const ayer   = new Date(hoy.getTime() - 86400000);
+  const hace7  = new Date(hoy.getTime() - 7*86400000);
+  const hace14 = new Date(hoy.getTime() - 14*86400000);
+  const primerDiaMes = new Date(now.getFullYear(), now.getMonth(), 1);
+  const primerDiaMesAnt = new Date(now.getFullYear(), now.getMonth()-1, 1);
+  const ultimoDiaMesAnt = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+
+  const tomasHoy     = tomasProcesadas.filter(t => t.fecha >= hoy);
+  const tomasAyer    = tomasProcesadas.filter(t => t.fecha >= ayer && t.fecha < hoy);
+  const tomasUlt7    = tomasProcesadas.filter(t => t.fecha >= hace7 && t.fecha < hoy);
+  const tomasMesAct  = tomasProcesadas.filter(t => t.fecha >= primerDiaMes);
+  const tomasMesAnt  = tomasProcesadas.filter(t => t.fecha >= primerDiaMesAnt && t.fecha <= ultimoDiaMesAnt);
+
+  const ozHoy   = tomasHoy.reduce((s,t)  => s + (t.onzas||0), 0);
+  const ozAyer  = tomasAyer.reduce((s,t) => s + (t.onzas||0), 0);
+
+  // Oz semana actual vs anterior
+  const tomasUlt7Act = tomasProcesadas.filter(t => t.fecha >= hace7);
+  const tomasUlt7Ant = tomasProcesadas.filter(t => t.fecha >= hace14 && t.fecha < hace7);
+  const ozSemAct = tomasUlt7Act.reduce((s,t) => s + (t.onzas||0), 0);
+  const ozSemAnt = tomasUlt7Ant.reduce((s,t) => s + (t.onzas||0), 0);
+
+  const ozMesAct = tomasMesAct.reduce((s,t) => s + (t.onzas||0), 0);
+  const ozMesAnt = tomasMesAnt.reduce((s,t) => s + (t.onzas||0), 0);
+
+  // Promedio diario (últimos 7 días)
+  const diasConTomas = {};
+  tomasUlt7.forEach(t => { const d = startOfDay(t.fecha).toISOString(); diasConTomas[d] = (diasConTomas[d]||0)+1; });
+  const diasArr = Object.values(diasConTomas);
+  const promDiario = diasArr.length > 0 ? (diasArr.reduce((a,b)=>a+b,0)/diasArr.length).toFixed(1) : '—';
+
+  // Pañales hoy vs ayer
+  const panHoy  = panalesProcesados.filter(p => p.fecha >= hoy).length;
+  const panAyer = panalesProcesados.filter(p => p.fecha >= ayer && p.fecha < hoy).length;
+
+  // Render stat tiles
+  setText('statTomasHoy', tomasHoy.length);
+  setTrend('statTomasTrend', tomasHoy.length, tomasAyer.length, 'vs ayer');
+
+  setText('statPromTomas', `${promDiario} <small>tomas</small>`);
+  document.getElementById('statPromSub').textContent = 'promedio últimos 7 días';
+
+  setText('statPanalesHoy', panHoy);
+  setTrend('statPanalesTrend', panHoy, panAyer, 'vs ayer');
+
+  document.getElementById('statOzHoy').innerHTML = `${ozHoy.toFixed(1)} <small>oz</small>`;
+  setTrend('statOzTrend', ozHoy, ozAyer, 'vs ayer');
+
+  // Compare rows
+  const cmp = [
+    { lbl: 'Ayer',    cur: ozHoy,    ref: ozAyer,   refLabel: `${ozAyer.toFixed(1)} oz` },
+    { lbl: 'Semana',  cur: ozSemAct, ref: ozSemAnt, refLabel: `${ozSemAnt.toFixed(1)} oz` },
+    { lbl: 'Mes ant', cur: ozMesAct, ref: ozMesAnt, refLabel: `${ozMesAnt.toFixed(1)} oz` },
+  ];
+  const maxOz = Math.max(...cmp.map(c => Math.max(c.cur, c.ref)), 1);
+  const rows = document.getElementById('cmpRows');
+  rows.innerHTML = '';
+  cmp.forEach(({ lbl, cur, ref, refLabel }) => {
+    const pct  = Math.round((cur / maxOz) * 100);
+    const diff = cur - ref;
+    const cls  = diff > 0 ? 'better' : diff < 0 ? 'worse' : 'same';
+    const sign = diff > 0 ? '+' : '';
+    const dCls = diff > 0 ? 'pos' : diff < 0 ? 'neg' : '';
+    rows.innerHTML += `
+      <div class="cmp-row">
+        <div class="cmp-row-lbl">${lbl}</div>
+        <div class="cmp-bar-wrap"><div class="cmp-bar ${cls}" style="width:${pct}%"></div></div>
+        <div class="cmp-num">${cur.toFixed(1)}<span class="cmp-delta ${dCls}">${diff !== 0 ? sign+diff.toFixed(1) : ''}</span></div>
+      </div>`;
+  });
+}
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = val;
+}
+function setTrend(id, cur, ref, label) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const diff = cur - ref;
+  const sign = diff > 0 ? '▲ +' : diff < 0 ? '▼ ' : '→ ';
+  el.className = 'stat-trend ' + (diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat');
+  el.textContent = `${sign}${diff !== 0 ? diff : '0'} ${label}`;
+}
+
+/* ═══════════════════════════════════════
+   CHART
+═══════════════════════════════════════ */
+document.querySelector('.chart-toggle').addEventListener('click', e => {
+  const btn = e.target.closest('.ctgl-btn');
+  if (!btn) return;
+  chartMode = btn.dataset.mode;
+  document.querySelectorAll('.ctgl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('chartTitle').textContent =
+    chartMode === 'acumulado' ? 'Consumo acumulado' : 'Onzas por toma';
+  generarGrafico();
+});
+
+document.getElementById('btnAplicarFiltros').addEventListener('click', generarGrafico);
+
+function generarGrafico() {
+  const ctx = document.getElementById('graficoMain').getContext('2d');
+  let filtradas = tomasProcesadas.filter(t => t.tipo === 'formula').slice().reverse();
+
+  const fs = document.getElementById('dateFilterStart').value;
+  const fe = document.getElementById('dateFilterEnd').value;
+  if (fs) { const d = new Date(fs); filtradas = filtradas.filter(t => t.fecha >= d); }
+  if (fe) { const d = new Date(fe); d.setHours(23,59,59); filtradas = filtradas.filter(t => t.fecha <= d); }
+
+  if (grafico) { grafico.destroy(); grafico = null; }
+  if (!filtradas.length) return;
+
+  const labels = filtradas.map((_, i) => `T${i+1}`);
+  let data, type, fill, tension, bgColor;
+
+  if (chartMode === 'acumulado') {
+    let a = 0;
+    data    = filtradas.map(t => +(a += t.onzas).toFixed(1));
+    type    = 'line'; fill = true; tension = 0.4;
+    bgColor = 'rgba(244,162,97,0.12)';
+  } else {
+    data    = filtradas.map(t => +t.onzas.toFixed(1));
+    type    = 'bar';  fill = false; tension = 0;
+    bgColor = filtradas.map((_, i) => i%2===0 ? 'rgba(244,162,97,0.75)' : 'rgba(69,123,157,0.65)');
+  }
+
+  grafico = new Chart(ctx, {
+    type,
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: '#F4A261',
+        backgroundColor: bgColor,
+        fill,
+        tension,
+        pointBackgroundColor: '#E76F51',
+        pointRadius: type==='bar'?0:4,
+        pointHoverRadius: type==='bar'?0:6,
+        borderWidth: type==='bar'?0:2.5,
+        borderRadius: type==='bar'?6:0,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: c => ` ${c.parsed.y} oz` },
+          backgroundColor: '#2D2214',
+          titleFont: { family: 'Nunito', weight: '800' },
+          bodyFont: { family: 'Nunito' },
+          cornerRadius: 8, padding: 10
+        }
+      },
+      scales: {
+        x: { grid: {display:false}, ticks: {font:{family:'Nunito',size:10},color:'#9A8878'} },
+        y: { beginAtZero:true, grid:{color:'rgba(45,34,20,0.05)'}, ticks:{font:{family:'Nunito',size:10},color:'#9A8878'} }
+      }
     }
-    function enviarNotificacion(titulo, cuerpo) {
-        if ("Notification" in window && Notification.permission === "granted") {
-            new Notification(titulo, { body: cuerpo, icon: "./icon.png" });
-        }
-    }
+  });
+}
 
-    /* ── FIREBASE: CONFIG SYNC ── */
-    db.collection("configuracion").doc("limiteGlobal").onSnapshot((doc) => {
-        if (doc.exists) {
-            limiteMinutos = doc.data().minutos;
-            limiteDisplay.textContent = limiteMinutos;
-            document.getElementById('inputLimite').value = limiteMinutos;
-        } else {
-            db.collection("configuracion").doc("limiteGlobal").set({ minutos: 150 });
-        }
-    });
-
-    /* ── FIREBASE: TOMAS REALTIME ── */
-    db.collection("tomas").orderBy("fecha", "desc").onSnapshot((snapshot) => {
-        listaHistorial.innerHTML = "";
-        tomasProcesadas = [];
-
-        if (snapshot.empty) {
-            listaHistorial.innerHTML = "<li class='hist-empty'>No hay tomas registradas aún 🍼</li>";
-            tiempoEl.textContent = "Sin tomas";
-            histBadge.textContent = "0";
-            return;
-        }
-
-        const primerDoc  = snapshot.docs[0];
-        const nuevaUltimaToma = primerDoc.data().fecha.toDate();
-        if (ultimaTomaId !== primerDoc.id) {
-            ultimaTomaId   = primerDoc.id;
-            ultimaToma     = nuevaUltimaToma;
-            notificado10Min= false;
-            notificadoLimite = false;
-            iniciarReloj();
-        }
-
-        const colorClasses = ['color-a', 'color-b', 'color-c'];
-
-        snapshot.forEach((doc, i) => {
-            const data     = doc.data();
-            const id       = doc.id;
-            const fechaToma= data.fecha.toDate();
-            const horaStr  = fechaToma.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const fechaStr = fechaToma.toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short' });
-            tomasProcesadas.push({ id, fecha: fechaToma, onzas: data.onzas });
-
-            const li = document.createElement('li');
-            li.className = 'hist-item';
-            li.innerHTML = `
-                <div class="hist-icon ${colorClasses[i % 3]}">🍼</div>
-                <div class="hist-meta">
-                    <div class="hist-time">${horaStr}</div>
-                    <div class="hist-date">${fechaStr}</div>
-                </div>
-                <div class="hist-oz">${data.onzas} <span>oz</span></div>
-                <button class="hist-del" onclick="borrarToma('${id}','${horaStr}')" title="Eliminar">🗑</button>
-            `;
-            listaHistorial.appendChild(li);
-        });
-
-        histBadge.textContent = snapshot.size;
-        generarGrafico();
-    });
-
-    /* ── SAVE TOMA ── */
-    btnGuardar.addEventListener('click', () => {
-        btnGuardarLabel.textContent = "Guardando…";
-        btnGuardarIcon.textContent  = "⏳";
-        btnGuardar.disabled = true;
-
-        const fechaToma = new Date(inputHora.value);
-        const onzas     = parseFloat(inputOz.value);
-
-        db.collection("tomas").add({ fecha: fechaToma, onzas, registro: new Date() })
-        .then(() => {
-            btnGuardar.classList.add('saved');
-            btnGuardarLabel.textContent = "¡Toma guardada!";
-            btnGuardarIcon.textContent  = "✅";
-            toast('✅ Toma registrada correctamente');
-            setTimeout(() => {
-                btnGuardar.classList.remove('saved');
-                btnGuardarLabel.textContent = "Guardar toma";
-                btnGuardarIcon.textContent  = "🍼";
-                btnGuardar.disabled = false;
-                setHoraActual();
-            }, 2200);
-        })
-        .catch(err => {
-            toast('❌ Error al guardar: ' + err.message, 3500);
-            btnGuardarLabel.textContent = "Guardar toma";
-            btnGuardarIcon.textContent  = "🍼";
-            btnGuardar.disabled = false;
-        });
-    });
-
-    /* ── CLOCK ── */
-    function iniciarReloj() {
-        if (intervaloReloj) clearInterval(intervaloReloj);
-        actualizarReloj();
-        intervaloReloj = setInterval(actualizarReloj, 30000);
-    }
-
-    function actualizarReloj() {
-        const ahora       = new Date();
-        const diffMs      = ahora - ultimaToma;
-        const diffMinutos = Math.floor(diffMs / 60000);
-        let minutosRestantes = limiteMinutos - diffMinutos;
-
-        // Last feed pill
-        if (diffMinutos >= 0) {
-            const h = Math.floor(diffMinutos / 60);
-            const m = diffMinutos % 60;
-            lastFeedText.textContent = h > 0
-                ? `Última toma hace ${h}h ${m}min`
-                : `Última toma hace ${m} min`;
-        }
-
-        // Timer display
-        if (diffMinutos < 0) {
-            tiempoEl.textContent = "-- min";
-            minutosRestantes = limiteMinutos;
-        } else if (minutosRestantes > 0) {
-            tiempoEl.textContent = `${minutosRestantes} min`;
-            labelReloj.textContent = "Siguiente toma en";
-        } else if (minutosRestantes === 0) {
-            tiempoEl.textContent = "¡YA!";
-        } else {
-            tiempoEl.textContent = `+${Math.abs(minutosRestantes)} min`;
-            labelReloj.textContent = "Retraso";
-        }
-
-        // Progress
-        const pct = Math.min(100, Math.max(0, (diffMinutos / limiteMinutos) * 100));
-        document.getElementById('progressBar').style.width = pct + '%';
-
-        // Colors
-        timerCard.classList.remove('state-warn', 'state-danger');
-        if (diffMinutos >= limiteMinutos) {
-            timerCard.classList.add('state-danger');
-        } else if (diffMinutos > limiteMinutos * 0.75) {
-            timerCard.classList.add('state-warn');
-        }
-
-        // Notifications
-        if (minutosRestantes === 10 && !notificado10Min) {
-            enviarNotificacion("¡Atención! 🍼", "Faltan 10 minutos para la próxima toma.");
-            notificado10Min = true;
-        } else if (minutosRestantes <= 0 && !notificadoLimite) {
-            enviarNotificacion("¡Hora del biberón! 🚨", "Se alcanzó el tiempo límite.");
-            notificadoLimite = true;
-        }
-    }
-
-    /* ── CHART ── */
-    let chartMode = 'acumulado'; // 'acumulado' | 'portoma'
-
-    document.getElementById('btnAplicarFiltros').addEventListener('click', generarGrafico);
-
-    document.getElementById('chartToggle').addEventListener('click', e => {
-        const btn = e.target.closest('.ctoggle-btn');
-        if (!btn) return;
-        chartMode = btn.dataset.mode;
-        document.querySelectorAll('.ctoggle-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        generarGrafico();
-    });
-
-    function generarGrafico() {
-        const ctx = document.getElementById('graficoOnzasCurva').getContext('2d');
-        let filtradas = tomasProcesadas.slice().reverse();
-
-        if (filterStart.value) {
-            const d = new Date(filterStart.value);
-            filtradas = filtradas.filter(t => t.fecha >= d);
-        }
-        if (filterEnd.value) {
-            const d = new Date(filterEnd.value);
-            d.setHours(23, 59, 59);
-            filtradas = filtradas.filter(t => t.fecha <= d);
-        }
-
-        if (graficoInstancia) { graficoInstancia.destroy(); graficoInstancia = null; }
-        if (!filtradas.length) return;
-
-        const labels = filtradas.map((_, i) => `T${i + 1}`);
-        let data, chartType, fillMode, yLabel, tension, barColor;
-
-        if (chartMode === 'acumulado') {
-            let acum = 0;
-            data = filtradas.map(t => { acum += t.onzas; return +acum.toFixed(1); });
-            chartType = 'line';
-            fillMode  = true;
-            tension   = 0.4;
-            yLabel    = 'oz acumuladas';
-        } else {
-            // Por toma: oz individualmente + barra para ver claramente cada toma
-            data      = filtradas.map(t => +t.onzas.toFixed(1));
-            chartType = 'bar';
-            fillMode  = false;
-            tension   = 0;
-            yLabel    = 'oz por toma';
-        }
-
-        const isBar = chartType === 'bar';
-
-        graficoInstancia = new Chart(ctx, {
-            type: chartType,
-            data: {
-                labels,
-                datasets: [{
-                    data,
-                    borderColor: '#F4A261',
-                    backgroundColor: isBar
-                        ? filtradas.map((_, i) => i % 2 === 0 ? 'rgba(244,162,97,0.75)' : 'rgba(69,123,157,0.65)')
-                        : 'rgba(244,162,97,0.12)',
-                    fill: fillMode,
-                    tension,
-                    pointBackgroundColor: '#E76F51',
-                    pointRadius: isBar ? 0 : 4,
-                    pointHoverRadius: isBar ? 0 : 6,
-                    borderWidth: isBar ? 0 : 2.5,
-                    borderRadius: isBar ? 6 : 0,
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ` ${ctx.parsed.y} oz`
-                        },
-                        backgroundColor: '#2D2214',
-                        titleFont: { family: 'Nunito', weight: '800' },
-                        bodyFont: { family: 'Nunito' },
-                        cornerRadius: 8,
-                        padding: 10,
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { family: 'Nunito', size: 10 }, color: '#9A8878' }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(45,34,20,0.05)' },
-                        ticks: { font: { family: 'Nunito', size: 10 }, color: '#9A8878' },
-                        title: { display: true, text: yLabel, font: { family: 'Nunito', size: 9 }, color: '#9A8878' }
-                    }
-                }
-            }
-        });
-    }
-
-    /* ── DELETE ── */
-    function borrarToma(id, horaStr) {
-        if (confirm(`¿Borrar la toma de las ${horaStr}?`)) {
-            db.collection("tomas").doc(id).delete()
-            .then(() => toast('🗑 Toma eliminada'))
-            .catch(err => toast('❌ Error: ' + err.message, 3000));
-        }
-    }
-
-    /* ── SETTINGS MODAL ── */
-    const modal = document.getElementById('settingsModal');
-    function abrirSettings() { modal.classList.add('open'); }
-    function cerrarSettings() { modal.classList.remove('open'); }
-
-    modal.addEventListener('click', e => { if (e.target === modal) cerrarSettings(); });
-
-    document.getElementById('btnGuardarSettings').addEventListener('click', () => {
-        const v = parseInt(document.getElementById('inputLimite').value);
-        if (v > 0) {
-            db.collection("configuracion").doc("limiteGlobal").set({ minutos: v })
-            .then(() => { cerrarSettings(); toast(`✅ Límite guardado: ${v} min`); })
-            .catch(err => toast('❌ Error: ' + err.message, 3000));
-        }
-    });
+/* ═══════════════════════════════════════
+   SETTINGS
+═══════════════════════════════════════ */
+function abrirSettings() { document.getElementById('settingsModal').classList.add('open'); }
+function cerrarSettings() { document.getElementById('settingsModal').classList.remove('open'); }
+document.getElementById('settingsModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('settingsModal')) cerrarSettings();
+});
+document.getElementById('btnGuardarSettings').addEventListener('click', () => {
+  const v = parseInt(document.getElementById('inputLimite').value);
+  if (v > 0) {
+    db.collection("configuracion").doc("limiteGlobal").set({ minutos: v })
+      .then(() => { cerrarSettings(); toast(`✅ Límite: ${v} min`); })
+      .catch(err => toast('❌ ' + err.message, 3000));
+  }
+});
 </script>
 </body>
 </html>
