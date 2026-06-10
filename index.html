@@ -249,6 +249,52 @@ header{padding:14px 20px 6px;display:flex;justify-content:space-between;align-it
 /* ── TOAST ── */
 #toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--ink);color:#fff;font-size:12px;font-weight:700;padding:9px 20px;border-radius:99px;z-index:200;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .25s;opacity:0;white-space:nowrap;pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ══════════════════════════════════════
+   NEW STYLES (arch, breast stat, big stat panel, filter chips)
+══════════════════════════════════════ */
+#serpentineSVG{width:100%;height:auto;display:block}
+
+/* Big STAT panel for acumulado */
+#acumPanel{padding:6px 0 4px}
+.acum-big-row{display:flex;gap:12px;align-items:stretch;margin-bottom:10px}
+.acum-big{flex:1.4;background:linear-gradient(135deg,var(--peach),rgba(252,218,183,.5));border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;justify-content:center}
+.acum-big-lbl{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--apricot);margin-bottom:4px}
+.acum-big-val{font-size:36px;font-weight:900;color:var(--ink);line-height:1;letter-spacing:-2px}
+.acum-big-val small{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:0}
+.acum-mini-col{flex:1;display:flex;flex-direction:column;gap:8px}
+.acum-mini{flex:1;background:var(--cream);border-radius:var(--radius-sm);padding:9px 12px;border:1.5px solid var(--peach);display:flex;flex-direction:column;justify-content:center}
+.acum-mini-lbl{font-size:8.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.acum-mini-val{font-size:19px;font-weight:900;color:var(--ink);line-height:1;letter-spacing:-.5px}
+.acum-mini-val small{font-size:10px;font-weight:700;color:var(--muted)}
+.acum-range-hint{font-size:10px;font-weight:700;color:var(--muted);text-align:center;letter-spacing:.4px;padding-top:4px}
+
+/* Filter chips */
+.filter-chips{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
+.fchip{border:none;background:var(--cream);border:1.5px solid var(--peach);color:var(--muted);font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:6px 10px;border-radius:99px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.fchip.active{background:linear-gradient(135deg,var(--apricot),var(--coral));color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(231,111,81,.3)}
+.fchip:active{transform:scale(.96)}
+.filter-row-custom{display:flex;gap:6px;margin-bottom:12px}
+
+/* Breast stat card */
+.breast-stat-card{padding:18px}
+.bst-content{}
+.bst-last{display:flex;align-items:center;gap:8px;background:var(--lav-lt);border:1.5px solid var(--lav);border-radius:var(--radius-sm);padding:9px 12px;margin-bottom:14px}
+.bst-last-ico{font-size:18px}
+.bst-last-meta{flex:1;min-width:0}
+.bst-last-lbl{font-size:9px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:#7B5EA7;line-height:1.1;margin-bottom:2px}
+.bst-last-val{font-size:13px;font-weight:900;color:var(--ink);line-height:1}
+.bst-last-val small{font-size:10px;font-weight:700;color:var(--muted);margin-left:4px}
+.bst-ratio-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.bst-ratio-lbl{font-size:11px;font-weight:800;color:var(--muted);width:78px;flex-shrink:0;display:flex;align-items:center;gap:4px}
+.bst-ratio-bar-wrap{flex:1;height:10px;background:rgba(45,34,20,.07);border-radius:99px;overflow:hidden}
+.bst-ratio-bar{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.34,1.56,.64,1)}
+.bst-ratio-bar.left{background:linear-gradient(90deg,var(--sky-lt),var(--sky))}
+.bst-ratio-bar.right{background:linear-gradient(90deg,#F5D2C3,var(--coral))}
+.bst-ratio-num{font-size:13px;font-weight:900;color:var(--ink);width:46px;text-align:right;flex-shrink:0}
+.bst-ratio-num small{font-size:9px;font-weight:700;color:var(--muted);margin-left:2px}
+.bst-badge{display:inline-block;background:var(--green);color:#fff;font-size:8px;font-weight:900;letter-spacing:.5px;padding:1px 6px;border-radius:99px;margin-left:5px;vertical-align:1px}
+
 </style>
 </head>
 <body>
@@ -343,7 +389,9 @@ header{padding:14px 20px 6px;display:flex;justify-content:space-between;align-it
       <div style="display:flex;gap:7px;margin-bottom:13px">
         <button class="breast-side-sel active" data-side="left">← Izquierdo</button>
         <button class="breast-side-sel" data-side="right">Derecho →</button>
-        <button class="breast-side-sel" data-side="both">↔ Ambos</button>
+      </div>
+      <div id="lastSideHint" style="font-size:10px;font-weight:800;color:var(--muted);text-align:center;margin-bottom:10px;letter-spacing:.4px;text-transform:uppercase;display:none">
+        Último lado usado: <span id="lastSideVal" style="color:#7B5EA7">—</span>
       </div>
       <div id="breastStopwatchCard">
         <div class="bsw-card" id="bswLeft">
@@ -453,6 +501,14 @@ header{padding:14px 20px 6px;display:flex;justify-content:space-between;align-it
     </div>
   </div>
 
+  <!-- Breast usage card -->
+  <div class="card breast-stat-card" id="breastStatCard">
+    <div class="cmp-title">Uso de pecho 🤱</div>
+    <div class="bst-content" id="bstContent">
+      <div class="hist-empty" style="padding:8px 0">Sin datos de pecho aún</div>
+    </div>
+  </div>
+
   <div class="card compare-card">
     <div class="cmp-title">Comparativa de consumo (oz)</div>
     <div id="cmpRows"><div class="hist-empty">Cargando…</div></div>
@@ -466,12 +522,45 @@ header{padding:14px 20px 6px;display:flex;justify-content:space-between;align-it
         <button class="ctgl" data-mode="portoma">🍼 Por toma</button>
       </div>
     </div>
-    <div class="filter-row">
+
+    <!-- Filter preset chips -->
+    <div class="filter-chips" id="filterChips">
+      <button class="fchip active" data-range="hoy">Hoy</button>
+      <button class="fchip" data-range="ayer">Ayer</button>
+      <button class="fchip" data-range="7d">7 días</button>
+      <button class="fchip" data-range="30d">30 días</button>
+      <button class="fchip" data-range="all">Todo</button>
+      <button class="fchip" data-range="custom">📅 Personalizar</button>
+    </div>
+    <div class="filter-row-custom" id="filterRowCustom" style="display:none">
       <input type="date" class="filter-date" id="dateFilterStart">
       <input type="date" class="filter-date" id="dateFilterEnd">
-      <button class="filter-go" id="btnFiltrar">↻</button>
+      <button class="filter-go" id="btnFiltrar">Aplicar</button>
     </div>
-    <canvas id="graficoMain"></canvas>
+
+    <!-- Acumulado: big STAT panel -->
+    <div id="acumPanel">
+      <div class="acum-big-row">
+        <div class="acum-big">
+          <div class="acum-big-lbl">Total consumido</div>
+          <div class="acum-big-val" id="acumTotalOz">— <small>oz</small></div>
+        </div>
+        <div class="acum-mini-col">
+          <div class="acum-mini">
+            <div class="acum-mini-lbl">Tomas</div>
+            <div class="acum-mini-val" id="acumNumTomas">—</div>
+          </div>
+          <div class="acum-mini">
+            <div class="acum-mini-lbl">Promedio</div>
+            <div class="acum-mini-val" id="acumProm">— <small>oz</small></div>
+          </div>
+        </div>
+      </div>
+      <div class="acum-range-hint" id="acumRangeHint">—</div>
+    </div>
+
+    <!-- Por toma: chart -->
+    <canvas id="graficoMain" style="display:none"></canvas>
   </div>
 
 </div>
@@ -618,7 +707,7 @@ function navTo(btn){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById(btn.dataset.page).classList.add('active');
-  if(btn.dataset.page==='pageStats'){calcStats();generarGrafico()}
+  if(btn.dataset.page==='pageStats'){calcStats();renderConsumoView();renderBreastStats()}
 }
 
 /* ══════════════════════════════════════
@@ -759,195 +848,224 @@ function buildTimeline(){
     })
   ];
 
-  drawSerpentine();
+  drawArch();
 }
 
-function drawSerpentine(){
+function drawArch(){
   const svg=document.getElementById('serpentineSVG');
-  const wrap=document.getElementById('serpentineWrap');
   svg.innerHTML='';
 
-  const n=tlSlots.length;
-  if(!n){
-    svg.setAttribute('viewBox','0 0 360 80');
-    svg.innerHTML='<text x="180" y="45" text-anchor="middle" font-family="Nunito" font-size="11" fill="#9A8878" font-weight="700">Sin tomas hoy</text>';
+  /* Layout */
+  const W=360, H=200;
+  const MARGIN_X=26;
+  const ARC_BOTTOM=145;
+  const AMPLITUDE=105;
+  const AXIS_Y=172;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+
+  const xFor=h=>MARGIN_X+(h/24)*(W-2*MARGIN_X);
+  const yFor=h=>ARC_BOTTOM-AMPLITUDE*Math.sin((h/24)*Math.PI);
+
+  /* defs: gradient + shadow */
+  const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML=`
+    <linearGradient id="arcGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#C9B8D8"/>
+      <stop offset="22%" stop-color="#F4A261"/>
+      <stop offset="50%" stop-color="#E9C46A"/>
+      <stop offset="78%" stop-color="#F4A261"/>
+      <stop offset="100%" stop-color="#C9B8D8"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#FFE9B8" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#FFE9B8" stop-opacity="0"/>
+    </radialGradient>`;
+  svg.appendChild(defs);
+
+  /* Sun glow halo at peak */
+  const glow=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  glow.setAttribute('cx',xFor(12));glow.setAttribute('cy',yFor(12));
+  glow.setAttribute('r','55');glow.setAttribute('fill','url(#sunGlow)');
+  svg.appendChild(glow);
+
+  /* Arc path */
+  let pathD=`M ${MARGIN_X} ${ARC_BOTTOM}`;
+  for(let i=1;i<=60;i++){
+    const h=(i/60)*24;
+    pathD+=` L ${xFor(h).toFixed(2)} ${yFor(h).toFixed(2)}`;
+  }
+  const arc=document.createElementNS('http://www.w3.org/2000/svg','path');
+  arc.setAttribute('d',pathD);
+  arc.setAttribute('stroke','url(#arcGrad)');
+  arc.setAttribute('stroke-width','3');
+  arc.setAttribute('fill','none');
+  arc.setAttribute('stroke-linecap','round');
+  arc.setAttribute('opacity','0.5');
+  svg.appendChild(arc);
+
+  /* Decorative icons: sunrise / sun / sunset */
+  [{h:6,t:'🌅',s:14},{h:12,t:'☀️',s:18},{h:18,t:'🌆',s:14}].forEach(d=>{
+    const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x',xFor(d.h));txt.setAttribute('y',yFor(d.h)-9);
+    txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size',d.s);
+    txt.setAttribute('opacity','0.6');txt.textContent=d.t;
+    svg.appendChild(txt);
+  });
+
+  /* Hour axis baseline */
+  const base=document.createElementNS('http://www.w3.org/2000/svg','line');
+  base.setAttribute('x1',MARGIN_X);base.setAttribute('x2',W-MARGIN_X);
+  base.setAttribute('y1',AXIS_Y);base.setAttribute('y2',AXIS_Y);
+  base.setAttribute('stroke','#E8E0D6');base.setAttribute('stroke-width','1');
+  svg.appendChild(base);
+
+  [0,6,12,18,24].forEach(h=>{
+    const x=xFor(h);
+    const tick=document.createElementNS('http://www.w3.org/2000/svg','line');
+    tick.setAttribute('x1',x);tick.setAttribute('x2',x);
+    tick.setAttribute('y1',AXIS_Y-3);tick.setAttribute('y2',AXIS_Y);
+    tick.setAttribute('stroke','#C8BFB4');tick.setAttribute('stroke-width','1');
+    svg.appendChild(tick);
+    const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+    lbl.setAttribute('x',x);lbl.setAttribute('y',AXIS_Y+12);
+    lbl.setAttribute('text-anchor','middle');
+    lbl.setAttribute('font-family','Nunito');lbl.setAttribute('font-size','9');
+    lbl.setAttribute('font-weight','700');lbl.setAttribute('fill','#9A8878');
+    lbl.textContent=String(h).padStart(2,'0')+'h';
+    svg.appendChild(lbl);
+  });
+
+  /* "Now" marker */
+  const now=new Date();
+  const nowH=now.getHours()+now.getMinutes()/60;
+  const nowX=xFor(nowH);
+  const nowLine=document.createElementNS('http://www.w3.org/2000/svg','line');
+  nowLine.setAttribute('x1',nowX);nowLine.setAttribute('x2',nowX);
+  nowLine.setAttribute('y1',yFor(nowH));nowLine.setAttribute('y2',AXIS_Y);
+  nowLine.setAttribute('stroke','#E76F51');nowLine.setAttribute('stroke-width','1.3');
+  nowLine.setAttribute('stroke-dasharray','2 2');nowLine.setAttribute('opacity','0.6');
+  svg.appendChild(nowLine);
+  const nowDot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  nowDot.setAttribute('cx',nowX);nowDot.setAttribute('cy',AXIS_Y);
+  nowDot.setAttribute('r','3');nowDot.setAttribute('fill','#E76F51');
+  svg.appendChild(nowDot);
+  const nowLbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+  nowLbl.setAttribute('x',nowX);nowLbl.setAttribute('y',AXIS_Y-7);
+  nowLbl.setAttribute('text-anchor','middle');
+  nowLbl.setAttribute('font-family','Nunito');nowLbl.setAttribute('font-size','7.5');
+  nowLbl.setAttribute('font-weight','900');nowLbl.setAttribute('fill','#E76F51');
+  nowLbl.setAttribute('letter-spacing','0.5');
+  nowLbl.textContent='AHORA';
+  svg.appendChild(nowLbl);
+
+  /* Empty state */
+  if(!tlSlots.length){
+    const empty=document.createElementNS('http://www.w3.org/2000/svg','text');
+    empty.setAttribute('x',W/2);empty.setAttribute('y',ARC_BOTTOM-4);
+    empty.setAttribute('text-anchor','middle');
+    empty.setAttribute('font-family','Nunito');empty.setAttribute('font-size','11');
+    empty.setAttribute('fill','#9A8878');empty.setAttribute('font-weight','700');
+    empty.textContent='Sin tomas hoy';
+    svg.appendChild(empty);
     return;
   }
 
-  /* Layout constants */
-  const W=360;
-  const ROW_H=90;       // height of each zigzag row
-  const MARGIN_X=40;    // horizontal margin
-  const NODE_R=22;      // node circle radius
-  const TRACK_W=8;      // path stroke width
+  /* Draw nodes */
+  const NODE_R=13;
+  const statusColor={done:'#52B788',next:'#F4A261',predicted:'#C9B8D8',overdue:'#E63946'};
+  const typeIcon={formula:'🍼',breast:'🤱',frozen:'🧊'};
 
-  /* How many rows? Each row holds one arc (left-to-right or right-to-left) */
-  /* We place nodes along a serpentine: row 0 goes L→R, row 1 R→L, etc.    */
-  const rows=Math.ceil(n/2);
-  const svgH=rows*ROW_H+20;
-  svg.setAttribute('viewBox',`0 0 ${W} ${svgH}`);
+  /* Compute positions and detect collisions for label staggering */
+  const nodesData=tlSlots.map(slot=>{
+    const hr=slot.time.getHours()+slot.time.getMinutes()/60;
+    const clampH=Math.max(0,Math.min(24,hr));
+    return {slot,x:xFor(clampH),y:yFor(clampH)};
+  });
+  /* Stagger labels above/below if x distance < 38 */
+  const labelAbove={};
+  const sorted=nodesData.map((n,i)=>({n,i})).sort((a,b)=>a.n.x-b.n.x);
+  let lastX=-9999, lastAbove=false;
+  sorted.forEach(({n,i})=>{
+    if(n.x-lastX<38){labelAbove[i]=!lastAbove;lastAbove=labelAbove[i]}
+    else{labelAbove[i]=false;lastAbove=false}
+    lastX=n.x;
+  });
 
-  /* Compute node positions along the serpentine */
-  const positions=[];
-  for(let i=0;i<n;i++){
-    const row=Math.floor(i/2);
-    const col=i%2;  // 0=start of row, 1=end of row
-    const y=row*ROW_H+NODE_R+10;
-    let x;
-    if(row%2===0){
-      // even rows: left→right
-      x=col===0?MARGIN_X:W-MARGIN_X;
-    } else {
-      // odd rows: right→left
-      x=col===0?W-MARGIN_X:MARGIN_X;
-    }
-    positions.push({x,y});
-  }
-
-  /* Color gradient per status */
-  const statusColor={
-    done:'#52B788', next:'#F4A261', predicted:'#C9B8D8',
-    overdue:'#E63946'
-  };
-  const statusEmoji={
-    done:'✅', next:'🍼', predicted:'🔮', overdue:'⚠️'
-  };
-
-  /* Defs for drop-shadow */
-  const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
-  defs.innerHTML=`
-    <filter id="nodeShadow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="rgba(45,34,20,0.14)"/>
-    </filter>`;
-  svg.appendChild(defs);
-
-  /* Draw PATH segments connecting nodes */
-  for(let i=0;i<n-1;i++){
-    const p0=positions[i];
-    const p1=positions[i+1];
-    const isDone=tlSlots[i].status==='done'&&tlSlots[i+1].status==='done';
-    const c0=statusColor[tlSlots[i].status];
-    const c1=statusColor[tlSlots[i+1].status];
-
-    /* Gradient for segment */
-    const gradId=`seg${i}`;
-    const grad=document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
-    grad.setAttribute('id',gradId);
-    grad.setAttribute('gradientUnits','userSpaceOnUse');
-    grad.setAttribute('x1',p0.x);grad.setAttribute('y1',p0.y);
-    grad.setAttribute('x2',p1.x);grad.setAttribute('y2',p1.y);
-    grad.innerHTML=`<stop offset="0%" stop-color="${c0}"/><stop offset="100%" stop-color="${c1}"/>`;
-    defs.appendChild(grad);
-
-    /* Bezier curve: for rows crossing, use a smooth S-curve */
-    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-    let d;
-    const sameRow=Math.floor(i/2)===Math.floor((i+1)/2);
-    if(sameRow){
-      // horizontal segment within row — straight line (will be short, nodes at edges)
-      d=`M ${p0.x} ${p0.y} L ${p1.x} ${p1.y}`;
-    } else {
-      // vertical connector between rows — smooth bezier
-      const midY=(p0.y+p1.y)/2;
-      d=`M ${p0.x} ${p0.y} C ${p0.x} ${midY}, ${p1.x} ${midY}, ${p1.x} ${p1.y}`;
-    }
-    path.setAttribute('d',d);
-    path.setAttribute('stroke',`url(#${gradId})`);
-    path.setAttribute('stroke-width',TRACK_W);
-    path.setAttribute('fill','none');
-    path.setAttribute('stroke-linecap','round');
-    if(tlSlots[i].status==='predicted'||tlSlots[i+1].status==='predicted'){
-      path.setAttribute('stroke-dasharray','12 8');
-    }
-    svg.appendChild(path);
-  }
-
-  /* Draw NODES */
-  positions.forEach((pos,i)=>{
-    const slot=tlSlots[i];
+  nodesData.forEach((nd,i)=>{
+    const {slot,x,y}=nd;
     const col=statusColor[slot.status];
-    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
-    g.setAttribute('cursor','pointer');
-    g.setAttribute('class','tl-node');
+    let ico;
+    if(slot.status==='done'&&slot.data) ico=typeIcon[slot.data.tipo]||'🍼';
+    else if(slot.status==='predicted') ico='🔮';
+    else if(slot.status==='overdue') ico='⚠️';
+    else ico='🍼';
 
-    /* outer glow ring for "next" */
+    /* pulsing ring for "next" */
     if(slot.status==='next'){
       const ring=document.createElementNS('http://www.w3.org/2000/svg','circle');
-      ring.setAttribute('cx',pos.x);ring.setAttribute('cy',pos.y);
-      ring.setAttribute('r',NODE_R+7);
-      ring.setAttribute('fill','none');
-      ring.setAttribute('stroke',col);
-      ring.setAttribute('stroke-width','2.5');
-      ring.setAttribute('opacity','0.35');
-      ring.innerHTML=`<animate attributeName="r" values="${NODE_R+5};${NODE_R+11};${NODE_R+5}" dur="2s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values=".35;0;.35" dur="2s" repeatCount="indefinite"/>`;
-      g.appendChild(ring);
+      ring.setAttribute('cx',x);ring.setAttribute('cy',y);
+      ring.setAttribute('r',NODE_R+4);ring.setAttribute('fill','none');
+      ring.setAttribute('stroke',col);ring.setAttribute('stroke-width','2');
+      ring.setAttribute('opacity','0.4');
+      ring.innerHTML=`<animate attributeName="r" values="${NODE_R+3};${NODE_R+8};${NODE_R+3}" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".4;0;.4" dur="2s" repeatCount="indefinite"/>`;
+      svg.appendChild(ring);
     }
 
-    /* shadow circle */
+    /* shadow */
     const shadow=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    shadow.setAttribute('cx',pos.x);shadow.setAttribute('cy',pos.y+3);
+    shadow.setAttribute('cx',x);shadow.setAttribute('cy',y+2);
     shadow.setAttribute('r',NODE_R);
-    shadow.setAttribute('fill','rgba(45,34,20,0.09)');
-    g.appendChild(shadow);
+    shadow.setAttribute('fill','rgba(45,34,20,0.13)');
+    svg.appendChild(shadow);
 
-    /* main circle */
-    const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    circle.setAttribute('cx',pos.x);circle.setAttribute('cy',pos.y);
-    circle.setAttribute('r',NODE_R);
-    circle.setAttribute('fill','#fff');
-    circle.setAttribute('stroke',col);
-    circle.setAttribute('stroke-width','3');
-    g.appendChild(circle);
+    /* circle */
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',NODE_R);
+    c.setAttribute('fill','#fff');c.setAttribute('stroke',col);
+    c.setAttribute('stroke-width','2.5');
+    if(slot.status==='predicted')c.setAttribute('stroke-dasharray','3 2');
+    svg.appendChild(c);
 
-    /* inner fill for done */
+    /* tinted fill for done */
     if(slot.status==='done'){
-      const fill=document.createElementNS('http://www.w3.org/2000/svg','circle');
-      fill.setAttribute('cx',pos.x);fill.setAttribute('cy',pos.y);
-      fill.setAttribute('r',NODE_R-6);
-      fill.setAttribute('fill',col);fill.setAttribute('opacity','0.18');
-      g.appendChild(fill);
+      const f=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      f.setAttribute('cx',x);f.setAttribute('cy',y);f.setAttribute('r',NODE_R-4);
+      f.setAttribute('fill',col);f.setAttribute('opacity','0.16');
+      svg.appendChild(f);
     }
 
-    /* emoji */
-    const ico=document.createElementNS('http://www.w3.org/2000/svg','text');
-    ico.setAttribute('x',pos.x);ico.setAttribute('y',pos.y+5);
-    ico.setAttribute('text-anchor','middle');ico.setAttribute('font-size','16');
-    ico.textContent=statusEmoji[slot.status];
-    g.appendChild(ico);
+    /* icon */
+    const iconEl=document.createElementNS('http://www.w3.org/2000/svg','text');
+    iconEl.setAttribute('x',x);iconEl.setAttribute('y',y+4);
+    iconEl.setAttribute('text-anchor','middle');iconEl.setAttribute('font-size','13');
+    iconEl.textContent=ico;
+    svg.appendChild(iconEl);
 
-    /* time label */
-    const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
-    const lblY=slot.status==='done'||i%2===0?pos.y+NODE_R+14:pos.y-NODE_R-6;
-    lbl.setAttribute('x',pos.x);lbl.setAttribute('y',lblY);
-    lbl.setAttribute('text-anchor','middle');
-    lbl.setAttribute('font-family','Nunito');lbl.setAttribute('font-size','10');
-    lbl.setAttribute('font-weight','800');lbl.setAttribute('fill',col);
-    lbl.textContent=fmtTime(slot.time);
-    g.appendChild(lbl);
+    /* time + value labels — placed OUTSIDE the node, never crossing the arc */
+    const above=labelAbove[i];
+    const timeY=above?y-NODE_R-6:y+NODE_R+11;
+    const valY =above?timeY-10:timeY+10;
 
-    /* oz/min badge for done */
+    const tEl=document.createElementNS('http://www.w3.org/2000/svg','text');
+    tEl.setAttribute('x',x);tEl.setAttribute('y',timeY);
+    tEl.setAttribute('text-anchor','middle');
+    tEl.setAttribute('font-family','Nunito');tEl.setAttribute('font-size','10');
+    tEl.setAttribute('font-weight','800');tEl.setAttribute('fill',col);
+    tEl.textContent=fmtTime(slot.time);
+    svg.appendChild(tEl);
+
     if(slot.status==='done'&&slot.data){
       const d=slot.data;
       const valTxt=d.tipo==='breast'?`${(d.leftMin||0)+(d.rightMin||0)}m`:`${d.onzas}oz`;
-      const badge=document.createElementNS('http://www.w3.org/2000/svg','text');
-      const bY=lblY>pos.y?lblY+12:lblY-12;
-      badge.setAttribute('x',pos.x);badge.setAttribute('y',bY);
-      badge.setAttribute('text-anchor','middle');
-      badge.setAttribute('font-family','Nunito');badge.setAttribute('font-size','9');
-      badge.setAttribute('font-weight','700');badge.setAttribute('fill','#9A8878');
-      badge.textContent=valTxt;
-      g.appendChild(badge);
+      const vEl=document.createElementNS('http://www.w3.org/2000/svg','text');
+      vEl.setAttribute('x',x);vEl.setAttribute('y',valY);
+      vEl.setAttribute('text-anchor','middle');
+      vEl.setAttribute('font-family','Nunito');vEl.setAttribute('font-size','8.5');
+      vEl.setAttribute('font-weight','700');vEl.setAttribute('fill','#9A8878');
+      vEl.textContent=valTxt;
+      svg.appendChild(vEl);
     }
-
-    /* click → open slot modal */
-    g.addEventListener('click',()=>openSlotModal(i));
-
-    svg.appendChild(g);
   });
-
-  /* resize SVG height in DOM */
-  wrap.style.height='auto';
 }
 
 /* ══════════════════════════════════════
@@ -993,7 +1111,7 @@ document.getElementById('btnConfirmSlot').addEventListener('click',()=>{
         if(tlSlots[i].status!=='done')
           tlSlots[i]={...tlSlots[i],time:new Date(tlSlots[i].time.getTime()+ms)};
       }
-      drawSerpentine();
+      drawArch();
     }
     cerrarSlotModal();
     toast(`✅ Toma confirmada${slotShiftMin!==0?` · predicciones corridas ${slotShiftMin>0?'+':''}${slotShiftMin} min`:''}`);
@@ -1011,8 +1129,21 @@ document.querySelectorAll('.type-btn').forEach(btn=>{
     document.getElementById('fieldsFormula').style.display=tipoActual==='formula'?'':'none';
     document.getElementById('fieldsBreast').style.display =tipoActual==='breast' ?'':'none';
     document.getElementById('fieldsFrozen').style.display =tipoActual==='frozen' ?'':'none';
+    if(tipoActual==='breast') updateLastSideHint();
   });
 });
+
+function updateLastSideHint(){
+  // find most recent breast feed
+  const breastFeeds=tomasData.filter(t=>t.tipo==='breast').sort((a,b)=>b.fecha-a.fecha);
+  const hint=document.getElementById('lastSideHint');
+  if(!breastFeeds.length){hint.style.display='none';return}
+  const last=breastFeeds[0];
+  const lastSide=(last.leftMin||0)>=(last.rightMin||0)?'Izquierdo ←':'Derecho →';
+  const suggestSide=(last.leftMin||0)>=(last.rightMin||0)?'right':'left';
+  document.getElementById('lastSideVal').textContent=`${lastSide} · sugiere alternar a ${suggestSide==='left'?'← Izquierdo':'Derecho →'}`;
+  hint.style.display='block';
+}
 
 /* ══════════════════════════════════════
    OZ STEPPERS
@@ -1063,9 +1194,9 @@ document.querySelectorAll('.breast-side-sel').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.breast-side-sel').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    breastSideMode=btn.dataset.side;
-    document.getElementById('bswLeft').style.display =breastSideMode!=='right'?'':'none';
-    document.getElementById('bswRight').style.display=breastSideMode!=='left' ?'':'none';
+    breastSideMode=btn.dataset.side;  // 'left' or 'right'
+    document.getElementById('bswLeft').style.display =breastSideMode==='left' ?'':'none';
+    document.getElementById('bswRight').style.display=breastSideMode==='right'?'':'none';
     refreshBswChips();
   });
 });
@@ -1122,15 +1253,13 @@ function bswReset(side){
 function refreshBswChips(){
   const lMin=Math.round(bsw.left.elapsed/60000);
   const rMin=Math.round(bsw.right.elapsed/60000);
-  const total=lMin+rMin;
-  const showL=breastSideMode!=='right'&&lMin>0;
-  const showR=breastSideMode!=='left' &&rMin>0;
+  const showL=breastSideMode==='left'&&lMin>0;
+  const showR=breastSideMode==='right'&&rMin>0;
   document.getElementById('chipL').style.display =showL?'inline-flex':'none';
   document.getElementById('chipR').style.display =showR?'inline-flex':'none';
-  document.getElementById('chipT').style.display =(showL&&showR)?'inline-flex':'none';
+  document.getElementById('chipT').style.display ='none';
   document.getElementById('chipLv').textContent=lMin;
   document.getElementById('chipRv').textContent=rMin;
-  document.getElementById('chipTv').textContent=total;
   document.getElementById('bswChips').style.display=(showL||showR)?'flex':'none';
   leftMinutes=lMin; rightMinutes=rMin;
 }
@@ -1263,6 +1392,49 @@ function calcStats(){
     </div>`;
   }).join('');
 }
+function renderBreastStats(){
+  const breastFeeds=tomasData.filter(t=>t.tipo==='breast');
+  const card=document.getElementById('breastStatCard');
+  const content=document.getElementById('bstContent');
+  if(!breastFeeds.length){
+    content.innerHTML='<div class="hist-empty" style="padding:8px 0">Sin datos de pecho aún 🤱</div>';
+    return;
+  }
+  // Tally minutes per side
+  let totalLeft=0, totalRight=0;
+  breastFeeds.forEach(t=>{ totalLeft+=(t.leftMin||0); totalRight+=(t.rightMin||0); });
+  const total=totalLeft+totalRight;
+  const lPct=total>0?Math.round((totalLeft/total)*100):0;
+  const rPct=100-lPct;
+  // Last side
+  const sorted=breastFeeds.slice().sort((a,b)=>b.fecha-a.fecha);
+  const last=sorted[0];
+  const lastSide=(last.leftMin||0)>=(last.rightMin||0)?'left':'right';
+  const lastSideTxt=lastSide==='left'?'← Izquierdo':'Derecho →';
+  const lastMin=lastSide==='left'?(last.leftMin||0):(last.rightMin||0);
+
+  content.innerHTML=`
+    <div class="bst-last">
+      <div class="bst-last-ico">🤱</div>
+      <div class="bst-last-meta">
+        <div class="bst-last-lbl">Último lado usado</div>
+        <div class="bst-last-val">${lastSideTxt} <small>· ${lastMin} min · ${fmtTime(last.fecha)}</small></div>
+      </div>
+    </div>
+    <div class="bst-ratio-row">
+      <div class="bst-ratio-lbl">← Izquierdo${lastSide==='left'?'<span class="bst-badge">ÚLTIMO</span>':''}</div>
+      <div class="bst-ratio-bar-wrap"><div class="bst-ratio-bar left" style="width:${lPct}%"></div></div>
+      <div class="bst-ratio-num">${totalLeft}<small>min</small></div>
+    </div>
+    <div class="bst-ratio-row">
+      <div class="bst-ratio-lbl">Derecho →${lastSide==='right'?'<span class="bst-badge">ÚLTIMO</span>':''}</div>
+      <div class="bst-ratio-bar-wrap"><div class="bst-ratio-bar right" style="width:${rPct}%"></div></div>
+      <div class="bst-ratio-num">${totalRight}<small>min</small></div>
+    </div>
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-align:center;margin-top:10px;letter-spacing:.4px">${breastFeeds.length} tomas de pecho · ${total} min totales</div>
+  `;
+}
+
 function setText(id,val){const e=document.getElementById(id);if(e)e.innerHTML=val}
 function setTrend(id,cur,ref,lbl){
   const e=document.getElementById(id);if(!e)return;
@@ -1272,8 +1444,10 @@ function setTrend(id,cur,ref,lbl){
 }
 
 /* ══════════════════════════════════════
-   CHART
+   FILTERS + ACUMULADO PANEL + CHART
 ══════════════════════════════════════ */
+let filterRange='hoy';  // hoy | ayer | 7d | 30d | all | custom
+
 document.querySelector('.chart-toggle').addEventListener('click',e=>{
   const b=e.target.closest('.ctgl');if(!b)return;
   chartMode=b.dataset.mode;
@@ -1281,43 +1455,118 @@ document.querySelector('.chart-toggle').addEventListener('click',e=>{
   b.classList.add('active');
   document.getElementById('chartTitle').textContent=
     chartMode==='acumulado'?'Consumo acumulado':'Onzas por toma';
-  generarGrafico();
+  renderConsumoView();
 });
-document.getElementById('btnFiltrar').addEventListener('click',generarGrafico);
 
-function generarGrafico(){
-  const ctx=document.getElementById('graficoMain').getContext('2d');
+document.getElementById('filterChips').addEventListener('click',e=>{
+  const b=e.target.closest('.fchip');if(!b)return;
+  document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  filterRange=b.dataset.range;
+  document.getElementById('filterRowCustom').style.display=filterRange==='custom'?'flex':'none';
+  if(filterRange!=='custom') renderConsumoView();
+});
+
+document.getElementById('btnFiltrar').addEventListener('click',renderConsumoView);
+
+function getFilteredData(){
   let data=tomasData.filter(t=>t.tipo!=='breast').slice().reverse();
-  const fs=document.getElementById('dateFilterStart').value;
-  const fe=document.getElementById('dateFilterEnd').value;
-  if(fs){const d=new Date(fs);data=data.filter(t=>t.fecha>=d)}
-  if(fe){const d=new Date(fe);d.setHours(23,59,59);data=data.filter(t=>t.fecha<=d)}
-  if(grafico){grafico.destroy();grafico=null}
-  if(!data.length)return;
-  const labels=data.map((_,i)=>`T${i+1}`);
-  let vals,type,fill,tension,bg;
-  if(chartMode==='acumulado'){
-    let a=0;vals=data.map(t=>+(a+=t.onzas).toFixed(1));
-    type='line';fill=true;tension=0.4;bg='rgba(244,162,97,0.12)';
-  } else {
-    vals=data.map(t=>+t.onzas.toFixed(1));
-    type='bar';fill=false;tension=0;
-    bg=data.map((_,i)=>i%2===0?'rgba(244,162,97,0.75)':'rgba(69,123,157,0.65)');
+  const now=new Date(); const hoy=startOfDay(now);
+  let from=null,to=null,rangeLbl='';
+  if(filterRange==='hoy'){from=hoy;to=endOfDay(now);rangeLbl='Hoy · '+fmtDate(now)}
+  else if(filterRange==='ayer'){const a=new Date(hoy.getTime()-86400000);from=a;to=endOfDay(a);rangeLbl='Ayer · '+fmtDate(a)}
+  else if(filterRange==='7d'){from=new Date(hoy.getTime()-6*86400000);to=endOfDay(now);rangeLbl='Últimos 7 días'}
+  else if(filterRange==='30d'){from=new Date(hoy.getTime()-29*86400000);to=endOfDay(now);rangeLbl='Últimos 30 días'}
+  else if(filterRange==='all'){rangeLbl='Histórico completo'}
+  else if(filterRange==='custom'){
+    const fs=document.getElementById('dateFilterStart').value;
+    const fe=document.getElementById('dateFilterEnd').value;
+    if(fs)from=new Date(fs);
+    if(fe){to=new Date(fe);to.setHours(23,59,59,999)}
+    rangeLbl='Personalizado';
   }
+  if(from) data=data.filter(t=>t.fecha>=from);
+  if(to)   data=data.filter(t=>t.fecha<=to);
+  return {data,rangeLbl};
+}
+
+function renderConsumoView(){
+  const acumPanel=document.getElementById('acumPanel');
+  const canvas=document.getElementById('graficoMain');
+  if(chartMode==='acumulado'){
+    acumPanel.style.display='block';
+    canvas.style.display='none';
+    renderAcumPanel();
+  } else {
+    acumPanel.style.display='none';
+    canvas.style.display='block';
+    renderPorTomaChart();
+  }
+}
+
+function renderAcumPanel(){
+  const {data,rangeLbl}=getFilteredData();
+  const totalOz=data.reduce((s,t)=>s+(t.onzas||0),0);
+  const n=data.length;
+  const avg=n>0?(totalOz/n):0;
+  document.getElementById('acumTotalOz').innerHTML=`${totalOz.toFixed(1)} <small>oz</small>`;
+  document.getElementById('acumNumTomas').textContent=n;
+  document.getElementById('acumProm').innerHTML=`${avg.toFixed(1)} <small>oz</small>`;
+  document.getElementById('acumRangeHint').textContent=rangeLbl+(n?` · ${n} ${n===1?'toma':'tomas'}`:' · sin tomas');
+}
+
+function renderPorTomaChart(){
+  const ctx=document.getElementById('graficoMain').getContext('2d');
+  const {data}=getFilteredData();
+  if(grafico){grafico.destroy();grafico=null}
+  if(!data.length){
+    ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    return;
+  }
+  // Use a lollipop / dot chart: scatter-style with vertical lines
+  const labels=data.map(t=>fmtTime(t.fecha));
+  const vals=data.map(t=>+t.onzas.toFixed(1));
+  // Color dots by type
+  const typeColor={formula:'#F4A261',frozen:'#457B9D'};
+  const dotColors=data.map(t=>typeColor[t.tipo]||'#F4A261');
+
   grafico=new Chart(ctx,{
-    type,
+    type:'bar',
     data:{labels,datasets:[{
-      data:vals,borderColor:'#F4A261',backgroundColor:bg,fill,tension,
-      pointBackgroundColor:'#E76F51',
-      pointRadius:type==='bar'?0:3,pointHoverRadius:type==='bar'?0:5,
-      borderWidth:type==='bar'?0:2.5,borderRadius:type==='bar'?5:0
+      data:vals,
+      backgroundColor:dotColors.map(c=>c+'33'),  // 20% opacity for bar
+      borderColor:dotColors,
+      borderWidth:0,
+      borderRadius:99,
+      barThickness:6,
+      categoryPercentage:0.9,
+      barPercentage:0.9,
+    },{
+      // Overlay dots as scatter on top
+      type:'line',
+      data:vals,
+      borderColor:'transparent',
+      backgroundColor:dotColors,
+      pointBackgroundColor:dotColors,
+      pointBorderColor:'#fff',
+      pointBorderWidth:2,
+      pointRadius:6,
+      pointHoverRadius:8,
+      showLine:false,
+      fill:false,
     }]},
-    options:{responsive:true,plugins:{legend:{display:false},
-      tooltip:{callbacks:{label:c=>` ${c.parsed.y} oz`},
-        backgroundColor:'#2D2214',cornerRadius:8,padding:9,
-        titleFont:{family:'Nunito',weight:'800'},bodyFont:{family:'Nunito'}}},
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{label:c=>` ${c.parsed.y} oz`,title:items=>labels[items[0].dataIndex]},
+          backgroundColor:'#2D2214',cornerRadius:8,padding:9,
+          titleFont:{family:'Nunito',weight:'800'},bodyFont:{family:'Nunito'}
+        }
+      },
       scales:{
-        x:{grid:{display:false},ticks:{font:{family:'Nunito',size:9},color:'#9A8878'}},
+        x:{grid:{display:false},ticks:{font:{family:'Nunito',size:8.5},color:'#9A8878',maxRotation:45,minRotation:0}},
         y:{beginAtZero:true,grid:{color:'rgba(45,34,20,.04)'},ticks:{font:{family:'Nunito',size:9},color:'#9A8878'}}
       }
     }
