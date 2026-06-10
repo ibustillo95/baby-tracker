@@ -7,122 +7,94 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="BabyTracker">
-<link rel="icon" sizes="512x512" href="./icon.png">
+<link rel="icon" href="./icon.png">
 <link rel="apple-touch-icon" href="./icon.png">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root {
-  --cream:    #FFF8F0;
-  --peach:    #FCDAB7;
-  --apricot:  #F4A261;
-  --coral:    #E76F51;
-  --sage:     #81B29A;
-  --sage-lt:  #C8DDD4;
-  --sky:      #457B9D;
-  --sky-lt:   #BDD5E8;
-  --lavender: #C9B8D8;
-  --lav-lt:   #EAE4F2;
-  --ink:      #2D2214;
-  --muted:    #9A8878;
-  --warn:     #E9C46A;
-  --danger:   #E63946;
-  --green:    #52B788;
-  --green-lt: #D8EFE4;
-  --card-bg:  rgba(255,255,255,0.82);
-  --glass:    rgba(255,255,255,0.55);
-  --radius:   20px;
-  --radius-sm:12px;
-  --shadow:   0 4px 24px rgba(45,34,20,0.10);
+/* ══════════════════════════════════════
+   TOKENS
+══════════════════════════════════════ */
+:root{
+  --cream:#FFF8F0; --peach:#FCDAB7; --apricot:#F4A261; --coral:#E76F51;
+  --sage:#81B29A;  --sage-lt:#C8DDD4; --sky:#457B9D; --sky-lt:#BDD5E8;
+  --lav:#C9B8D8;   --lav-lt:#EAE4F2; --ink:#2D2214; --muted:#9A8878;
+  --warn:#E9C46A;  --danger:#E63946; --green:#52B788; --green-lt:#D8EFE4;
+  --card-bg:rgba(255,255,255,0.84); --radius:20px; --radius-sm:12px;
+  --shadow:0 4px 24px rgba(45,34,20,.10);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--ink)}
-body{min-height:100vh;font-family:'Nunito',sans-serif;background:var(--cream);color:var(--ink)}
-body::before{content:'';position:fixed;top:-120px;right:-120px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,var(--peach) 0%,transparent 70%);pointer-events:none;z-index:0}
-body::after{content:'';position:fixed;bottom:-100px;left:-80px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,var(--sage-lt) 0%,transparent 70%);pointer-events:none;z-index:0}
+html,body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--ink)}
+body{min-height:100vh}
+body::before{content:'';position:fixed;top:-100px;right:-100px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,var(--peach) 0%,transparent 70%);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;bottom:-80px;left:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,var(--sage-lt) 0%,transparent 70%);pointer-events:none;z-index:0}
 
-/* ── APP SHELL ── */
-#app{position:relative;z-index:1;max-width:430px;margin:0 auto;padding-bottom:80px}
+/* ══════════════════════════════════════
+   SHELL
+══════════════════════════════════════ */
+#app{position:relative;z-index:1;max-width:430px;margin:0 auto;padding-bottom:76px}
 
-/* ── HEADER ── */
-header{padding:16px 20px 8px;display:flex;justify-content:space-between;align-items:center}
+header{padding:14px 20px 6px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:40;background:rgba(255,248,240,.92);backdrop-filter:blur(14px)}
 .header-brand{display:flex;align-items:center;gap:10px}
-.header-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--apricot),var(--coral));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 10px rgba(244,162,97,0.45)}
-.header-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);letter-spacing:-0.3px}
+.header-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--apricot),var(--coral));border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 2px 10px rgba(244,162,97,.4)}
+.header-title{font-family:'Playfair Display',serif;font-size:21px;color:var(--ink);letter-spacing:-.3px;line-height:1}
 .header-title span{color:var(--apricot)}
-.header-sub{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;line-height:1;margin-top:1px}
-.hdr-actions{display:flex;gap:8px}
-.icon-btn{width:38px;height:38px;border:none;background:var(--glass);backdrop-filter:blur(10px);border-radius:12px;color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,0.8);transition:all .2s}
-.icon-btn:active{transform:scale(0.92);background:var(--peach)}
+.header-sub{font-size:9px;font-weight:800;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase}
+.icon-btn{width:36px;height:36px;border:none;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);border-radius:11px;border:1.5px solid rgba(255,255,255,.9);color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.icon-btn:active{transform:scale(.92);background:var(--peach)}
 
-/* ── BOTTOM NAV ── */
-#bottomNav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(255,248,240,0.95);backdrop-filter:blur(20px);border-top:1.5px solid rgba(255,255,255,0.9);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
-.nav-btn{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 4px 8px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);transition:color .2s}
-.nav-btn.active{color:var(--coral)}
-.nav-btn .nav-ico{font-size:20px;line-height:1}
-.nav-btn.active .nav-ico{filter:drop-shadow(0 2px 4px rgba(231,111,81,0.4))}
-
-/* ── PAGES ── */
-.page{display:none;padding:8px 16px 0;flex-direction:column;gap:14px}
+/* pages */
+.page{display:none;flex-direction:column;gap:14px;padding:10px 16px 0}
 .page.active{display:flex}
 
-/* ── CARDS ── */
-.card{background:var(--card-bg);backdrop-filter:blur(16px);border-radius:var(--radius);border:1.5px solid rgba(255,255,255,0.9);box-shadow:var(--shadow);overflow:hidden}
+/* cards */
+.card{background:var(--card-bg);backdrop-filter:blur(16px);border-radius:var(--radius);border:1.5px solid rgba(255,255,255,.9);box-shadow:var(--shadow);overflow:hidden}
+
+/* bottom nav */
+#bottomNav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(255,248,240,.95);backdrop-filter:blur(20px);border-top:1.5px solid rgba(255,255,255,.9);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:9px 4px 7px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);transition:color .2s}
+.nav-btn.active{color:var(--coral)}
+.nav-ico{font-size:19px;line-height:1}
+.nav-btn.active .nav-ico{filter:drop-shadow(0 2px 4px rgba(231,111,81,.4))}
 
 /* ══════════════════════════════════════
    PAGE 1 · TIMELINE
 ══════════════════════════════════════ */
 
-/* NEXT FEED hero */
-#heroCard{padding:20px;transition:background .6s;background:linear-gradient(135deg,rgba(255,255,255,0.85),rgba(252,218,183,0.45))}
-#heroCard.warn{background:linear-gradient(135deg,rgba(255,255,255,0.85),rgba(233,196,106,0.45))}
-#heroCard.danger{background:linear-gradient(135deg,rgba(255,255,255,0.85),rgba(230,57,70,0.15));animation:pulseBorder 1.4s ease-in-out infinite}
-@keyframes pulseBorder{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 4px rgba(230,57,70,0.18),var(--shadow)}}
-.hero-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
-.hero-lbl{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
-#heroTime{font-size:42px;font-weight:900;line-height:1;letter-spacing:-2px;color:var(--ink);transition:color .4s}
+/* Hero countdown */
+#heroCard{padding:18px 20px;transition:background .6s}
+#heroCard.warn{background:linear-gradient(135deg,rgba(255,255,255,.85),rgba(233,196,106,.4))}
+#heroCard.danger{background:linear-gradient(135deg,rgba(255,255,255,.85),rgba(230,57,70,.12));animation:pulseBorder 1.4s ease-in-out infinite}
+@keyframes pulseBorder{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 4px rgba(230,57,70,.18),var(--shadow)}}
+.hero-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.hero-lbl{font-size:9px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+#heroTime{font-size:40px;font-weight:900;line-height:1;letter-spacing:-2px;color:var(--ink);transition:color .4s}
 #heroCard.warn #heroTime{color:#B07C00}
 #heroCard.danger #heroTime{color:var(--danger)}
 .hero-right{text-align:right}
-.hero-right .hero-lbl{margin-bottom:4px}
-#heroNextAt{font-size:22px;font-weight:900;color:var(--ink)}
-#heroNextAt small{font-size:12px;font-weight:700;color:var(--muted)}
-.prog-track{height:8px;background:rgba(45,34,20,0.08);border-radius:99px;overflow:hidden}
+#heroNextAt{font-size:20px;font-weight:900;color:var(--ink)}
+#heroNextAt small{font-size:11px;font-weight:700;color:var(--muted)}
+.prog-track{height:7px;background:rgba(45,34,20,.07);border-radius:99px;overflow:hidden}
 #heroProg{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--sage),var(--sky));width:0%;transition:width 1s linear,background .6s}
 #heroCard.warn #heroProg{background:linear-gradient(90deg,var(--warn),#D4A017)}
 #heroCard.danger #heroProg{background:linear-gradient(90deg,var(--coral),var(--danger))}
-#heroLastFeed{margin-top:10px;font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:5px}
+#heroLastFeed{margin-top:9px;font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:5px}
 #heroLastFeed .dot{width:6px;height:6px;border-radius:50%;background:var(--sage);display:inline-block}
 
-/* TIMELINE */
-.tl-header{padding:14px 20px 8px;display:flex;justify-content:space-between;align-items:center}
-.tl-title{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
-.tl-date{font-size:12px;font-weight:800;color:var(--ink)}
-#tlScroll{overflow-x:auto;padding:0 16px 16px;display:flex;gap:10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-#tlScroll::-webkit-scrollbar{display:none}
+/* ── SERPENTINE DAY TIMELINE ── */
+.tl-card{padding:18px 16px}
+.tl-card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.tl-card-title{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.tl-card-date{font-size:12px;font-weight:800;color:var(--ink)}
 
-.tl-slot{flex-shrink:0;width:80px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
-.tl-bubble{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;position:relative;transition:transform .2s,box-shadow .2s}
-.tl-bubble:active{transform:scale(0.92)}
-.tl-slot.done .tl-bubble{background:var(--green-lt);border:2px solid var(--green);box-shadow:0 2px 10px rgba(82,183,136,0.25)}
-.tl-slot.next .tl-bubble{background:linear-gradient(135deg,var(--apricot),var(--coral));border:2px solid var(--coral);box-shadow:0 4px 16px rgba(231,111,81,0.40);animation:bounceNext 2s ease-in-out infinite}
-@keyframes bounceNext{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-.tl-slot.predicted .tl-bubble{background:#fff;border:2px dashed var(--peach)}
-.tl-slot.overdue .tl-bubble{background:rgba(230,57,70,0.08);border:2px solid var(--danger)}
-.tl-slot.skipped .tl-bubble{background:#f5f5f5;border:2px dashed #ddd;opacity:.6}
+/* SVG serpentine path container */
+#serpentineWrap{width:100%;position:relative}
+#serpentineSVG{width:100%;display:block;overflow:visible}
 
-.tl-badge{position:absolute;top:-3px;right:-3px;width:16px;height:16px;border-radius:50%;font-size:8px;font-weight:900;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff}
-.tl-slot.done .tl-badge{background:var(--green);color:#fff}
-.tl-slot.overdue .tl-badge{background:var(--danger);color:#fff}
-
-.tl-time{font-size:11px;font-weight:800;color:var(--ink)}
-.tl-sub{font-size:9px;font-weight:700;color:var(--muted);text-align:center;line-height:1.2}
-
-/* connector line */
-.tl-line{position:relative;padding:0 16px 0}
-.tl-line-inner{height:2px;background:linear-gradient(90deg,var(--green) var(--done-pct,0%),var(--peach) var(--done-pct,0%));border-radius:1px;margin-bottom:-8px;position:relative;z-index:0}
+/* Slot popup tooltip */
+.slot-tooltip{position:absolute;background:var(--ink);color:#fff;font-size:11px;font-weight:700;padding:6px 12px;border-radius:99px;pointer-events:none;white-space:nowrap;z-index:30;transition:opacity .2s;opacity:0}
+.slot-tooltip.visible{opacity:1}
 
 /* ══════════════════════════════════════
    PAGE 2 · REGISTER
@@ -130,181 +102,159 @@ header{padding:16px 20px 8px;display:flex;justify-content:space-between;align-it
 .reg-card{padding:20px}
 .sec-lbl{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
 
-/* Type selector */
 .type-seg{display:flex;background:var(--cream);border-radius:var(--radius-sm);border:1.5px solid var(--peach);padding:4px;gap:4px;margin-bottom:16px}
-.type-btn{flex:1;border:none;background:transparent;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:var(--muted);padding:9px 6px;border-radius:9px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
-.type-btn.active{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(45,34,20,0.10)}
+.type-btn{flex:1;border:none;background:transparent;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:var(--muted);padding:9px 4px;border-radius:9px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:4px}
+.type-btn.active{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(45,34,20,.10)}
 
-/* Formula fields */
-#fieldsFormula{}
+/* oz stepper */
 .oz-stepper{display:flex;align-items:center;justify-content:space-between;background:var(--cream);border-radius:var(--radius-sm);border:1.5px solid var(--peach);padding:10px 14px;margin-bottom:12px}
-.step-btn{width:40px;height:40px;border:none;border-radius:10px;background:#fff;color:var(--ink);font-size:22px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(45,34,20,0.10);display:flex;align-items:center;justify-content:center;transition:transform .15s}
-.step-btn:active{transform:scale(0.88)}
+.step-btn{width:40px;height:40px;border:none;border-radius:10px;background:#fff;color:var(--ink);font-size:22px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(45,34,20,.10);display:flex;align-items:center;justify-content:center;transition:transform .15s;flex-shrink:0}
+.step-btn:active{transform:scale(.88)}
 .oz-display{display:flex;flex-direction:column;align-items:center}
-#inputOzDisplay{font-size:44px;font-weight:900;color:var(--sky);line-height:1;letter-spacing:-2px}
+.oz-big{font-size:44px;font-weight:900;color:var(--sky);line-height:1;letter-spacing:-2px}
 .oz-unit{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
-#inputOz{display:none}
+
 .quick-pills{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
 .quick-pill{border:none;background:var(--peach);color:var(--ink);font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;border-radius:99px;padding:5px 14px;cursor:pointer;transition:all .15s}
 .quick-pill.active,.quick-pill:active{background:var(--apricot);color:#fff}
 
-/* Breast fields */
-#fieldsBreast{display:none}
-.breast-row{display:flex;gap:10px;margin-bottom:12px}
-.breast-side{flex:1;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px}
-.breast-side.active-side{border-color:var(--lavender);background:var(--lav-lt)}
-.breast-ico{font-size:22px}
-.breast-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
-.breast-min{font-size:28px;font-weight:900;color:var(--sky);line-height:1}
-.breast-min-lbl{font-size:9px;font-weight:700;color:var(--muted)}
-.breast-steppers{display:flex;gap:6px}
-.bs-btn{width:32px;height:32px;border:none;border-radius:9px;background:#fff;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(45,34,20,0.08);transition:transform .15s}
-.bs-btn:active{transform:scale(0.88)}
+/* frozen info banner */
+.frozen-banner{background:var(--sky-lt);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:var(--sky)}
 
-/* Time row */
-.time-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.time-input-wrap{flex:1}
-#inputHora{width:100%;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:10px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--ink);outline:none;transition:border-color .2s}
-#inputHora:focus{border-color:var(--apricot)}
-.now-btn{border:none;background:var(--sage-lt);color:var(--sage);font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:8px 12px;border-radius:var(--radius-sm);cursor:pointer;white-space:nowrap;transition:all .15s}
+/* breast stopwatch */
+.breast-side-sel{flex:1;border:none;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:9px 4px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;color:var(--muted);cursor:pointer;transition:all .2s;text-align:center}
+.breast-side-sel.active{background:var(--lav-lt);border-color:var(--lav);color:#7B5EA7}
+#breastStopwatchCard{display:flex;gap:10px}
+.bsw-card{flex:1;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius);padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .3s}
+.bsw-card.running{background:var(--lav-lt);border-color:var(--lav);animation:bswPulse 1.5s ease-in-out infinite}
+.bsw-card.stopped{background:var(--green-lt);border-color:var(--green)}
+@keyframes bswPulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 4px rgba(201,184,216,.3)}}
+.bsw-ico{font-size:22px;line-height:1}
+.bsw-lbl{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.bsw-timer{font-size:30px;font-weight:900;color:var(--ink);letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1}
+.bsw-card.running .bsw-timer{color:#7B5EA7}
+.bsw-card.stopped .bsw-timer{color:var(--green)}
+.bsw-recorded{font-size:9px;font-weight:700;color:var(--muted);min-height:13px}
+.bsw-btn{width:100%;border:none;border-radius:var(--radius-sm);padding:9px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:900;cursor:pointer;transition:all .2s;background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(45,34,20,.10);margin-top:2px}
+.bsw-card.running .bsw-btn{background:var(--danger);color:#fff}
+.bsw-card.stopped .bsw-btn{background:var(--sage-lt);color:var(--sage)}
+.bsw-chips{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.bsw-chip{display:inline-flex;align-items:center;gap:3px;background:var(--lav-lt);color:#7B5EA7;font-size:11px;font-weight:800;padding:4px 11px;border-radius:99px;border:1.5px solid var(--lav)}
+.bsw-chip-total{background:var(--green-lt);color:var(--green);border-color:var(--green)}
+
+/* time row */
+.time-row{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.time-row input[type=datetime-local]{flex:1;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:10px 12px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--ink);outline:none}
+.time-row input:focus{border-color:var(--apricot)}
+.now-btn{border:none;background:var(--sage-lt);color:var(--sage);font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:8px 12px;border-radius:var(--radius-sm);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
 .now-btn:active{background:var(--sage);color:#fff}
 
-/* Save btn */
-#btnGuardar{width:100%;background:linear-gradient(135deg,var(--apricot),var(--coral));color:#fff;border:none;border-radius:var(--radius-sm);padding:15px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 4px 18px rgba(231,111,81,0.40);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
-#btnGuardar:active{transform:scale(0.97)}
+/* save button */
+#btnGuardar{width:100%;background:linear-gradient(135deg,var(--apricot),var(--coral));color:#fff;border:none;border-radius:var(--radius-sm);padding:15px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 4px 18px rgba(231,111,81,.38);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+#btnGuardar:active{transform:scale(.97)}
 #btnGuardar:disabled{opacity:.7}
-#btnGuardar.saved{background:linear-gradient(135deg,var(--sage),#5A9E84);box-shadow:0 4px 18px rgba(129,178,154,0.40)}
+#btnGuardar.saved{background:linear-gradient(135deg,var(--sage),#5A9E84);box-shadow:0 4px 18px rgba(129,178,154,.38)}
 
-/* Diaper card */
-.diaper-card{padding:20px}
-.diaper-row{display:flex;gap:10px}
-.diaper-btn{flex:1;border:none;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:14px 8px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s}
-.diaper-btn span{font-size:24px}
-.diaper-btn:active,.diaper-btn.saving{background:var(--peach);color:var(--ink);border-color:var(--apricot);transform:scale(0.96)}
+/* diaper */
+.diaper-card{padding:18px 20px}
+.diaper-row{display:flex;gap:8px}
+.diaper-btn{flex:1;border:none;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:13px 6px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s}
+.diaper-btn span{font-size:22px}
+.diaper-btn:active{background:var(--peach);color:var(--ink);border-color:var(--apricot);transform:scale(.96)}
 
-/* History */
-.section-label{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);padding:14px 20px 10px;display:flex;justify-content:space-between;align-items:center}
-.section-badge{background:var(--peach);color:var(--apricot);font-size:10px;font-weight:900;padding:2px 9px;border-radius:99px}
-#listaHistorial{list-style:none;max-height:260px;overflow-y:auto;scrollbar-width:none}
+/* history */
+.sec-header{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);padding:14px 20px 10px;display:flex;justify-content:space-between;align-items:center}
+.sec-badge{background:var(--peach);color:var(--apricot);font-size:10px;font-weight:900;padding:2px 9px;border-radius:99px}
+#listaHistorial{list-style:none;max-height:280px;overflow-y:auto;scrollbar-width:none}
 #listaHistorial::-webkit-scrollbar{display:none}
-.hist-item{display:flex;align-items:center;padding:10px 20px;gap:12px;border-bottom:1px solid rgba(45,34,20,0.05);animation:slideIn .25s ease}
-@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.hist-item{display:flex;align-items:center;padding:10px 20px;gap:12px;border-bottom:1px solid rgba(45,34,20,.05);animation:slideIn .25s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 .hist-item:last-child{border-bottom:none}
-.hist-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.hist-icon.ca{background:var(--sky-lt);color:var(--sky)}
-.hist-icon.cb{background:var(--sage-lt);color:var(--sage)}
-.hist-icon.cc{background:var(--peach);color:var(--apricot)}
-.hist-icon.cd{background:var(--lav-lt);color:#9B72CF}
+.hist-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.ca{background:var(--sky-lt);color:var(--sky)}.cb{background:var(--sage-lt);color:var(--sage)}
+.cc{background:var(--peach);color:var(--apricot)}.cd{background:var(--lav-lt);color:#9B72CF}
 .hist-meta{flex:1;min-width:0}
 .hist-time{font-size:14px;font-weight:800;color:var(--ink)}
 .hist-date{font-size:11px;color:var(--muted);font-weight:600}
-.hist-val{font-size:18px;font-weight:900;color:var(--sky);white-space:nowrap}
+.hist-val{font-size:17px;font-weight:900;color:var(--sky);white-space:nowrap}
 .hist-val span{font-size:11px;font-weight:700;color:var(--muted)}
-.hist-del{border:none;background:none;color:#ddd;font-size:14px;cursor:pointer;padding:4px 6px;border-radius:8px;transition:all .15s}
-.hist-del:active{color:var(--danger);background:rgba(230,57,70,0.08)}
-.hist-empty{padding:28px 20px;text-align:center;color:var(--muted);font-size:14px;font-weight:600}
-
-/* ══════════════════════════════════════
-   BREAST STOPWATCH
-══════════════════════════════════════ */
-.breast-side-sel{flex:1;border:none;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:9px 6px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:var(--muted);cursor:pointer;transition:all .2s}
-.breast-side-sel.active{background:var(--lav-lt);border-color:var(--lavender);color:#7B5EA7}
-#breastStopwatchCard{display:flex;gap:10px}
-.bsw-side-card{flex:1;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius);padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;transition:border-color .3s,background .3s}
-.bsw-side-card.running{background:var(--lav-lt);border-color:var(--lavender);animation:bswPulse 1.5s ease-in-out infinite}
-.bsw-side-card.stopped{background:var(--green-lt);border-color:var(--green)}
-@keyframes bswPulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 4px rgba(201,184,216,0.35)}}
-.bsw-ico{font-size:24px;line-height:1}
-.bsw-side-lbl{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-.bsw-timer{font-size:32px;font-weight:900;color:var(--ink);letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1}
-.bsw-side-card.running .bsw-timer{color:#7B5EA7}
-.bsw-side-card.stopped .bsw-timer{color:var(--green)}
-.bsw-recorded{font-size:10px;font-weight:700;color:var(--muted);min-height:14px}
-.bsw-start-btn{width:100%;border:none;border-radius:var(--radius-sm);padding:10px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;cursor:pointer;transition:all .2s;background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(45,34,20,0.10)}
-.bsw-side-card.running .bsw-start-btn{background:var(--danger);color:#fff;box-shadow:0 2px 10px rgba(230,57,70,0.35)}
-.bsw-side-card.stopped .bsw-start-btn{background:var(--sage-lt);color:var(--sage)}
-.bsw-chip{display:inline-flex;align-items:center;gap:4px;background:var(--lav-lt);color:#7B5EA7;font-size:12px;font-weight:800;padding:5px 12px;border-radius:99px;border:1.5px solid var(--lavender)}
-.bsw-chip-total{background:var(--green-lt);color:var(--green);border-color:var(--green)}
+.hist-del{border:none;background:none;color:#ddd;font-size:13px;cursor:pointer;padding:4px 6px;border-radius:8px;transition:all .15s}
+.hist-del:active{color:var(--danger);background:rgba(230,57,70,.08)}
+.hist-empty{padding:26px 20px;text-align:center;color:var(--muted);font-size:13px;font-weight:600}
 
 /* ══════════════════════════════════════
    PAGE 3 · STATS
 ══════════════════════════════════════ */
-/* Stat grid */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.stat-card{background:var(--card-bg);backdrop-filter:blur(16px);border-radius:var(--radius);border:1.5px solid rgba(255,255,255,0.9);box-shadow:var(--shadow);padding:16px}
-.stat-ico{font-size:22px;margin-bottom:8px}
-.stat-lbl{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
-.stat-val{font-size:28px;font-weight:900;color:var(--ink);line-height:1;letter-spacing:-1px}
-.stat-val small{font-size:12px;font-weight:700;color:var(--muted)}
+.stat-card{background:var(--card-bg);backdrop-filter:blur(16px);border-radius:var(--radius);border:1.5px solid rgba(255,255,255,.9);box-shadow:var(--shadow);padding:15px}
+.stat-ico{font-size:20px;margin-bottom:7px}
+.stat-lbl{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.stat-val{font-size:26px;font-weight:900;color:var(--ink);line-height:1;letter-spacing:-1px}
+.stat-val small{font-size:11px;font-weight:700;color:var(--muted)}
 .stat-trend{font-size:10px;font-weight:800;margin-top:4px}
-.stat-trend.up{color:var(--green)}
-.stat-trend.down{color:var(--danger)}
-.stat-trend.flat{color:var(--muted)}
+.stat-trend.up{color:var(--green)}.stat-trend.down{color:var(--danger)}.stat-trend.flat{color:var(--muted)}
 
-/* Compare card */
 .compare-card{padding:18px}
 .cmp-title{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
-.cmp-rows{display:flex;flex-direction:column;gap:10px}
-.cmp-row{display:flex;align-items:center;gap:10px}
-.cmp-row-lbl{font-size:12px;font-weight:800;color:var(--muted);width:64px;flex-shrink:0}
-.cmp-bar-wrap{flex:1;height:8px;background:rgba(45,34,20,0.07);border-radius:99px;overflow:hidden}
+.cmp-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cmp-row:last-child{margin-bottom:0}
+.cmp-row-lbl{font-size:12px;font-weight:800;color:var(--muted);width:62px;flex-shrink:0}
+.cmp-bar-wrap{flex:1;height:7px;background:rgba(45,34,20,.07);border-radius:99px;overflow:hidden}
 .cmp-bar{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.34,1.56,.64,1)}
 .cmp-bar.better{background:linear-gradient(90deg,var(--sage),var(--green))}
 .cmp-bar.worse{background:linear-gradient(90deg,var(--warn),var(--coral))}
 .cmp-bar.same{background:var(--sky-lt)}
-.cmp-num{font-size:12px;font-weight:900;color:var(--ink);width:50px;text-align:right;flex-shrink:0}
-.cmp-delta{font-size:10px;font-weight:800;margin-left:4px}
-.cmp-delta.pos{color:var(--green)}
-.cmp-delta.neg{color:var(--danger)}
+.cmp-num{font-size:12px;font-weight:900;color:var(--ink);width:52px;text-align:right;flex-shrink:0}
+.cmp-delta{font-size:10px;font-weight:800}
+.cmp-delta.pos{color:var(--green)}.cmp-delta.neg{color:var(--danger)}
 
-/* Chart card */
 .chart-card{padding:16px}
-.chart-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.chart-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .chart-title{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
-.chart-toggle{display:flex;gap:5px;background:var(--cream);border-radius:var(--radius-sm);border:1.5px solid var(--peach);padding:3px}
-.ctgl-btn{flex:1;border:none;background:transparent;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;color:var(--muted);padding:7px 8px;border-radius:9px;cursor:pointer;transition:all .2s;white-space:nowrap}
-.ctgl-btn.active{background:linear-gradient(135deg,var(--apricot),var(--coral));color:#fff;box-shadow:0 2px 10px rgba(231,111,81,0.30)}
-.filter-row{display:flex;gap:6px;margin-bottom:12px}
-.filter-date{background:var(--cream);border:1.5px solid var(--peach);border-radius:8px;padding:6px 8px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;color:var(--ink);outline:none;min-width:0;flex:1}
-.filter-btn{border:none;background:var(--apricot);color:#fff;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;padding:6px 12px;border-radius:8px;cursor:pointer;transition:all .15s;flex-shrink:0}
-.filter-btn:active{background:var(--coral)}
-#graficoMain{max-height:180px}
+.chart-toggle{display:flex;gap:4px;background:var(--cream);border-radius:var(--radius-sm);border:1.5px solid var(--peach);padding:3px}
+.ctgl{flex:1;border:none;background:transparent;font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:var(--muted);padding:6px 6px;border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.ctgl.active{background:linear-gradient(135deg,var(--apricot),var(--coral));color:#fff;box-shadow:0 2px 8px rgba(231,111,81,.3)}
+.filter-row{display:flex;gap:6px;margin-bottom:10px}
+.filter-date{background:var(--cream);border:1.5px solid var(--peach);border-radius:8px;padding:6px 7px;font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;color:var(--ink);outline:none;flex:1;min-width:0}
+.filter-go{border:none;background:var(--apricot);color:#fff;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;padding:6px 11px;border-radius:8px;cursor:pointer;flex-shrink:0}
+#graficoMain{max-height:170px}
 
 /* ══════════════════════════════════════
-   MODALS
+   MODALS (bottom sheets)
 ══════════════════════════════════════ */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(45,34,20,0.45);backdrop-filter:blur(6px);z-index:100;align-items:flex-end;justify-content:center}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(45,34,20,.45);backdrop-filter:blur(6px);z-index:100;align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal-sheet{background:#fff;border-radius:28px 28px 0 0;width:100%;max-width:430px;padding:28px 24px calc(28px + env(safe-area-inset-bottom));animation:sheetUp .3s cubic-bezier(0.34,1.56,0.64,1)}
+.modal-sheet{background:#fff;border-radius:28px 28px 0 0;width:100%;max-width:430px;padding:24px 22px calc(24px + env(safe-area-inset-bottom));animation:sheetUp .28s cubic-bezier(.34,1.56,.64,1)}
 @keyframes sheetUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-drag{width:40px;height:4px;border-radius:2px;background:#e0e0e0;margin:0 auto 20px}
-.modal-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--ink);margin-bottom:6px}
-.modal-sub{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:18px}
-.modal-lbl{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:block}
-.modal-input{width:100%;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:12px;font-family:'Nunito',sans-serif;font-size:28px;font-weight:900;text-align:center;color:var(--ink);outline:none;margin-bottom:18px;transition:border-color .2s}
-.modal-input:focus{border-color:var(--apricot)}
-.modal-btns{display:flex;gap:10px}
-.modal-cancel{flex:1;border:none;background:#F2EDE8;color:var(--muted);font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;padding:13px;border-radius:var(--radius-sm);cursor:pointer}
-.modal-ok{flex:1;border:none;background:linear-gradient(135deg,var(--apricot),var(--coral));color:#fff;font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;padding:13px;border-radius:var(--radius-sm);cursor:pointer;box-shadow:0 4px 14px rgba(231,111,81,0.35)}
+.modal-drag{width:38px;height:4px;border-radius:2px;background:#e2ddd8;margin:0 auto 18px}
+.modal-title{font-family:'Playfair Display',serif;font-size:19px;color:var(--ink);margin-bottom:4px}
+.modal-sub{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:16px}
+.modal-lbl{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:block}
+.modal-inp{width:100%;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:11px;font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;text-align:center;color:var(--ink);outline:none;margin-bottom:16px}
+.modal-inp:focus{border-color:var(--apricot)}
+.modal-btns{display:flex;gap:8px}
+.modal-cancel{flex:1;border:none;background:#F2EDE8;color:var(--muted);font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;padding:13px;border-radius:var(--radius-sm);cursor:pointer}
+.modal-ok{flex:1;border:none;background:linear-gradient(135deg,var(--apricot),var(--coral));color:#fff;font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;padding:13px;border-radius:var(--radius-sm);cursor:pointer;box-shadow:0 4px 12px rgba(231,111,81,.32)}
 
-/* Confirm slot modal fields */
-.cslot-time-display{font-size:36px;font-weight:900;color:var(--ink);text-align:center;margin-bottom:4px;letter-spacing:-1px}
-.cslot-meta{font-size:12px;font-weight:700;color:var(--muted);text-align:center;margin-bottom:16px}
-#cslotNewTime{width:100%;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:10px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--ink);outline:none;text-align:center;margin-bottom:16px}
-.cslot-shift-lbl{font-size:11px;font-weight:800;color:var(--muted);text-align:center;margin-bottom:8px;letter-spacing:.5px}
-.cslot-shift-pills{display:flex;gap:6px;margin-bottom:16px;justify-content:center}
-.shift-pill{border:none;background:var(--peach);color:var(--ink);font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;border-radius:99px;padding:5px 12px;cursor:pointer;transition:all .15s}
-.shift-pill:active{background:var(--apricot);color:#fff}
+/* slot confirm modal */
+.slot-time-big{font-size:34px;font-weight:900;color:var(--ink);text-align:center;letter-spacing:-1px;margin-bottom:3px}
+.slot-meta-txt{font-size:12px;font-weight:700;color:var(--muted);text-align:center;margin-bottom:14px}
+.shift-row{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
+.shift-pill{border:none;background:var(--peach);color:var(--ink);font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;border-radius:99px;padding:5px 11px;cursor:pointer;transition:all .15s}
+.shift-pill.active{background:var(--apricot);color:#fff}
+
+/* diaper confirm */
+.diaper-ico-big{font-size:40px;text-align:center;margin-bottom:6px}
 
 /* ── TOAST ── */
-#toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:13px;font-weight:700;padding:10px 22px;border-radius:99px;z-index:200;transition:transform .35s cubic-bezier(0.34,1.56,0.64,1),opacity .3s;opacity:0;white-space:nowrap;pointer-events:none}
+#toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--ink);color:#fff;font-size:12px;font-weight:700;padding:9px 20px;border-radius:99px;z-index:200;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .25s;opacity:0;white-space:nowrap;pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 </style>
 </head>
 <body>
 <div id="app">
 
-<!-- HEADER -->
+<!-- ─── HEADER ─── -->
 <header>
   <div class="header-brand">
     <div class="header-icon">🍼</div>
@@ -313,15 +263,15 @@ header{padding:16px 20px 8px;display:flex;justify-content:space-between;align-it
       <div class="header-sub">Ethan</div>
     </div>
   </div>
-  <div class="hdr-actions">
-    <button class="icon-btn" onclick="abrirSettings()" title="Ajustes">⚙️</button>
-  </div>
+  <button class="icon-btn" onclick="abrirSettings()">⚙️</button>
 </header>
 
-<!-- ══ PAGE 1: TIMELINE ══ -->
+<!-- ══════════════════════════════════════
+     PAGE 1 · TIMELINE
+══════════════════════════════════════ -->
 <div id="pageTimeline" class="page active">
 
-  <!-- Hero: next feed countdown -->
+  <!-- Hero countdown -->
   <div id="heroCard" class="card">
     <div class="hero-row">
       <div>
@@ -337,45 +287,48 @@ header{padding:16px 20px 8px;display:flex;justify-content:space-between;align-it
     <div id="heroLastFeed"><span class="dot"></span><span id="heroLastText">Cargando…</span></div>
   </div>
 
-  <!-- Timeline of day -->
-  <div class="card" style="overflow:hidden">
-    <div class="tl-header">
-      <span class="tl-title">Línea de tiempo · hoy</span>
-      <span class="tl-date" id="tlDateLabel">—</span>
+  <!-- Serpentine timeline -->
+  <div class="card tl-card">
+    <div class="tl-card-hdr">
+      <span class="tl-card-title">Línea del día</span>
+      <span class="tl-card-date" id="tlDateLabel">—</span>
     </div>
-    <div class="tl-line"><div class="tl-line-inner" id="tlLine"></div></div>
-    <div id="tlScroll">
-      <div style="color:var(--muted);font-size:12px;font-weight:700;padding:20px 0;text-align:center;width:100%">Cargando…</div>
+    <div id="serpentineWrap">
+      <svg id="serpentineSVG" viewBox="0 0 360 100" preserveAspectRatio="xMidYMid meet">
+        <text x="180" y="55" text-anchor="middle" font-family="Nunito" font-size="11" fill="#9A8878" font-weight="700">Cargando…</text>
+      </svg>
+      <div id="slotTooltip" class="slot-tooltip"></div>
     </div>
   </div>
 
 </div>
 
-<!-- ══ PAGE 2: REGISTER ══ -->
+<!-- ══════════════════════════════════════
+     PAGE 2 · REGISTER
+══════════════════════════════════════ -->
 <div id="pageRegister" class="page">
 
-  <!-- Feed register -->
+  <!-- Feed register card -->
   <div class="card reg-card">
     <div class="sec-lbl">Registrar toma</div>
 
-    <!-- Type toggle -->
     <div class="type-seg">
-      <button class="type-btn active" data-type="formula" id="typeBtnFormula">🍼 Fórmula</button>
-      <button class="type-btn" data-type="breast" id="typeBtnBreast">🤱 Pecho</button>
-      <button class="type-btn" data-type="frozen" id="typeBtnFrozen">🧊 Congelada</button>
+      <button class="type-btn active" data-type="formula">🍼 Fórmula</button>
+      <button class="type-btn" data-type="breast">🤱 Pecho</button>
+      <button class="type-btn" data-type="frozen">🧊 Congelada</button>
     </div>
 
-    <!-- Formula fields -->
+    <!-- Formula -->
     <div id="fieldsFormula">
       <div class="oz-stepper">
         <button class="step-btn" id="btnMinus">−</button>
         <div class="oz-display">
-          <div id="inputOzDisplay">4.0</div>
+          <div class="oz-big" id="inputOzDisplay">4.0</div>
           <div class="oz-unit">Onzas (oz)</div>
         </div>
         <button class="step-btn" id="btnPlus">+</button>
       </div>
-      <input type="number" id="inputOz" value="4.0" step="0.5">
+      <input type="number" id="inputOz" value="4.0" step="0.5" style="display:none">
       <div class="quick-pills" id="quickPills">
         <button class="quick-pill" data-oz="2.0">2 oz</button>
         <button class="quick-pill" data-oz="3.0">3 oz</button>
@@ -385,105 +338,94 @@ header{padding:16px 20px 8px;display:flex;justify-content:space-between;align-it
       </div>
     </div>
 
-    <!-- Breast fields -->
+    <!-- Breast -->
     <div id="fieldsBreast" style="display:none">
-
-      <!-- Side selector -->
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <button class="breast-side-sel active" data-side="left"  id="selLeft">← Izquierdo</button>
-        <button class="breast-side-sel"        data-side="right" id="selRight">Derecho →</button>
-        <button class="breast-side-sel"        data-side="both"  id="selBoth">↔ Ambos</button>
+      <div style="display:flex;gap:7px;margin-bottom:13px">
+        <button class="breast-side-sel active" data-side="left">← Izquierdo</button>
+        <button class="breast-side-sel" data-side="right">Derecho →</button>
+        <button class="breast-side-sel" data-side="both">↔ Ambos</button>
       </div>
-
-      <!-- Stopwatch display -->
       <div id="breastStopwatchCard">
-        <!-- Left side -->
-        <div class="bsw-side-card" id="bswLeft">
+        <div class="bsw-card" id="bswLeft">
           <div class="bsw-ico">←🤱</div>
-          <div class="bsw-side-lbl">Izquierdo</div>
+          <div class="bsw-lbl">Izquierdo</div>
           <div class="bsw-timer" id="bswLeftTime">00:00</div>
-          <div class="bsw-recorded" id="bswLeftRecorded"></div>
-          <button class="bsw-start-btn" id="bswBtnLeft" data-side="left">▶ Iniciar</button>
+          <div class="bsw-recorded" id="bswLeftRec"></div>
+          <button class="bsw-btn" id="bswBtnLeft">▶ Iniciar</button>
         </div>
-        <!-- Right side -->
-        <div class="bsw-side-card" id="bswRight" style="display:none">
+        <div class="bsw-card" id="bswRight" style="display:none">
           <div class="bsw-ico">🤱→</div>
-          <div class="bsw-side-lbl">Derecho</div>
+          <div class="bsw-lbl">Derecho</div>
           <div class="bsw-timer" id="bswRightTime">00:00</div>
-          <div class="bsw-recorded" id="bswRightRecorded"></div>
-          <button class="bsw-start-btn" id="bswBtnRight" data-side="right">▶ Iniciar</button>
+          <div class="bsw-recorded" id="bswRightRec"></div>
+          <button class="bsw-btn" id="bswBtnRight">▶ Iniciar</button>
         </div>
       </div>
-
-      <!-- Summary chips -->
-      <div id="bswSummary" style="display:none;gap:8px;margin-top:12px;flex-wrap:wrap">
-        <div class="bsw-chip" id="bswChipLeft" style="display:none">← <span id="bswChipLeftVal">0</span> min</div>
-        <div class="bsw-chip" id="bswChipRight" style="display:none">→ <span id="bswChipRightVal">0</span> min</div>
-        <div class="bsw-chip bsw-chip-total" id="bswChipTotal" style="display:none">Total: <span id="bswChipTotalVal">0</span> min</div>
+      <div class="bsw-chips" id="bswChips" style="display:none">
+        <div class="bsw-chip" id="chipL" style="display:none">← <span id="chipLv">0</span> min</div>
+        <div class="bsw-chip" id="chipR" style="display:none">→ <span id="chipRv">0</span> min</div>
+        <div class="bsw-chip bsw-chip-total" id="chipT" style="display:none">Total: <span id="chipTv">0</span> min</div>
       </div>
-
     </div>
 
-    <!-- Frozen breast milk fields -->
+    <!-- Frozen -->
     <div id="fieldsFrozen" style="display:none">
-      <div style="background:var(--sky-lt);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
-        <span style="font-size:18px">🧊→♨️</span>
-        <span style="font-size:11px;font-weight:800;color:var(--sky)">Leche materna descongelada (baño maría)</span>
-      </div>
+      <div class="frozen-banner"><span>🧊→♨️</span>Leche materna descongelada · baño maría</div>
       <div class="oz-stepper">
-        <button class="step-btn" id="btnMinusFrozen">−</button>
+        <button class="step-btn" id="btnMinusF">−</button>
         <div class="oz-display">
-          <div id="inputOzFrozenDisplay">3.0</div>
+          <div class="oz-big" id="inputOzFDisplay">3.0</div>
           <div class="oz-unit">Onzas (oz)</div>
         </div>
-        <button class="step-btn" id="btnPlusFrozen">+</button>
+        <button class="step-btn" id="btnPlusF">+</button>
       </div>
-      <input type="number" id="inputOzFrozen" value="3.0" step="0.5" style="display:none">
+      <input type="number" id="inputOzF" value="3.0" step="0.5" style="display:none">
       <div class="quick-pills">
-        <button class="quick-pill frozen-pill" data-oz="1.5">1.5 oz</button>
-        <button class="quick-pill frozen-pill" data-oz="2.0">2 oz</button>
-        <button class="quick-pill frozen-pill active" data-oz="3.0">3 oz</button>
-        <button class="quick-pill frozen-pill" data-oz="4.0">4 oz</button>
-        <button class="quick-pill frozen-pill" data-oz="5.0">5 oz</button>
+        <button class="quick-pill fz-pill" data-oz="1.5">1.5 oz</button>
+        <button class="quick-pill fz-pill" data-oz="2.0">2 oz</button>
+        <button class="quick-pill fz-pill active" data-oz="3.0">3 oz</button>
+        <button class="quick-pill fz-pill" data-oz="4.0">4 oz</button>
+        <button class="quick-pill fz-pill" data-oz="5.0">5 oz</button>
       </div>
     </div>
-      <div class="time-input-wrap">
-        <input type="datetime-local" id="inputHora">
-      </div>
+
+    <div class="time-row">
+      <input type="datetime-local" id="inputHora">
       <button class="now-btn" id="btnAhora">Ahora</button>
     </div>
 
     <button id="btnGuardar">
-      <span id="btnGuardarIcon">🍼</span>
-      <span id="btnGuardarLabel">Guardar toma</span>
+      <span id="bgiIco">🍼</span>
+      <span id="bgiLbl">Guardar toma</span>
     </button>
   </div>
 
-  <!-- Diaper log -->
+  <!-- Diaper card -->
   <div class="card diaper-card">
     <div class="sec-lbl" style="margin-bottom:12px">Registrar pañal</div>
     <div class="diaper-row">
-      <button class="diaper-btn" id="diaperWet"   onclick="confirmarPanal('wet')"><span>💧</span>Mojado</button>
-      <button class="diaper-btn" id="diaperDirty" onclick="confirmarPanal('dirty')"><span>💩</span>Sucio</button>
-      <button class="diaper-btn" id="diaperBoth"  onclick="confirmarPanal('both')"><span>💧💩</span>Ambos</button>
+      <button class="diaper-btn" onclick="confirmarPanal('wet')"><span>💧</span>Mojado</button>
+      <button class="diaper-btn" onclick="confirmarPanal('dirty')"><span>💩</span>Sucio</button>
+      <button class="diaper-btn" onclick="confirmarPanal('both')"><span>💧💩</span>Ambos</button>
     </div>
   </div>
 
   <!-- History -->
   <div class="card" style="overflow:hidden">
-    <div class="section-label">
+    <div class="sec-header">
       <span>Historial reciente</span>
-      <span class="section-badge" id="histBadge">—</span>
+      <span class="sec-badge" id="histBadge">—</span>
     </div>
     <ul id="listaHistorial"><li class="hist-empty">Cargando…</li></ul>
   </div>
 
 </div>
 
-<!-- ══ PAGE 3: STATS ══ -->
+<!-- ══════════════════════════════════════
+     PAGE 3 · STATS
+══════════════════════════════════════ -->
 <div id="pageStats" class="page">
 
-  <!-- 4 stat tiles -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-ico">🍼</div>
@@ -494,14 +436,14 @@ header{padding:16px 20px 8px;display:flex;justify-content:space-between;align-it
     <div class="stat-card">
       <div class="stat-ico">📊</div>
       <div class="stat-lbl">Promedio diario</div>
-      <div class="stat-val" id="statPromTomas">— <small>tomas</small></div>
-      <div class="stat-trend flat" id="statPromSub">últimos 7 días</div>
+      <div class="stat-val" id="statProm">— <small>tomas</small></div>
+      <div class="stat-trend flat">últimos 7 días</div>
     </div>
     <div class="stat-card">
       <div class="stat-ico">💧</div>
       <div class="stat-lbl">Pañales hoy</div>
-      <div class="stat-val" id="statPanalesHoy">—</div>
-      <div class="stat-trend flat" id="statPanalesTrend">vs ayer</div>
+      <div class="stat-val" id="statPanHoy">—</div>
+      <div class="stat-trend flat" id="statPanTrend">vs ayer</div>
     </div>
     <div class="stat-card">
       <div class="stat-ico">🥛</div>
@@ -511,27 +453,23 @@ header{padding:16px 20px 8px;display:flex;justify-content:space-between;align-it
     </div>
   </div>
 
-  <!-- Comparativa -->
   <div class="card compare-card">
     <div class="cmp-title">Comparativa de consumo (oz)</div>
-    <div class="cmp-rows" id="cmpRows">
-      <div style="color:var(--muted);font-size:12px;font-weight:700;padding:10px 0">Cargando…</div>
-    </div>
+    <div id="cmpRows"><div class="hist-empty">Cargando…</div></div>
   </div>
 
-  <!-- Chart -->
   <div class="card chart-card">
     <div class="chart-hdr">
       <div class="chart-title" id="chartTitle">Consumo acumulado</div>
       <div class="chart-toggle">
-        <button class="ctgl-btn active" data-mode="acumulado">📈 Global</button>
-        <button class="ctgl-btn" data-mode="portoma">🍼 Por toma</button>
+        <button class="ctgl active" data-mode="acumulado">📈 Global</button>
+        <button class="ctgl" data-mode="portoma">🍼 Por toma</button>
       </div>
     </div>
     <div class="filter-row">
       <input type="date" class="filter-date" id="dateFilterStart">
       <input type="date" class="filter-date" id="dateFilterEnd">
-      <button class="filter-btn" id="btnAplicarFiltros">↻</button>
+      <button class="filter-go" id="btnFiltrar">↻</button>
     </div>
     <canvas id="graficoMain"></canvas>
   </div>
@@ -540,7 +478,7 @@ header{padding:16px 20px 8px;display:flex;justify-content:space-between;align-it
 
 </div><!-- /app -->
 
-<!-- BOTTOM NAV -->
+<!-- ── BOTTOM NAV ── -->
 <nav id="bottomNav">
   <button class="nav-btn active" data-page="pageTimeline" onclick="navTo(this)">
     <span class="nav-ico">⏱️</span>Timeline
@@ -553,14 +491,14 @@ header{padding:16px 20px 8px;display:flex;justify-content:space-between;align-it
   </button>
 </nav>
 
-<!-- SETTINGS MODAL -->
+<!-- ── SETTINGS MODAL ── -->
 <div id="settingsModal" class="modal-overlay">
   <div class="modal-sheet">
     <div class="modal-drag"></div>
     <div class="modal-title">Configuración ⚙️</div>
-    <div class="modal-sub">Ajustes del tracker de Ethan</div>
-    <label class="modal-lbl" for="inputLimite">Minutos entre tomas</label>
-    <input type="number" class="modal-input" id="inputLimite" value="150">
+    <div class="modal-sub">Ajustes de BabyTracker · Ethan</div>
+    <label class="modal-lbl">Minutos entre tomas</label>
+    <input type="number" class="modal-inp" id="inputLimite" value="150">
     <div class="modal-btns">
       <button class="modal-cancel" onclick="cerrarSettings()">Cancelar</button>
       <button class="modal-ok" id="btnGuardarSettings">Guardar</button>
@@ -568,20 +506,20 @@ header{padding:16px 20px 8px;display:flex;justify-content:space-between;align-it
   </div>
 </div>
 
-<!-- CONFIRM SLOT MODAL -->
+<!-- ── SLOT CONFIRM MODAL ── -->
 <div id="slotModal" class="modal-overlay">
   <div class="modal-sheet">
     <div class="modal-drag"></div>
     <div class="modal-title" id="slotModalTitle">Confirmar toma</div>
-    <div class="cslot-time-display" id="slotTimeDisplay">--:--</div>
-    <div class="cslot-meta" id="slotMeta">Toma predicha</div>
-    <label class="modal-lbl">¿A qué hora se realizó?</label>
-    <input type="datetime-local" id="cslotNewTime" style="width:100%;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:10px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--ink);outline:none;margin-bottom:16px">
-    <div class="cslot-shift-lbl">¿CORRER RESTO DE TOMAS DEL DÍA?</div>
-    <div class="cslot-shift-pills">
+    <div class="slot-time-big" id="slotTimeBig">--:--</div>
+    <div class="slot-meta-txt" id="slotMetaTxt">Toma predicha</div>
+    <label class="modal-lbl">¿A qué hora ocurrió?</label>
+    <input type="datetime-local" id="cslotTime" style="width:100%;background:var(--cream);border:1.5px solid var(--peach);border-radius:var(--radius-sm);padding:10px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--ink);outline:none;margin-bottom:14px">
+    <div style="font-size:10px;font-weight:800;color:var(--muted);text-align:center;letter-spacing:.8px;margin-bottom:8px">CORRER PREDICCIONES</div>
+    <div class="shift-row" id="shiftPills">
       <button class="shift-pill" data-min="-30">−30 min</button>
       <button class="shift-pill" data-min="-15">−15 min</button>
-      <button class="shift-pill" data-min="0">Sin cambio</button>
+      <button class="shift-pill active" data-min="0">Sin cambio</button>
       <button class="shift-pill" data-min="15">+15 min</button>
       <button class="shift-pill" data-min="30">+30 min</button>
     </div>
@@ -592,869 +530,812 @@ header{padding:16px 20px 8px;display:flex;justify-content:space-between;align-it
   </div>
 </div>
 
-<!-- DIAPER CONFIRM MODAL -->
+<!-- ── DIAPER CONFIRM MODAL ── -->
 <div id="diaperModal" class="modal-overlay">
   <div class="modal-sheet">
     <div class="modal-drag"></div>
-    <div style="text-align:center;font-size:42px;margin-bottom:8px" id="diaperModalIco">💧</div>
-    <div class="modal-title" style="text-align:center" id="diaperModalTitle">Pañal mojado</div>
-    <div class="modal-sub" style="text-align:center">¿Confirmas registrar este cambio de pañal?</div>
+    <div class="diaper-ico-big" id="diaperIcoBig">💧</div>
+    <div class="modal-title" style="text-align:center" id="diaperTitle">Pañal mojado</div>
+    <div class="modal-sub" style="text-align:center">¿Confirmas registrar este cambio?</div>
     <div class="modal-btns">
       <button class="modal-cancel" onclick="cerrarDiaperModal()">Cancelar</button>
-      <button class="modal-ok" id="btnConfirmDiaper">💧 Confirmar</button>
+      <button class="modal-ok" id="btnConfirmDiaper">Confirmar</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
+<!-- ── TOAST ── -->
 <div id="toast"></div>
 
+<!-- ─────────────────────────────────────
+     FIREBASE + APP JS
+───────────────────────────────────── -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script>
-/* ═══════════════════════════════════════
-   FIREBASE
-═══════════════════════════════════════ */
+/* ══════════════════════════════════════
+   FIREBASE INIT
+══════════════════════════════════════ */
 const firebaseConfig = {
   apiKey: "AIzaSyC1p8czf56NeSUboDYSzaSed4m2yJq2SDA",
   authDomain: "momb2b-3eb14.firebaseapp.com",
   projectId: "momb2b-3eb14",
   storageBucket: "momb2b-3eb14.firebasestorage.app",
   messagingSenderId: "440475320328",
-  appId: "1:440475320328:web:794638a982f19902a891bd",
-  measurementId: "G-JXCTRXV4ZF"
+  appId: "1:440475320328:web:794638a982f19902a891bd"
 };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
    STATE
-═══════════════════════════════════════ */
-let limiteMinutos   = 150;
-let ultimaToma      = new Date();
-let ultimaTomaId    = null;
-let intervaloReloj  = null;
-let tomasProcesadas = [];  // {id, fecha, tipo, onzas, leftMin, rightMin}
-let panalesProcesados = [];
-let notif10         = false;
-let notifLimit      = false;
-let chartMode       = 'acumulado';
-let grafico         = null;
-let tipoActual      = 'formula';
-let leftMinutes     = 0;
-let rightMinutes    = 0;
-// Timeline: predicted slots for today (Date objects)
-let tlSlots         = []; // [{time:Date, status:'done'|'next'|'predicted'|'overdue', feedId?}]
-let slotShiftMin    = 0;
-let slotTargetIdx   = -1;
+══════════════════════════════════════ */
+let limiteMin      = 150;
+let ultimaToma     = new Date();
+let ultimaTomaId   = null;
+let clockInterval  = null;
+let tomasData      = [];   // all feeds {id,fecha,tipo,onzas,leftMin,rightMin}
+let panalesData    = [];
+let tlSlots        = [];   // timeline slots
+let slotTargetIdx  = -1;
+let slotShiftMin   = 0;
+let chartMode      = 'acumulado';
+let grafico        = null;
+let tipoActual     = 'formula';
+let leftMinutes    = 0;
+let rightMinutes   = 0;
+let breastSideMode = 'left';
+let diaperPending  = null;
+const bsw = {
+  left:  {running:false,startTs:null,elapsed:0,interval:null},
+  right: {running:false,startTs:null,elapsed:0,interval:null}
+};
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
+   HELPERS
+══════════════════════════════════════ */
+function toast(msg,dur=2400){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+function setNow(el){
+  const n=new Date(); n.setMinutes(n.getMinutes()-n.getTimezoneOffset());
+  el.value=n.toISOString().slice(0,16);
+}
+function fmtTime(d){return d.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}
+function fmtDate(d){return d.toLocaleDateString('es',{weekday:'short',day:'numeric',month:'short'})}
+function startOfDay(d){const x=new Date(d);x.setHours(0,0,0,0);return x}
+function endOfDay(d){const x=new Date(d);x.setHours(23,59,59,999);return x}
+
+setNow(document.getElementById('inputHora'));
+
+/* ══════════════════════════════════════
    NAVIGATION
-═══════════════════════════════════════ */
-function navTo(btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+══════════════════════════════════════ */
+function navTo(btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById(btn.dataset.page).classList.add('active');
-  if (btn.dataset.page === 'pageStats') {
-    calcStats();
-    generarGrafico();
-  }
+  if(btn.dataset.page==='pageStats'){calcStats();generarGrafico()}
 }
 
-/* ═══════════════════════════════════════
-   HELPERS
-═══════════════════════════════════════ */
-function toast(msg, dur = 2400) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), dur);
-}
-
-function setHoraActual(inputEl) {
-  const now = new Date();
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  inputEl.value = now.toISOString().slice(0, 16);
-}
-setHoraActual(document.getElementById('inputHora'));
-
-function fmtTime(date) {
-  return date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-}
-function fmtDate(date) {
-  return date.toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short' });
-}
-function startOfDay(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
-function endOfDay(d)   { const x = new Date(d); x.setHours(23,59,59,999); return x; }
-
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
    FIREBASE: CONFIG
-═══════════════════════════════════════ */
-db.collection("configuracion").doc("limiteGlobal").onSnapshot(doc => {
-  if (doc.exists) {
-    limiteMinutos = doc.data().minutos;
-    document.getElementById('limiteDisplay') && (document.getElementById('limiteDisplay').textContent = limiteMinutos);
-    document.getElementById('inputLimite').value = limiteMinutos;
+══════════════════════════════════════ */
+db.collection('configuracion').doc('limiteGlobal').onSnapshot(doc=>{
+  if(doc.exists){
+    limiteMin=doc.data().minutos;
+    document.getElementById('inputLimite').value=limiteMin;
     buildTimeline();
   } else {
-    db.collection("configuracion").doc("limiteGlobal").set({ minutos: 150 });
+    db.collection('configuracion').doc('limiteGlobal').set({minutos:150});
   }
 });
 
-/* ═══════════════════════════════════════
-   FIREBASE: TOMAS REALTIME
-═══════════════════════════════════════ */
-db.collection("tomas").orderBy("fecha", "desc").onSnapshot(snapshot => {
-  tomasProcesadas = [];
-  document.getElementById('listaHistorial').innerHTML = '';
+/* ══════════════════════════════════════
+   FIREBASE: TOMAS
+══════════════════════════════════════ */
+db.collection('tomas').orderBy('fecha','desc').onSnapshot(snap=>{
+  tomasData=[];
+  document.getElementById('listaHistorial').innerHTML='';
 
-  if (snapshot.empty) {
-    document.getElementById('listaHistorial').innerHTML = "<li class='hist-empty'>No hay tomas registradas aún 🍼</li>";
-    document.getElementById('histBadge').textContent = '0';
-    buildTimeline();
-    return;
+  if(snap.empty){
+    document.getElementById('listaHistorial').innerHTML="<li class='hist-empty'>No hay tomas registradas aún 🍼</li>";
+    document.getElementById('histBadge').textContent='0';
+    buildTimeline(); return;
   }
 
-  const primerDoc = snapshot.docs[0];
-  if (ultimaTomaId !== primerDoc.id) {
-    ultimaTomaId  = primerDoc.id;
-    ultimaToma    = primerDoc.data().fecha.toDate();
-    notif10 = false; notifLimit = false;
-    iniciarReloj();
+  const first=snap.docs[0];
+  if(ultimaTomaId!==first.id){
+    ultimaTomaId=first.id;
+    ultimaToma=first.data().fecha.toDate();
+    iniciarClock();
   }
 
-  const icons = ['ca','cb','cc','cd'];
-  const emojis = { formula: '🍼', breast: '🤱', frozen: '🧊', diaper: '💧' };
+  const iconCls=['ca','cb','cc','cd'];
+  const icoMap={formula:'🍼',breast:'🤱',frozen:'🧊'};
 
-  snapshot.forEach((doc, i) => {
-    const d = doc.data();
-    const fecha = d.fecha.toDate();
-    const tipo  = d.tipo || 'formula';
-    let valStr = '', valUnit = '';
-    if (tipo === 'formula') { valStr = d.onzas; valUnit = 'oz'; }
-    else if (tipo === 'breast') { valStr = (d.leftMin||0)+(d.rightMin||0); valUnit = 'min'; }
-    tomasProcesadas.push({ id: doc.id, fecha, tipo, onzas: d.onzas||0, leftMin: d.leftMin||0, rightMin: d.rightMin||0 });
-
-    const li = document.createElement('li');
-    li.className = 'hist-item';
-    li.innerHTML = `
-      <div class="hist-icon ${icons[i%4]}">${emojis[tipo]||'🍼'}</div>
+  snap.forEach((doc,i)=>{
+    const d=doc.data();
+    const f=d.fecha.toDate();
+    const tipo=d.tipo||'formula';
+    let valStr='',valUnit='';
+    if(tipo==='formula'||tipo==='frozen'){valStr=d.onzas;valUnit='oz'}
+    else{valStr=(d.leftMin||0)+(d.rightMin||0);valUnit='min'}
+    tomasData.push({id:doc.id,fecha:f,tipo,onzas:d.onzas||0,leftMin:d.leftMin||0,rightMin:d.rightMin||0});
+    const li=document.createElement('li');
+    li.className='hist-item';
+    li.innerHTML=`
+      <div class="hist-ico ${iconCls[i%4]}">${icoMap[tipo]||'🍼'}</div>
       <div class="hist-meta">
-        <div class="hist-time">${fmtTime(fecha)}</div>
-        <div class="hist-date">${fmtDate(fecha)}</div>
+        <div class="hist-time">${fmtTime(f)}</div>
+        <div class="hist-date">${fmtDate(f)}</div>
       </div>
       <div class="hist-val">${valStr} <span>${valUnit}</span></div>
-      <button class="hist-del" onclick="borrarToma('${doc.id}','${fmtTime(fecha)}')">🗑</button>`;
+      <button class="hist-del" onclick="borrarToma('${doc.id}','${fmtTime(f)}')">🗑</button>`;
     document.getElementById('listaHistorial').appendChild(li);
   });
 
-  document.getElementById('histBadge').textContent = snapshot.size;
+  document.getElementById('histBadge').textContent=snap.size;
   buildTimeline();
 });
 
-/* ═══════════════════════════════════════
-   FIREBASE: PAÑALES REALTIME
-═══════════════════════════════════════ */
-db.collection("panales").orderBy("fecha","desc").onSnapshot(snapshot => {
-  panalesProcesados = [];
-  snapshot.forEach(doc => {
-    panalesProcesados.push({ id: doc.id, fecha: doc.data().fecha.toDate(), tipo: doc.data().tipo });
-  });
+/* ══════════════════════════════════════
+   FIREBASE: PAÑALES
+══════════════════════════════════════ */
+db.collection('panales').orderBy('fecha','desc').onSnapshot(snap=>{
+  panalesData=[];
+  snap.forEach(doc=>panalesData.push({id:doc.id,fecha:doc.data().fecha.toDate(),tipo:doc.data().tipo}));
 });
 
-/* ═══════════════════════════════════════
-   TIMELINE
-═══════════════════════════════════════ */
-function buildTimeline() {
-  const now   = new Date();
-  const hoy   = startOfDay(now);
-  const finHoy = endOfDay(now);
-  document.getElementById('tlDateLabel').textContent = now.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
-
-  // Tomas confirmadas de hoy (cronológico)
-  const tomasHoy = tomasProcesadas
-    .filter(t => t.fecha >= hoy && t.fecha <= finHoy)
-    .sort((a,b) => a.fecha - b.fecha);
-
-  // Build predicted slots forward from last confirmed toma
-  const base = tomasHoy.length > 0 ? tomasHoy[tomasHoy.length-1].fecha : ultimaToma;
-  const intervalMs = limiteMinutos * 60000;
-
-  // How many predicted tomas fit in rest of day?
-  const predicted = [];
-  let cursor = new Date(base.getTime() + intervalMs);
-  while (cursor <= finHoy) {
-    predicted.push(new Date(cursor));
-    cursor = new Date(cursor.getTime() + intervalMs);
+/* ══════════════════════════════════════
+   CLOCK / HERO
+══════════════════════════════════════ */
+function iniciarClock(){
+  if(clockInterval) clearInterval(clockInterval);
+  tickClock();
+  clockInterval=setInterval(tickClock,30000);
+}
+function tickClock(){
+  const now=new Date();
+  const diffMs=now-ultimaToma;
+  const diffMin=Math.floor(diffMs/60000);
+  const rem=limiteMin-diffMin;
+  const card=document.getElementById('heroCard');
+  const h=Math.floor(diffMin/60),m=diffMin%60;
+  document.getElementById('heroLastText').textContent=
+    h>0?`Última toma hace ${h}h ${m}min`:`Última toma hace ${m} min`;
+  const nextTime=new Date(ultimaToma.getTime()+limiteMin*60000);
+  document.getElementById('heroNextAt').innerHTML=`${fmtTime(nextTime)} <small>hrs</small>`;
+  card.classList.remove('warn','danger');
+  if(rem>0){
+    document.getElementById('heroTime').textContent=`${rem} min`;
+    document.getElementById('heroLabel').textContent='Próxima toma en';
+    if(rem<=limiteMin*0.25) card.classList.add('warn');
+  } else {
+    document.getElementById('heroTime').textContent=rem===0?'¡YA!':`+${Math.abs(rem)} min`;
+    document.getElementById('heroLabel').textContent=rem===0?'¡Es ahora!':'Retraso';
+    card.classList.add('danger');
   }
-  // At least show next one even if past midnight
-  if (predicted.length === 0) {
-    predicted.push(new Date(base.getTime() + intervalMs));
-  }
+  const pct=Math.min(100,Math.max(0,(diffMin/limiteMin)*100));
+  document.getElementById('heroProg').style.width=pct+'%';
+}
+iniciarClock();
+if('Notification' in window && Notification.permission==='default') Notification.requestPermission();
 
-  // Build slot list
-  tlSlots = [
-    ...tomasHoy.map(t => ({ time: t.fecha, status: 'done', feedId: t.id, data: t })),
-    ...predicted.map((t, i) => {
-      let status = i === 0 ? 'next' : 'predicted';
-      if (t < now) status = 'overdue';
-      return { time: t, status, feedId: null };
+/* ══════════════════════════════════════
+   SERPENTINE TIMELINE (SVG)
+   zig-zag path, nodes for each slot
+══════════════════════════════════════ */
+function buildTimeline(){
+  const now=new Date();
+  const hoy=startOfDay(now);
+  const finHoy=endOfDay(now);
+
+  document.getElementById('tlDateLabel').textContent=
+    now.toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long'});
+
+  /* tomas of today confirmed */
+  const tomasHoy=tomasData
+    .filter(t=>t.fecha>=hoy&&t.fecha<=finHoy)
+    .sort((a,b)=>a.fecha-b.fecha);
+
+  /* build predicted future slots */
+  const base=tomasHoy.length?tomasHoy[tomasHoy.length-1].fecha:ultimaToma;
+  const iMs=limiteMin*60000;
+  const predicted=[];
+  let cur=new Date(base.getTime()+iMs);
+  while(cur<=finHoy){predicted.push(new Date(cur));cur=new Date(cur.getTime()+iMs)}
+  if(!predicted.length) predicted.push(new Date(base.getTime()+iMs));
+
+  tlSlots=[
+    ...tomasHoy.map(t=>({time:t.fecha,status:'done',data:t})),
+    ...predicted.map((t,i)=>{
+      let s=i===0?'next':'predicted';
+      if(t<now) s='overdue';
+      return {time:t,status:s,data:null};
     })
   ];
 
-  // Progress line pct
-  const donePct = tomasHoy.length === 0 ? 0
-    : Math.round((tomasHoy.length / (tomasHoy.length + predicted.length)) * 100);
-  document.getElementById('tlLine').style.setProperty('--done-pct', donePct + '%');
-
-  renderTimeline();
+  drawSerpentine();
 }
 
-function renderTimeline() {
-  const container = document.getElementById('tlScroll');
-  container.innerHTML = '';
-  if (tlSlots.length === 0) {
-    container.innerHTML = "<div style='color:var(--muted);font-size:12px;font-weight:700;padding:20px;text-align:center;width:200px'>Sin tomas hoy</div>";
+function drawSerpentine(){
+  const svg=document.getElementById('serpentineSVG');
+  const wrap=document.getElementById('serpentineWrap');
+  svg.innerHTML='';
+
+  const n=tlSlots.length;
+  if(!n){
+    svg.setAttribute('viewBox','0 0 360 80');
+    svg.innerHTML='<text x="180" y="45" text-anchor="middle" font-family="Nunito" font-size="11" fill="#9A8878" font-weight="700">Sin tomas hoy</text>';
     return;
   }
 
-  tlSlots.forEach((slot, idx) => {
-    const div = document.createElement('div');
-    div.className = 'tl-slot ' + slot.status;
-    div.dataset.idx = idx;
+  /* Layout constants */
+  const W=360;
+  const ROW_H=90;       // height of each zigzag row
+  const MARGIN_X=40;    // horizontal margin
+  const NODE_R=22;      // node circle radius
+  const TRACK_W=8;      // path stroke width
 
-    let ico = '🍼', badge = '';
-    if (slot.status === 'done') { ico = '✅'; badge = `<div class="tl-badge">✓</div>`; }
-    else if (slot.status === 'next') ico = '🍼';
-    else if (slot.status === 'overdue') { ico = '⚠️'; badge = `<div class="tl-badge">!</div>`; }
-    else ico = '🔮';
+  /* How many rows? Each row holds one arc (left-to-right or right-to-left) */
+  /* We place nodes along a serpentine: row 0 goes L→R, row 1 R→L, etc.    */
+  const rows=Math.ceil(n/2);
+  const svgH=rows*ROW_H+20;
+  svg.setAttribute('viewBox',`0 0 ${W} ${svgH}`);
 
-    let subTxt = '';
-    if (slot.status === 'done' && slot.data) {
-      if (slot.data.tipo === 'breast') subTxt = `${(slot.data.leftMin||0)+(slot.data.rightMin||0)} min`;
-      else subTxt = `${slot.data.onzas} oz`;
-    } else if (slot.status === 'next') subTxt = 'Próxima';
-    else if (slot.status === 'predicted') subTxt = 'Predicha';
-    else if (slot.status === 'overdue') subTxt = 'Pendiente';
+  /* Compute node positions along the serpentine */
+  const positions=[];
+  for(let i=0;i<n;i++){
+    const row=Math.floor(i/2);
+    const col=i%2;  // 0=start of row, 1=end of row
+    const y=row*ROW_H+NODE_R+10;
+    let x;
+    if(row%2===0){
+      // even rows: left→right
+      x=col===0?MARGIN_X:W-MARGIN_X;
+    } else {
+      // odd rows: right→left
+      x=col===0?W-MARGIN_X:MARGIN_X;
+    }
+    positions.push({x,y});
+  }
 
-    div.innerHTML = `
-      <div class="tl-bubble">${ico}${badge}</div>
-      <div class="tl-time">${fmtTime(slot.time)}</div>
-      <div class="tl-sub">${subTxt}</div>`;
+  /* Color gradient per status */
+  const statusColor={
+    done:'#52B788', next:'#F4A261', predicted:'#C9B8D8',
+    overdue:'#E63946'
+  };
+  const statusEmoji={
+    done:'✅', next:'🍼', predicted:'🔮', overdue:'⚠️'
+  };
 
-    div.addEventListener('click', () => openSlotModal(idx));
-    container.appendChild(div);
+  /* Defs for drop-shadow */
+  const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML=`
+    <filter id="nodeShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="rgba(45,34,20,0.14)"/>
+    </filter>`;
+  svg.appendChild(defs);
+
+  /* Draw PATH segments connecting nodes */
+  for(let i=0;i<n-1;i++){
+    const p0=positions[i];
+    const p1=positions[i+1];
+    const isDone=tlSlots[i].status==='done'&&tlSlots[i+1].status==='done';
+    const c0=statusColor[tlSlots[i].status];
+    const c1=statusColor[tlSlots[i+1].status];
+
+    /* Gradient for segment */
+    const gradId=`seg${i}`;
+    const grad=document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+    grad.setAttribute('id',gradId);
+    grad.setAttribute('gradientUnits','userSpaceOnUse');
+    grad.setAttribute('x1',p0.x);grad.setAttribute('y1',p0.y);
+    grad.setAttribute('x2',p1.x);grad.setAttribute('y2',p1.y);
+    grad.innerHTML=`<stop offset="0%" stop-color="${c0}"/><stop offset="100%" stop-color="${c1}"/>`;
+    defs.appendChild(grad);
+
+    /* Bezier curve: for rows crossing, use a smooth S-curve */
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    let d;
+    const sameRow=Math.floor(i/2)===Math.floor((i+1)/2);
+    if(sameRow){
+      // horizontal segment within row — straight line (will be short, nodes at edges)
+      d=`M ${p0.x} ${p0.y} L ${p1.x} ${p1.y}`;
+    } else {
+      // vertical connector between rows — smooth bezier
+      const midY=(p0.y+p1.y)/2;
+      d=`M ${p0.x} ${p0.y} C ${p0.x} ${midY}, ${p1.x} ${midY}, ${p1.x} ${p1.y}`;
+    }
+    path.setAttribute('d',d);
+    path.setAttribute('stroke',`url(#${gradId})`);
+    path.setAttribute('stroke-width',TRACK_W);
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke-linecap','round');
+    if(tlSlots[i].status==='predicted'||tlSlots[i+1].status==='predicted'){
+      path.setAttribute('stroke-dasharray','12 8');
+    }
+    svg.appendChild(path);
+  }
+
+  /* Draw NODES */
+  positions.forEach((pos,i)=>{
+    const slot=tlSlots[i];
+    const col=statusColor[slot.status];
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('cursor','pointer');
+    g.setAttribute('class','tl-node');
+
+    /* outer glow ring for "next" */
+    if(slot.status==='next'){
+      const ring=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      ring.setAttribute('cx',pos.x);ring.setAttribute('cy',pos.y);
+      ring.setAttribute('r',NODE_R+7);
+      ring.setAttribute('fill','none');
+      ring.setAttribute('stroke',col);
+      ring.setAttribute('stroke-width','2.5');
+      ring.setAttribute('opacity','0.35');
+      ring.innerHTML=`<animate attributeName="r" values="${NODE_R+5};${NODE_R+11};${NODE_R+5}" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values=".35;0;.35" dur="2s" repeatCount="indefinite"/>`;
+      g.appendChild(ring);
+    }
+
+    /* shadow circle */
+    const shadow=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    shadow.setAttribute('cx',pos.x);shadow.setAttribute('cy',pos.y+3);
+    shadow.setAttribute('r',NODE_R);
+    shadow.setAttribute('fill','rgba(45,34,20,0.09)');
+    g.appendChild(shadow);
+
+    /* main circle */
+    const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',pos.x);circle.setAttribute('cy',pos.y);
+    circle.setAttribute('r',NODE_R);
+    circle.setAttribute('fill','#fff');
+    circle.setAttribute('stroke',col);
+    circle.setAttribute('stroke-width','3');
+    g.appendChild(circle);
+
+    /* inner fill for done */
+    if(slot.status==='done'){
+      const fill=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      fill.setAttribute('cx',pos.x);fill.setAttribute('cy',pos.y);
+      fill.setAttribute('r',NODE_R-6);
+      fill.setAttribute('fill',col);fill.setAttribute('opacity','0.18');
+      g.appendChild(fill);
+    }
+
+    /* emoji */
+    const ico=document.createElementNS('http://www.w3.org/2000/svg','text');
+    ico.setAttribute('x',pos.x);ico.setAttribute('y',pos.y+5);
+    ico.setAttribute('text-anchor','middle');ico.setAttribute('font-size','16');
+    ico.textContent=statusEmoji[slot.status];
+    g.appendChild(ico);
+
+    /* time label */
+    const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+    const lblY=slot.status==='done'||i%2===0?pos.y+NODE_R+14:pos.y-NODE_R-6;
+    lbl.setAttribute('x',pos.x);lbl.setAttribute('y',lblY);
+    lbl.setAttribute('text-anchor','middle');
+    lbl.setAttribute('font-family','Nunito');lbl.setAttribute('font-size','10');
+    lbl.setAttribute('font-weight','800');lbl.setAttribute('fill',col);
+    lbl.textContent=fmtTime(slot.time);
+    g.appendChild(lbl);
+
+    /* oz/min badge for done */
+    if(slot.status==='done'&&slot.data){
+      const d=slot.data;
+      const valTxt=d.tipo==='breast'?`${(d.leftMin||0)+(d.rightMin||0)}m`:`${d.onzas}oz`;
+      const badge=document.createElementNS('http://www.w3.org/2000/svg','text');
+      const bY=lblY>pos.y?lblY+12:lblY-12;
+      badge.setAttribute('x',pos.x);badge.setAttribute('y',bY);
+      badge.setAttribute('text-anchor','middle');
+      badge.setAttribute('font-family','Nunito');badge.setAttribute('font-size','9');
+      badge.setAttribute('font-weight','700');badge.setAttribute('fill','#9A8878');
+      badge.textContent=valTxt;
+      g.appendChild(badge);
+    }
+
+    /* click → open slot modal */
+    g.addEventListener('click',()=>openSlotModal(i));
+
+    svg.appendChild(g);
   });
 
-  // Auto-scroll to next slot
-  const nextEl = container.querySelector('.tl-slot.next, .tl-slot.overdue');
-  if (nextEl) setTimeout(() => nextEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }), 300);
+  /* resize SVG height in DOM */
+  wrap.style.height='auto';
 }
 
-/* ═══════════════════════════════════════
-   SLOT MODAL (confirm / adjust toma)
-═══════════════════════════════════════ */
-function openSlotModal(idx) {
-  slotTargetIdx = idx;
-  slotShiftMin  = 0;
-  const slot = tlSlots[idx];
-  const modal = document.getElementById('slotModal');
-
-  document.getElementById('slotTimeDisplay').textContent = fmtTime(slot.time);
-  document.getElementById('slotMeta').textContent =
-    slot.status === 'done' ? '✅ Toma ya registrada'
-    : slot.status === 'next' ? '⏳ Próxima toma predicha'
-    : slot.status === 'overdue' ? '⚠️ Toma pendiente / retrasada'
-    : '🔮 Toma predicha';
-
-  // Pre-fill time input with slot time
-  const t = new Date(slot.time);
-  t.setMinutes(t.getMinutes() - t.getTimezoneOffset());
-  document.getElementById('cslotNewTime').value = t.toISOString().slice(0,16);
-
-  // Update shift pills
-  document.querySelectorAll('.shift-pill').forEach(p => p.classList.remove('active'));
-  document.querySelector('.shift-pill[data-min="0"]').classList.add('active');
-
-  document.getElementById('slotModalTitle').textContent =
-    slot.status === 'done' ? 'Detalle de toma' : 'Confirmar toma';
-  document.getElementById('btnConfirmSlot').textContent =
-    slot.status === 'done' ? '✅ Cerrar' : '✅ Confirmar toma';
-
-  modal.classList.add('open');
+/* ══════════════════════════════════════
+   SLOT MODAL
+══════════════════════════════════════ */
+function openSlotModal(idx){
+  slotTargetIdx=idx; slotShiftMin=0;
+  const slot=tlSlots[idx];
+  document.getElementById('slotTimeBig').textContent=fmtTime(slot.time);
+  document.getElementById('slotMetaTxt').textContent=
+    slot.status==='done'?'✅ Toma ya registrada':
+    slot.status==='next'?'⏳ Próxima toma predicha':
+    slot.status==='overdue'?'⚠️ Toma pendiente / retrasada':'🔮 Toma predicha';
+  document.getElementById('slotModalTitle').textContent=
+    slot.status==='done'?'Detalle de toma':'Confirmar toma';
+  document.getElementById('btnConfirmSlot').textContent=
+    slot.status==='done'?'✅ Cerrar':'✅ Confirmar';
+  const t=new Date(slot.time);
+  t.setMinutes(t.getMinutes()-t.getTimezoneOffset());
+  document.getElementById('cslotTime').value=t.toISOString().slice(0,16);
+  document.querySelectorAll('.shift-pill').forEach(p=>p.classList.toggle('active',p.dataset.min==='0'));
+  document.getElementById('slotModal').classList.add('open');
 }
-
-function cerrarSlotModal() {
-  document.getElementById('slotModal').classList.remove('open');
-  slotTargetIdx = -1;
-}
-
-document.querySelectorAll('.shift-pill').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.shift-pill').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    slotShiftMin = parseInt(btn.dataset.min);
-  });
+function cerrarSlotModal(){document.getElementById('slotModal').classList.remove('open');slotTargetIdx=-1}
+document.getElementById('slotModal').addEventListener('click',e=>{if(e.target===document.getElementById('slotModal'))cerrarSlotModal()});
+document.getElementById('shiftPills').addEventListener('click',e=>{
+  const b=e.target.closest('.shift-pill');if(!b)return;
+  document.querySelectorAll('.shift-pill').forEach(p=>p.classList.remove('active'));
+  b.classList.add('active'); slotShiftMin=parseInt(b.dataset.min);
 });
-
-document.getElementById('btnConfirmSlot').addEventListener('click', () => {
-  const slot = tlSlots[slotTargetIdx];
-  if (!slot) { cerrarSlotModal(); return; }
-  if (slot.status === 'done') { cerrarSlotModal(); return; }
-
-  const rawVal = document.getElementById('cslotNewTime').value;
-  if (!rawVal) { toast('⚠️ Ingresa la hora de la toma'); return; }
-  const fechaToma = new Date(rawVal);
-
-  // Save the toma (formula default 4oz — user can edit later in Register tab)
-  db.collection("tomas").add({
-    fecha: fechaToma,
-    tipo: 'formula',
-    onzas: 4.0,
-    registro: new Date(),
-    fromTimeline: true
-  }).then(() => {
-    // If shift, update future predicted slots visually
-    if (slotShiftMin !== 0) {
-      shiftFuturePredictions(slotTargetIdx, slotShiftMin);
+document.getElementById('btnConfirmSlot').addEventListener('click',()=>{
+  const slot=tlSlots[slotTargetIdx];
+  if(!slot){cerrarSlotModal();return}
+  if(slot.status==='done'){cerrarSlotModal();return}
+  const rawVal=document.getElementById('cslotTime').value;
+  if(!rawVal){toast('⚠️ Ingresa la hora');return}
+  db.collection('tomas').add({
+    fecha:new Date(rawVal),tipo:'formula',onzas:4.0,registro:new Date(),fromTimeline:true
+  }).then(()=>{
+    if(slotShiftMin!==0){
+      const ms=slotShiftMin*60000;
+      for(let i=slotTargetIdx+1;i<tlSlots.length;i++){
+        if(tlSlots[i].status!=='done')
+          tlSlots[i]={...tlSlots[i],time:new Date(tlSlots[i].time.getTime()+ms)};
+      }
+      drawSerpentine();
     }
     cerrarSlotModal();
-    toast(`✅ Toma confirmada${slotShiftMin !== 0 ? ` · predicciones corridas ${slotShiftMin > 0 ? '+' : ''}${slotShiftMin} min` : ''}`);
-  }).catch(err => toast('❌ Error: ' + err.message, 3000));
+    toast(`✅ Toma confirmada${slotShiftMin!==0?` · predicciones corridas ${slotShiftMin>0?'+':''}${slotShiftMin} min`:''}`);
+  }).catch(err=>toast('❌ '+err.message,3000));
 });
 
-function shiftFuturePredictions(fromIdx, shiftMin) {
-  const ms = shiftMin * 60000;
-  // Only shift predicted/next/overdue slots after fromIdx
-  for (let i = fromIdx + 1; i < tlSlots.length; i++) {
-    if (tlSlots[i].status !== 'done') {
-      tlSlots[i] = { ...tlSlots[i], time: new Date(tlSlots[i].time.getTime() + ms) };
-    }
-  }
-  renderTimeline();
-}
-
-document.getElementById('slotModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('slotModal')) cerrarSlotModal();
-});
-
-/* ═══════════════════════════════════════
-   CLOCK
-═══════════════════════════════════════ */
-function iniciarReloj() {
-  if (intervaloReloj) clearInterval(intervaloReloj);
-  actualizarReloj();
-  intervaloReloj = setInterval(actualizarReloj, 30000);
-}
-
-function actualizarReloj() {
-  const now         = new Date();
-  const diffMs      = now - ultimaToma;
-  const diffMin     = Math.floor(diffMs / 60000);
-  const remaining   = limiteMinutos - diffMin;
-
-  const heroCard    = document.getElementById('heroCard');
-  const heroTime    = document.getElementById('heroTime');
-  const heroLabel   = document.getElementById('heroLabel');
-  const heroNextAt  = document.getElementById('heroNextAt');
-  const heroLastText= document.getElementById('heroLastText');
-  const heroProg    = document.getElementById('heroProg');
-
-  // Last feed text
-  if (diffMin >= 0) {
-    const h = Math.floor(diffMin/60), m = diffMin%60;
-    heroLastText.textContent = h > 0 ? `Última toma hace ${h}h ${m}min` : `Última toma hace ${m} min`;
-  }
-
-  // Next feed time
-  const nextFeedTime = new Date(ultimaToma.getTime() + limiteMinutos * 60000);
-  heroNextAt.innerHTML = `${fmtTime(nextFeedTime)} <small>hrs</small>`;
-
-  // Countdown
-  heroCard.classList.remove('warn','danger');
-  if (remaining > 0) {
-    heroTime.textContent = `${remaining} min`;
-    heroLabel.textContent = 'Próxima toma en';
-    if (remaining <= limiteMinutos * 0.25) heroCard.classList.add('warn');
-  } else if (remaining === 0) {
-    heroTime.textContent = '¡YA!';
-    heroCard.classList.add('danger');
-  } else {
-    heroTime.textContent = `+${Math.abs(remaining)} min`;
-    heroLabel.textContent = 'Retraso';
-    heroCard.classList.add('danger');
-  }
-
-  // Progress
-  const pct = Math.min(100, Math.max(0, (diffMin / limiteMinutos) * 100));
-  heroProg.style.width = pct + '%';
-
-  // Notifications
-  if ('Notification' in window && Notification.permission === 'granted') {
-    if (remaining === 10 && !notif10) {
-      new Notification('¡Atención! 🍼', { body: 'Faltan 10 minutos para la próxima toma de Ethan.' });
-      notif10 = true;
-    } else if (remaining <= 0 && !notifLimit) {
-      new Notification('¡Hora del biberón! 🚨', { body: 'Se alcanzó el tiempo límite para Ethan.' });
-      notifLimit = true;
-    }
-  }
-}
-
-if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
-iniciarReloj();
-
-/* ═══════════════════════════════════════
-   REGISTER: TYPE TOGGLE
-═══════════════════════════════════════ */
-document.querySelectorAll('.type-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+/* ══════════════════════════════════════
+   TYPE TOGGLE
+══════════════════════════════════════ */
+document.querySelectorAll('.type-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    tipoActual = btn.dataset.type;
-    document.getElementById('fieldsFormula').style.display = tipoActual === 'formula' ? '' : 'none';
-    document.getElementById('fieldsBreast').style.display  = tipoActual === 'breast'  ? '' : 'none';
-    document.getElementById('fieldsFrozen').style.display  = tipoActual === 'frozen'  ? '' : 'none';
+    tipoActual=btn.dataset.type;
+    document.getElementById('fieldsFormula').style.display=tipoActual==='formula'?'':'none';
+    document.getElementById('fieldsBreast').style.display =tipoActual==='breast' ?'':'none';
+    document.getElementById('fieldsFrozen').style.display =tipoActual==='frozen' ?'':'none';
   });
 });
 
-/* ═══════════════════════════════════════
-   OZ STEPPER
-═══════════════════════════════════════ */
-function syncOzDisplay(val) {
-  document.getElementById('inputOzDisplay').textContent = parseFloat(val).toFixed(1);
-  document.querySelectorAll('.quick-pill').forEach(p =>
-    p.classList.toggle('active', parseFloat(p.dataset.oz) === parseFloat(val)));
+/* ══════════════════════════════════════
+   OZ STEPPERS
+══════════════════════════════════════ */
+function syncOzDisplay(val){
+  document.getElementById('inputOzDisplay').textContent=parseFloat(val).toFixed(1);
+  document.querySelectorAll('.quick-pill:not(.fz-pill)').forEach(p=>
+    p.classList.toggle('active',parseFloat(p.dataset.oz)===parseFloat(val)));
 }
-document.getElementById('btnMinus').addEventListener('click', () => {
-  const v = parseFloat(document.getElementById('inputOz').value);
-  if (v > 0.5) { document.getElementById('inputOz').value = (v-0.5).toFixed(1); syncOzDisplay(v-0.5); }
+document.getElementById('btnMinus').addEventListener('click',()=>{
+  const v=parseFloat(document.getElementById('inputOz').value);
+  if(v>0.5){document.getElementById('inputOz').value=(v-.5).toFixed(1);syncOzDisplay(v-.5)}
 });
-document.getElementById('btnPlus').addEventListener('click', () => {
-  const v = parseFloat(document.getElementById('inputOz').value);
-  document.getElementById('inputOz').value = (v+0.5).toFixed(1); syncOzDisplay(v+0.5);
+document.getElementById('btnPlus').addEventListener('click',()=>{
+  const v=parseFloat(document.getElementById('inputOz').value);
+  document.getElementById('inputOz').value=(v+.5).toFixed(1);syncOzDisplay(v+.5);
 });
-document.getElementById('quickPills').addEventListener('click', e => {
-  const btn = e.target.closest('.quick-pill');
-  if (!btn) return;
-  document.getElementById('inputOz').value = btn.dataset.oz;
-  syncOzDisplay(btn.dataset.oz);
+document.getElementById('quickPills').addEventListener('click',e=>{
+  const b=e.target.closest('.quick-pill:not(.fz-pill)');if(!b)return;
+  document.getElementById('inputOz').value=b.dataset.oz;syncOzDisplay(b.dataset.oz);
 });
 
-/* ── Frozen oz stepper ── */
-function syncFrozenDisplay(val) {
-  document.getElementById('inputOzFrozenDisplay').textContent = parseFloat(val).toFixed(1);
-  document.querySelectorAll('.frozen-pill').forEach(p =>
-    p.classList.toggle('active', parseFloat(p.dataset.oz) === parseFloat(val)));
+function syncFzDisplay(val){
+  document.getElementById('inputOzFDisplay').textContent=parseFloat(val).toFixed(1);
+  document.querySelectorAll('.fz-pill').forEach(p=>
+    p.classList.toggle('active',parseFloat(p.dataset.oz)===parseFloat(val)));
 }
-document.getElementById('btnMinusFrozen').addEventListener('click', () => {
-  const v = parseFloat(document.getElementById('inputOzFrozen').value);
-  if (v > 0.5) { document.getElementById('inputOzFrozen').value = (v-0.5).toFixed(1); syncFrozenDisplay(v-0.5); }
+document.getElementById('btnMinusF').addEventListener('click',()=>{
+  const v=parseFloat(document.getElementById('inputOzF').value);
+  if(v>0.5){document.getElementById('inputOzF').value=(v-.5).toFixed(1);syncFzDisplay(v-.5)}
 });
-document.getElementById('btnPlusFrozen').addEventListener('click', () => {
-  const v = parseFloat(document.getElementById('inputOzFrozen').value);
-  document.getElementById('inputOzFrozen').value = (v+0.5).toFixed(1); syncFrozenDisplay(v+0.5);
+document.getElementById('btnPlusF').addEventListener('click',()=>{
+  const v=parseFloat(document.getElementById('inputOzF').value);
+  document.getElementById('inputOzF').value=(v+.5).toFixed(1);syncFzDisplay(v+.5);
 });
-document.querySelectorAll('.frozen-pill').forEach(p => p.addEventListener('click', () => {
-  document.getElementById('inputOzFrozen').value = p.dataset.oz;
-  syncFrozenDisplay(p.dataset.oz);
+document.querySelectorAll('.fz-pill').forEach(p=>p.addEventListener('click',()=>{
+  document.getElementById('inputOzF').value=p.dataset.oz;syncFzDisplay(p.dataset.oz);
 }));
 
-/* ═══════════════════════════════════════
-   BREAST STOPWATCH
-═══════════════════════════════════════ */
-const bsw = {
-  left:  { running: false, startTs: null, elapsed: 0, interval: null },
-  right: { running: false, startTs: null, elapsed: 0, interval: null },
-};
-let breastSideMode = 'left'; // 'left' | 'right' | 'both'
-
-// Side selector
-document.querySelectorAll('.breast-side-sel').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.breast-side-sel').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    breastSideMode = btn.dataset.side;
-    document.getElementById('bswLeft').style.display  = breastSideMode !== 'right' ? '' : 'none';
-    document.getElementById('bswRight').style.display = breastSideMode !== 'left'  ? '' : 'none';
-    refreshBswSummary();
-  });
+document.getElementById('btnAhora').addEventListener('click',()=>{
+  setNow(document.getElementById('inputHora'));toast('⏰ Hora actualizada');
 });
 
-function bswFmt(ms) {
-  const s = Math.floor(ms / 1000);
-  const m = Math.floor(s / 60);
-  const ss = s % 60;
+/* ══════════════════════════════════════
+   BREAST STOPWATCH
+══════════════════════════════════════ */
+document.querySelectorAll('.breast-side-sel').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.breast-side-sel').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    breastSideMode=btn.dataset.side;
+    document.getElementById('bswLeft').style.display =breastSideMode!=='right'?'':'none';
+    document.getElementById('bswRight').style.display=breastSideMode!=='left' ?'':'none';
+    refreshBswChips();
+  });
+});
+function bswFmt(ms){
+  const s=Math.floor(ms/1000),m=Math.floor(s/60),ss=s%60;
   return `${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
 }
-
-function bswTick(side) {
-  const state = bsw[side];
-  const now   = Date.now();
-  const total = state.elapsed + (state.running ? now - state.startTs : 0);
-  document.getElementById(side === 'left' ? 'bswLeftTime' : 'bswRightTime').textContent = bswFmt(total);
-  refreshBswSummary();
+function bswTick(side){
+  const st=bsw[side];
+  const total=st.elapsed+(st.running?Date.now()-st.startTs:0);
+  document.getElementById(side==='left'?'bswLeftTime':'bswRightTime').textContent=bswFmt(total);
+  refreshBswChips();
 }
-
-function bswToggle(side) {
-  const state    = bsw[side];
-  const card     = document.getElementById(side === 'left' ? 'bswLeft' : 'bswRight');
-  const btn      = document.getElementById(side === 'left' ? 'bswBtnLeft' : 'bswBtnRight');
-  const recEl    = document.getElementById(side === 'left' ? 'bswLeftRecorded' : 'bswRightRecorded');
-
-  if (!state.running) {
-    // START
-    state.running = true;
-    state.startTs = Date.now();
-    card.classList.add('running');
-    card.classList.remove('stopped');
-    btn.textContent = '⏹ Detener';
-    recEl.textContent = '';
-    state.interval = setInterval(() => bswTick(side), 500);
+function bswToggle(side){
+  const st=bsw[side];
+  const card=document.getElementById(side==='left'?'bswLeft':'bswRight');
+  const btn=document.getElementById(side==='left'?'bswBtnLeft':'bswBtnRight');
+  const rec=document.getElementById(side==='left'?'bswLeftRec':'bswRightRec');
+  if(!st.running){
+    st.running=true;st.startTs=Date.now();
+    card.classList.add('running');card.classList.remove('stopped');
+    btn.textContent='⏹ Detener';rec.textContent='';
+    st.interval=setInterval(()=>bswTick(side),500);
   } else {
-    // STOP
-    clearInterval(state.interval);
-    state.elapsed += Date.now() - state.startTs;
-    state.running  = false;
-    state.startTs  = null;
-    card.classList.remove('running');
-    card.classList.add('stopped');
-    const mins = Math.round(state.elapsed / 60000);
-    btn.textContent = '↺ Reiniciar';
-    recEl.textContent = `✓ ${mins} min registrados`;
-    bswTick(side);
-    refreshBswSummary();
+    clearInterval(st.interval);
+    st.elapsed+=Date.now()-st.startTs;
+    st.running=false;st.startTs=null;
+    card.classList.remove('running');card.classList.add('stopped');
+    btn.textContent='↺ Reiniciar';
+    rec.textContent=`✓ ${Math.round(st.elapsed/60000)} min`;
+    bswTick(side);refreshBswChips();
   }
 }
-
-// Reiniciar (when already stopped, btn becomes reset)
-document.getElementById('bswBtnLeft').addEventListener('click', () => {
-  if (bsw.left.running) { bswToggle('left'); }
-  else if (bsw.left.elapsed > 0) { bswReset('left'); }
-  else { bswToggle('left'); }
+document.getElementById('bswBtnLeft').addEventListener('click',()=>{
+  if(bsw.left.running)bswToggle('left');
+  else if(bsw.left.elapsed>0)bswReset('left');
+  else bswToggle('left');
 });
-document.getElementById('bswBtnRight').addEventListener('click', () => {
-  if (bsw.right.running) { bswToggle('right'); }
-  else if (bsw.right.elapsed > 0) { bswReset('right'); }
-  else { bswToggle('right'); }
+document.getElementById('bswBtnRight').addEventListener('click',()=>{
+  if(bsw.right.running)bswToggle('right');
+  else if(bsw.right.elapsed>0)bswReset('right');
+  else bswToggle('right');
 });
-
-function bswReset(side) {
+function bswReset(side){
   clearInterval(bsw[side].interval);
-  bsw[side] = { running: false, startTs: null, elapsed: 0, interval: null };
-  const card = document.getElementById(side === 'left' ? 'bswLeft' : 'bswRight');
+  bsw[side]={running:false,startTs:null,elapsed:0,interval:null};
+  const card=document.getElementById(side==='left'?'bswLeft':'bswRight');
   card.classList.remove('running','stopped');
-  document.getElementById(side === 'left' ? 'bswLeftTime' : 'bswRightTime').textContent = '00:00';
-  document.getElementById(side === 'left' ? 'bswLeftRecorded' : 'bswRightRecorded').textContent = '';
-  document.getElementById(side === 'left' ? 'bswBtnLeft' : 'bswBtnRight').textContent = '▶ Iniciar';
-  refreshBswSummary();
+  document.getElementById(side==='left'?'bswLeftTime':'bswRightTime').textContent='00:00';
+  document.getElementById(side==='left'?'bswLeftRec':'bswRightRec').textContent='';
+  document.getElementById(side==='left'?'bswBtnLeft':'bswBtnRight').textContent='▶ Iniciar';
+  refreshBswChips();
+}
+function refreshBswChips(){
+  const lMin=Math.round(bsw.left.elapsed/60000);
+  const rMin=Math.round(bsw.right.elapsed/60000);
+  const total=lMin+rMin;
+  const showL=breastSideMode!=='right'&&lMin>0;
+  const showR=breastSideMode!=='left' &&rMin>0;
+  document.getElementById('chipL').style.display =showL?'inline-flex':'none';
+  document.getElementById('chipR').style.display =showR?'inline-flex':'none';
+  document.getElementById('chipT').style.display =(showL&&showR)?'inline-flex':'none';
+  document.getElementById('chipLv').textContent=lMin;
+  document.getElementById('chipRv').textContent=rMin;
+  document.getElementById('chipTv').textContent=total;
+  document.getElementById('bswChips').style.display=(showL||showR)?'flex':'none';
+  leftMinutes=lMin; rightMinutes=rMin;
 }
 
-function bswGetMinutes(side) {
-  return Math.round(bsw[side].elapsed / 60000);
-}
-
-function refreshBswSummary() {
-  const lMin = bswGetMinutes('left');
-  const rMin = bswGetMinutes('right');
-  const total = lMin + rMin;
-  const summaryEl = document.getElementById('bswSummary');
-  const showLeft  = breastSideMode !== 'right' && lMin > 0;
-  const showRight = breastSideMode !== 'left'  && rMin > 0;
-
-  document.getElementById('bswChipLeft').style.display  = showLeft  ? 'inline-flex' : 'none';
-  document.getElementById('bswChipRight').style.display = showRight ? 'inline-flex' : 'none';
-  document.getElementById('bswChipTotal').style.display = (showLeft && showRight) ? 'inline-flex' : 'none';
-  document.getElementById('bswChipLeftVal').textContent  = lMin;
-  document.getElementById('bswChipRightVal').textContent = rMin;
-  document.getElementById('bswChipTotalVal').textContent = total;
-  summaryEl.style.display = (showLeft || showRight) ? 'flex' : 'none';
-
-  // expose for save
-  leftMinutes  = lMin;
-  rightMinutes = rMin;
-}
-
-document.getElementById('btnAhora').addEventListener('click', () => {
-  setHoraActual(document.getElementById('inputHora'));
-  toast('⏰ Hora actualizada');
-});
-
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
    SAVE TOMA
-═══════════════════════════════════════ */
-document.getElementById('btnGuardar').addEventListener('click', () => {
-  const lbl  = document.getElementById('btnGuardarLabel');
-  const ico  = document.getElementById('btnGuardarIcon');
-  const btn  = document.getElementById('btnGuardar');
-  lbl.textContent = 'Guardando…'; ico.textContent = '⏳'; btn.disabled = true;
-
-  const fecha = new Date(document.getElementById('inputHora').value);
-  const data  = { fecha, tipo: tipoActual, registro: new Date() };
-
-  if (tipoActual === 'formula') {
-    data.onzas = parseFloat(document.getElementById('inputOz').value);
-  } else if (tipoActual === 'frozen') {
-    data.onzas = parseFloat(document.getElementById('inputOzFrozen').value);
-  } else {
-    data.leftMin  = leftMinutes;
-    data.rightMin = rightMinutes;
-  }
-
-  db.collection("tomas").add(data)
-    .then(() => {
-      btn.classList.add('saved');
-      lbl.textContent = '¡Guardado!'; ico.textContent = '✅';
+══════════════════════════════════════ */
+document.getElementById('btnGuardar').addEventListener('click',()=>{
+  const lbl=document.getElementById('bgiLbl');
+  const ico=document.getElementById('bgiIco');
+  const btn=document.getElementById('btnGuardar');
+  lbl.textContent='Guardando…';ico.textContent='⏳';btn.disabled=true;
+  const fecha=new Date(document.getElementById('inputHora').value);
+  const data={fecha,tipo:tipoActual,registro:new Date()};
+  if(tipoActual==='formula') data.onzas=parseFloat(document.getElementById('inputOz').value);
+  else if(tipoActual==='frozen') data.onzas=parseFloat(document.getElementById('inputOzF').value);
+  else{data.leftMin=leftMinutes;data.rightMin=rightMinutes}
+  db.collection('tomas').add(data)
+    .then(()=>{
+      btn.classList.add('saved');lbl.textContent='¡Guardado!';ico.textContent='✅';
       toast('✅ Toma registrada');
-      setTimeout(() => {
-        btn.classList.remove('saved');
-        lbl.textContent = 'Guardar toma'; ico.textContent = '🍼';
-        btn.disabled = false;
-        setHoraActual(document.getElementById('inputHora'));
-        leftMinutes = rightMinutes = 0;
-        // reset stopwatch
-        bswReset('left'); bswReset('right');
-      }, 2200);
+      setTimeout(()=>{
+        btn.classList.remove('saved');lbl.textContent='Guardar toma';ico.textContent='🍼';
+        btn.disabled=false;setNow(document.getElementById('inputHora'));
+        bswReset('left');bswReset('right');
+        leftMinutes=rightMinutes=0;
+      },2000);
     })
-    .catch(err => {
-      toast('❌ Error: ' + err.message, 3500);
-      lbl.textContent = 'Guardar toma'; ico.textContent = '🍼'; btn.disabled = false;
-    });
+    .catch(err=>{toast('❌ '+err.message,3500);lbl.textContent='Guardar toma';ico.textContent='🍼';btn.disabled=false});
 });
 
-/* ═══════════════════════════════════════
-   PAÑAL — confirm modal
-═══════════════════════════════════════ */
-let diaperPendingTipo = null;
-const diaperMeta = {
-  wet:   { ico: '💧', label: 'Pañal mojado',  btn: '💧 Confirmar' },
-  dirty: { ico: '💩', label: 'Pañal sucio',   btn: '💩 Confirmar' },
-  both:  { ico: '💧💩', label: 'Pañal mixto', btn: '💧💩 Confirmar' },
+/* ══════════════════════════════════════
+   PAÑAL
+══════════════════════════════════════ */
+const diaperMeta={
+  wet:{ico:'💧',label:'Pañal mojado'},
+  dirty:{ico:'💩',label:'Pañal sucio'},
+  both:{ico:'💧💩',label:'Pañal mixto'}
 };
-
-function confirmarPanal(tipo) {
-  diaperPendingTipo = tipo;
-  const m = diaperMeta[tipo];
-  document.getElementById('diaperModalIco').textContent   = m.ico;
-  document.getElementById('diaperModalTitle').textContent = m.label;
-  document.getElementById('btnConfirmDiaper').textContent = m.btn;
+function confirmarPanal(tipo){
+  diaperPending=tipo;
+  const m=diaperMeta[tipo];
+  document.getElementById('diaperIcoBig').textContent=m.ico;
+  document.getElementById('diaperTitle').textContent=m.label;
+  document.getElementById('btnConfirmDiaper').textContent=`${m.ico} Confirmar`;
   document.getElementById('diaperModal').classList.add('open');
 }
-function cerrarDiaperModal() {
-  document.getElementById('diaperModal').classList.remove('open');
-  diaperPendingTipo = null;
-}
-document.getElementById('diaperModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('diaperModal')) cerrarDiaperModal();
-});
-document.getElementById('btnConfirmDiaper').addEventListener('click', () => {
-  if (!diaperPendingTipo) return;
-  const tipo = diaperPendingTipo;
-  cerrarDiaperModal();
-  db.collection("panales").add({ fecha: new Date(), tipo })
-    .then(() => {
-      const msgs = { wet: '💧 Pañal mojado registrado', dirty: '💩 Pañal sucio registrado', both: '💧💩 Pañal mixto registrado' };
-      toast(msgs[tipo]);
-    })
-    .catch(err => toast('❌ Error: ' + err.message, 3000));
+function cerrarDiaperModal(){document.getElementById('diaperModal').classList.remove('open');diaperPending=null}
+document.getElementById('diaperModal').addEventListener('click',e=>{if(e.target===document.getElementById('diaperModal'))cerrarDiaperModal()});
+document.getElementById('btnConfirmDiaper').addEventListener('click',()=>{
+  if(!diaperPending)return;
+  const tipo=diaperPending; cerrarDiaperModal();
+  db.collection('panales').add({fecha:new Date(),tipo})
+    .then(()=>toast({wet:'💧 Pañal mojado registrado',dirty:'💩 Pañal sucio registrado',both:'💧💩 Pañal mixto registrado'}[tipo]))
+    .catch(err=>toast('❌ '+err.message,3000));
 });
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
    DELETE TOMA
-═══════════════════════════════════════ */
-function borrarToma(id, hora) {
-  if (confirm(`¿Borrar la toma de las ${hora}?`)) {
-    db.collection("tomas").doc(id).delete()
-      .then(() => toast('🗑 Toma eliminada'))
-      .catch(err => toast('❌ ' + err.message, 3000));
+══════════════════════════════════════ */
+function borrarToma(id,hora){
+  if(confirm(`¿Borrar la toma de las ${hora}?`)){
+    db.collection('tomas').doc(id).delete()
+      .then(()=>toast('🗑 Toma eliminada'))
+      .catch(err=>toast('❌ '+err.message,3000));
   }
 }
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
    STATS
-═══════════════════════════════════════ */
-function calcStats() {
-  const now    = new Date();
-  const hoy    = startOfDay(now);
-  const ayer   = new Date(hoy.getTime() - 86400000);
-  const hace7  = new Date(hoy.getTime() - 7*86400000);
-  const hace14 = new Date(hoy.getTime() - 14*86400000);
-  const primerDiaMes = new Date(now.getFullYear(), now.getMonth(), 1);
-  const primerDiaMesAnt = new Date(now.getFullYear(), now.getMonth()-1, 1);
-  const ultimoDiaMesAnt = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+══════════════════════════════════════ */
+function calcStats(){
+  const now=new Date();
+  const hoy=startOfDay(now);
+  const ayer=new Date(hoy.getTime()-86400000);
+  const hace7=new Date(hoy.getTime()-7*86400000);
+  const hace14=new Date(hoy.getTime()-14*86400000);
+  const primerMes=new Date(now.getFullYear(),now.getMonth(),1);
+  const primerMesAnt=new Date(now.getFullYear(),now.getMonth()-1,1);
+  const ultMesAnt=new Date(now.getFullYear(),now.getMonth(),0,23,59,59);
 
-  const tomasHoy     = tomasProcesadas.filter(t => t.fecha >= hoy);
-  const tomasAyer    = tomasProcesadas.filter(t => t.fecha >= ayer && t.fecha < hoy);
-  const tomasUlt7    = tomasProcesadas.filter(t => t.fecha >= hace7 && t.fecha < hoy);
-  const tomasMesAct  = tomasProcesadas.filter(t => t.fecha >= primerDiaMes);
-  const tomasMesAnt  = tomasProcesadas.filter(t => t.fecha >= primerDiaMesAnt && t.fecha <= ultimoDiaMesAnt);
+  const tHoy=tomasData.filter(t=>t.fecha>=hoy);
+  const tAyer=tomasData.filter(t=>t.fecha>=ayer&&t.fecha<hoy);
+  const t7=tomasData.filter(t=>t.fecha>=hace7&&t.fecha<hoy);
+  const t7a=tomasData.filter(t=>t.fecha>=hace14&&t.fecha<hace7);
+  const tMes=tomasData.filter(t=>t.fecha>=primerMes);
+  const tMesA=tomasData.filter(t=>t.fecha>=primerMesAnt&&t.fecha<=ultMesAnt);
 
-  const ozHoy   = tomasHoy.reduce((s,t)  => s + (t.onzas||0), 0);
-  const ozAyer  = tomasAyer.reduce((s,t) => s + (t.onzas||0), 0);
+  const ozSum=arr=>arr.reduce((s,t)=>s+(t.onzas||0),0);
+  const ozHoy=ozSum(tHoy), ozAyer=ozSum(tAyer);
+  const oz7=ozSum([...tomasData.filter(t=>t.fecha>=hace7)]);
+  const oz7a=ozSum(t7a);
+  const ozMes=ozSum(tMes), ozMesA=ozSum(tMesA);
 
-  // Oz semana actual vs anterior
-  const tomasUlt7Act = tomasProcesadas.filter(t => t.fecha >= hace7);
-  const tomasUlt7Ant = tomasProcesadas.filter(t => t.fecha >= hace14 && t.fecha < hace7);
-  const ozSemAct = tomasUlt7Act.reduce((s,t) => s + (t.onzas||0), 0);
-  const ozSemAnt = tomasUlt7Ant.reduce((s,t) => s + (t.onzas||0), 0);
+  /* promedio diario */
+  const diasMap={};
+  t7.forEach(t=>{const d=startOfDay(t.fecha).toISOString();diasMap[d]=(diasMap[d]||0)+1});
+  const dias=Object.values(diasMap);
+  const prom=dias.length?(dias.reduce((a,b)=>a+b,0)/dias.length).toFixed(1):'—';
 
-  const ozMesAct = tomasMesAct.reduce((s,t) => s + (t.onzas||0), 0);
-  const ozMesAnt = tomasMesAnt.reduce((s,t) => s + (t.onzas||0), 0);
+  const panHoy=panalesData.filter(p=>p.fecha>=hoy).length;
+  const panAyer=panalesData.filter(p=>p.fecha>=ayer&&p.fecha<hoy).length;
 
-  // Promedio diario (últimos 7 días)
-  const diasConTomas = {};
-  tomasUlt7.forEach(t => { const d = startOfDay(t.fecha).toISOString(); diasConTomas[d] = (diasConTomas[d]||0)+1; });
-  const diasArr = Object.values(diasConTomas);
-  const promDiario = diasArr.length > 0 ? (diasArr.reduce((a,b)=>a+b,0)/diasArr.length).toFixed(1) : '—';
+  // stat tiles
+  setText('statTomasHoy',tHoy.length);
+  setTrend('statTomasTrend',tHoy.length,tAyer.length,'vs ayer');
+  document.getElementById('statProm').innerHTML=`${prom} <small>tomas</small>`;
+  setText('statPanHoy',panHoy);
+  setTrend('statPanTrend',panHoy,panAyer,'vs ayer');
+  document.getElementById('statOzHoy').innerHTML=`${ozHoy.toFixed(1)} <small>oz</small>`;
+  setTrend('statOzTrend',ozHoy,ozAyer,'vs ayer');
 
-  // Pañales hoy vs ayer
-  const panHoy  = panalesProcesados.filter(p => p.fecha >= hoy).length;
-  const panAyer = panalesProcesados.filter(p => p.fecha >= ayer && p.fecha < hoy).length;
-
-  // Render stat tiles
-  setText('statTomasHoy', tomasHoy.length);
-  setTrend('statTomasTrend', tomasHoy.length, tomasAyer.length, 'vs ayer');
-
-  setText('statPromTomas', `${promDiario} <small>tomas</small>`);
-  document.getElementById('statPromSub').textContent = 'promedio últimos 7 días';
-
-  setText('statPanalesHoy', panHoy);
-  setTrend('statPanalesTrend', panHoy, panAyer, 'vs ayer');
-
-  document.getElementById('statOzHoy').innerHTML = `${ozHoy.toFixed(1)} <small>oz</small>`;
-  setTrend('statOzTrend', ozHoy, ozAyer, 'vs ayer');
-
-  // Compare rows
-  const cmp = [
-    { lbl: 'Ayer',    cur: ozHoy,    ref: ozAyer,   refLabel: `${ozAyer.toFixed(1)} oz` },
-    { lbl: 'Semana',  cur: ozSemAct, ref: ozSemAnt, refLabel: `${ozSemAnt.toFixed(1)} oz` },
-    { lbl: 'Mes ant', cur: ozMesAct, ref: ozMesAnt, refLabel: `${ozMesAnt.toFixed(1)} oz` },
+  // compare rows
+  const rows=[
+    {lbl:'Ayer',cur:ozHoy,ref:ozAyer},
+    {lbl:'Semana',cur:oz7,ref:oz7a},
+    {lbl:'Mes ant',cur:ozMes,ref:ozMesA}
   ];
-  const maxOz = Math.max(...cmp.map(c => Math.max(c.cur, c.ref)), 1);
-  const rows = document.getElementById('cmpRows');
-  rows.innerHTML = '';
-  cmp.forEach(({ lbl, cur, ref, refLabel }) => {
-    const pct  = Math.round((cur / maxOz) * 100);
-    const diff = cur - ref;
-    const cls  = diff > 0 ? 'better' : diff < 0 ? 'worse' : 'same';
-    const sign = diff > 0 ? '+' : '';
-    const dCls = diff > 0 ? 'pos' : diff < 0 ? 'neg' : '';
-    rows.innerHTML += `
-      <div class="cmp-row">
-        <div class="cmp-row-lbl">${lbl}</div>
-        <div class="cmp-bar-wrap"><div class="cmp-bar ${cls}" style="width:${pct}%"></div></div>
-        <div class="cmp-num">${cur.toFixed(1)}<span class="cmp-delta ${dCls}">${diff !== 0 ? sign+diff.toFixed(1) : ''}</span></div>
-      </div>`;
-  });
+  const maxOz=Math.max(...rows.map(r=>Math.max(r.cur,r.ref)),1);
+  document.getElementById('cmpRows').innerHTML=rows.map(({lbl,cur,ref})=>{
+    const pct=Math.round((cur/maxOz)*100);
+    const diff=cur-ref;
+    const cls=diff>0?'better':diff<0?'worse':'same';
+    const dCls=diff>0?'pos':diff<0?'neg':'';
+    const sign=diff>0?'+':'';
+    return `<div class="cmp-row">
+      <div class="cmp-row-lbl">${lbl}</div>
+      <div class="cmp-bar-wrap"><div class="cmp-bar ${cls}" style="width:${pct}%"></div></div>
+      <div class="cmp-num">${cur.toFixed(1)}<span class="cmp-delta ${dCls}">${diff!==0?sign+diff.toFixed(1):''}</span></div>
+    </div>`;
+  }).join('');
+}
+function setText(id,val){const e=document.getElementById(id);if(e)e.innerHTML=val}
+function setTrend(id,cur,ref,lbl){
+  const e=document.getElementById(id);if(!e)return;
+  const d=cur-ref;
+  e.className='stat-trend '+(d>0?'up':d<0?'down':'flat');
+  e.textContent=`${d>0?'▲ +':d<0?'▼ ':'→ '}${d!==0?d:'0'} ${lbl}`;
 }
 
-function setText(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.innerHTML = val;
-}
-function setTrend(id, cur, ref, label) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const diff = cur - ref;
-  const sign = diff > 0 ? '▲ +' : diff < 0 ? '▼ ' : '→ ';
-  el.className = 'stat-trend ' + (diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat');
-  el.textContent = `${sign}${diff !== 0 ? diff : '0'} ${label}`;
-}
-
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
    CHART
-═══════════════════════════════════════ */
-document.querySelector('.chart-toggle').addEventListener('click', e => {
-  const btn = e.target.closest('.ctgl-btn');
-  if (!btn) return;
-  chartMode = btn.dataset.mode;
-  document.querySelectorAll('.ctgl-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('chartTitle').textContent =
-    chartMode === 'acumulado' ? 'Consumo acumulado' : 'Onzas por toma';
+══════════════════════════════════════ */
+document.querySelector('.chart-toggle').addEventListener('click',e=>{
+  const b=e.target.closest('.ctgl');if(!b)return;
+  chartMode=b.dataset.mode;
+  document.querySelectorAll('.ctgl').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById('chartTitle').textContent=
+    chartMode==='acumulado'?'Consumo acumulado':'Onzas por toma';
   generarGrafico();
 });
+document.getElementById('btnFiltrar').addEventListener('click',generarGrafico);
 
-document.getElementById('btnAplicarFiltros').addEventListener('click', generarGrafico);
-
-function generarGrafico() {
-  const ctx = document.getElementById('graficoMain').getContext('2d');
-  let filtradas = tomasProcesadas.filter(t => t.tipo === 'formula').slice().reverse();
-
-  const fs = document.getElementById('dateFilterStart').value;
-  const fe = document.getElementById('dateFilterEnd').value;
-  if (fs) { const d = new Date(fs); filtradas = filtradas.filter(t => t.fecha >= d); }
-  if (fe) { const d = new Date(fe); d.setHours(23,59,59); filtradas = filtradas.filter(t => t.fecha <= d); }
-
-  if (grafico) { grafico.destroy(); grafico = null; }
-  if (!filtradas.length) return;
-
-  const labels = filtradas.map((_, i) => `T${i+1}`);
-  let data, type, fill, tension, bgColor;
-
-  if (chartMode === 'acumulado') {
-    let a = 0;
-    data    = filtradas.map(t => +(a += t.onzas).toFixed(1));
-    type    = 'line'; fill = true; tension = 0.4;
-    bgColor = 'rgba(244,162,97,0.12)';
+function generarGrafico(){
+  const ctx=document.getElementById('graficoMain').getContext('2d');
+  let data=tomasData.filter(t=>t.tipo!=='breast').slice().reverse();
+  const fs=document.getElementById('dateFilterStart').value;
+  const fe=document.getElementById('dateFilterEnd').value;
+  if(fs){const d=new Date(fs);data=data.filter(t=>t.fecha>=d)}
+  if(fe){const d=new Date(fe);d.setHours(23,59,59);data=data.filter(t=>t.fecha<=d)}
+  if(grafico){grafico.destroy();grafico=null}
+  if(!data.length)return;
+  const labels=data.map((_,i)=>`T${i+1}`);
+  let vals,type,fill,tension,bg;
+  if(chartMode==='acumulado'){
+    let a=0;vals=data.map(t=>+(a+=t.onzas).toFixed(1));
+    type='line';fill=true;tension=0.4;bg='rgba(244,162,97,0.12)';
   } else {
-    data    = filtradas.map(t => +t.onzas.toFixed(1));
-    type    = 'bar';  fill = false; tension = 0;
-    bgColor = filtradas.map((_, i) => i%2===0 ? 'rgba(244,162,97,0.75)' : 'rgba(69,123,157,0.65)');
+    vals=data.map(t=>+t.onzas.toFixed(1));
+    type='bar';fill=false;tension=0;
+    bg=data.map((_,i)=>i%2===0?'rgba(244,162,97,0.75)':'rgba(69,123,157,0.65)');
   }
-
-  grafico = new Chart(ctx, {
+  grafico=new Chart(ctx,{
     type,
-    data: {
-      labels,
-      datasets: [{
-        data,
-        borderColor: '#F4A261',
-        backgroundColor: bgColor,
-        fill,
-        tension,
-        pointBackgroundColor: '#E76F51',
-        pointRadius: type==='bar'?0:4,
-        pointHoverRadius: type==='bar'?0:6,
-        borderWidth: type==='bar'?0:2.5,
-        borderRadius: type==='bar'?6:0,
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: { label: c => ` ${c.parsed.y} oz` },
-          backgroundColor: '#2D2214',
-          titleFont: { family: 'Nunito', weight: '800' },
-          bodyFont: { family: 'Nunito' },
-          cornerRadius: 8, padding: 10
-        }
-      },
-      scales: {
-        x: { grid: {display:false}, ticks: {font:{family:'Nunito',size:10},color:'#9A8878'} },
-        y: { beginAtZero:true, grid:{color:'rgba(45,34,20,0.05)'}, ticks:{font:{family:'Nunito',size:10},color:'#9A8878'} }
+    data:{labels,datasets:[{
+      data:vals,borderColor:'#F4A261',backgroundColor:bg,fill,tension,
+      pointBackgroundColor:'#E76F51',
+      pointRadius:type==='bar'?0:3,pointHoverRadius:type==='bar'?0:5,
+      borderWidth:type==='bar'?0:2.5,borderRadius:type==='bar'?5:0
+    }]},
+    options:{responsive:true,plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:c=>` ${c.parsed.y} oz`},
+        backgroundColor:'#2D2214',cornerRadius:8,padding:9,
+        titleFont:{family:'Nunito',weight:'800'},bodyFont:{family:'Nunito'}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{family:'Nunito',size:9},color:'#9A8878'}},
+        y:{beginAtZero:true,grid:{color:'rgba(45,34,20,.04)'},ticks:{font:{family:'Nunito',size:9},color:'#9A8878'}}
       }
     }
   });
 }
 
-/* ═══════════════════════════════════════
+/* ══════════════════════════════════════
    SETTINGS
-═══════════════════════════════════════ */
-function abrirSettings() { document.getElementById('settingsModal').classList.add('open'); }
-function cerrarSettings() { document.getElementById('settingsModal').classList.remove('open'); }
-document.getElementById('settingsModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('settingsModal')) cerrarSettings();
-});
-document.getElementById('btnGuardarSettings').addEventListener('click', () => {
-  const v = parseInt(document.getElementById('inputLimite').value);
-  if (v > 0) {
-    db.collection("configuracion").doc("limiteGlobal").set({ minutos: v })
-      .then(() => { cerrarSettings(); toast(`✅ Límite: ${v} min`); })
-      .catch(err => toast('❌ ' + err.message, 3000));
+══════════════════════════════════════ */
+function abrirSettings(){document.getElementById('settingsModal').classList.add('open')}
+function cerrarSettings(){document.getElementById('settingsModal').classList.remove('open')}
+document.getElementById('settingsModal').addEventListener('click',e=>{if(e.target===document.getElementById('settingsModal'))cerrarSettings()});
+document.getElementById('btnGuardarSettings').addEventListener('click',()=>{
+  const v=parseInt(document.getElementById('inputLimite').value);
+  if(v>0){
+    db.collection('configuracion').doc('limiteGlobal').set({minutos:v})
+      .then(()=>{cerrarSettings();toast(`✅ Límite: ${v} min`)})
+      .catch(err=>toast('❌ '+err.message,3000));
   }
 });
 </script>
